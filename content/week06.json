@@ -1,0 +1,415 @@
+[
+  {
+    "day": 31,
+    "module": "js-data",
+    "title": "Arrays: the everyday methods",
+    "goal": "Add, remove, find and copy array items confidently, knowing which methods change the original array.",
+    "learn": {
+      "concepts": [
+        "Creating arrays, length, indexing, at(-1)",
+        "Mutating methods: push, pop, shift, unshift, splice, sort, reverse",
+        "Non-mutating methods: slice, concat, includes, indexOf, join, toSorted",
+        "Copying arrays with [...arr] and why = doesn't copy",
+        "Array.isArray and Array.from",
+        "Arrays hold references: two variables can point to the same array"
+      ],
+      "resources": [
+        { "title": "javascript.info: Arrays", "url": "https://javascript.info/array" },
+        { "title": "MDN: Array", "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array" }
+      ]
+    },
+    "build": {
+      "task": "In day31/, write playlist.js: manage a playlist array of song titles with functions addSong(list, song) (no duplicates), removeSong(list, song), moveSong(list, from, to), shuffle(list) (returns a NEW shuffled array, original unchanged; use Fisher–Yates), and nowPlaying(list, index) that wraps around at the end. Decide for each whether it mutates or returns a new array, and write that in a comment above it. Add at least 12 checks, including one proving shuffle doesn't change the original.",
+      "starterFiles": [],
+      "acceptance": [
+        "Each function has a comment saying 'mutates' or 'returns new array'",
+        "addSong refuses duplicates (case-insensitive is a bonus)",
+        "moveSong uses splice correctly for moves forward and backward",
+        "shuffle returns a new array and the original is unchanged (checked)",
+        "nowPlaying(list, list.length) returns the first song",
+        "At least 12 passing checks"
+      ]
+    },
+    "hints": [
+      "Moving an item: const [item] = list.splice(from, 1); list.splice(to, 0, item);",
+      "Fisher–Yates: copy the array, then loop i from the end down to 1, pick j = random 0..i, and swap a[i] and a[j].",
+      "To compare arrays in checks, compare JSON.stringify(a) === JSON.stringify(b). === on two arrays compares references, not contents."
+    ],
+    "proof": "Commit with day31/playlist.js.",
+    "explainBack": [
+      { "q": "Which of your functions mutate the array and which return a new one? Why did you choose that for shuffle?", "lookFor": ["names their functions correctly", "shuffle returns new so original order is kept", "mutation can surprise other code holding the same array"] },
+      { "q": "Why does const b = a not copy an array? What does?", "lookFor": ["both variables reference the same array", "change through one shows in the other", "[...a] or a.slice() makes a shallow copy"] }
+    ],
+    "lastHintExplanation": "Arrays are objects, and a variable holds a reference to them. const b = a makes b point to the same array, so mutating either one changes both. [...a] or a.slice() makes a new (shallow) copy. Returning a new array from shuffle leaves the caller's data untouched, which avoids surprise bugs.",
+    "predict": [
+      { "q": "const a = [1, 2, 3]; const b = a; b.push(4); console.log(a.length)", "options": ["3", "4", "Error: const", "undefined"], "answer": 1, "why": "a and b point to the same array; const prevents reassignment, not mutation." },
+      { "q": "console.log([10, 9, 1].sort())", "options": ["[1, 9, 10]", "[1, 10, 9]", "[10, 9, 1]", "[9, 10, 1]"], "answer": 1, "why": "Default sort compares as strings: '1' < '10' < '9'." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Arrays and hashing",
+      "note": "Use a Set or Map to avoid nested loops.",
+      "problems": [
+        { "title": "LeetCode 349: Intersection of Two Arrays", "url": "https://leetcode.com/problems/intersection-of-two-arrays/" },
+        { "title": "LeetCode 219: Contains Duplicate II", "url": "https://leetcode.com/problems/contains-duplicate-ii/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Speed, distance and time: basics",
+      "questions": [
+        { "q": "What is 72 km/h in m/s?", "options": ["18", "20", "25", "72"], "answer": 1, "why": "72 × 5/18 = 20." },
+        { "q": "A car travels 300 km in 5 hours. What is its speed?", "options": ["50 km/h", "60 km/h", "65 km/h", "75 km/h"], "answer": 1, "why": "300 / 5 = 60." },
+        { "q": "Walking at 5 km/h you arrive 10 minutes late. At 6 km/h you arrive 5 minutes early. How far is it?", "options": ["6 km", "7.5 km", "9 km", "10 km"], "answer": 1, "why": "d/5 − d/6 = 15 min = 1/4 h, so d/30 = 1/4 and d = 7.5 km." },
+        { "q": "What is 15 m/s in km/h?", "options": ["45", "54", "60", "50"], "answer": 1, "why": "15 × 18/5 = 54." },
+        { "q": "A trip takes 4 hours at 60 km/h. How long does it take at 80 km/h?", "options": ["2.5 h", "3 h", "3.5 h", "3.2 h"], "answer": 1, "why": "240 km / 80 = 3 h." }
+      ]
+    },
+    "revision": ["Day 30: re-solve Two Sum with a Map from a blank file."]
+  },
+  {
+    "day": 32,
+    "module": "js-data",
+    "title": "map, filter, reduce and friends",
+    "goal": "Transform and summarise data with higher-order array methods instead of manual loops.",
+    "learn": {
+      "concepts": [
+        "forEach vs map: map returns a new array",
+        "filter for keeping items, find/findIndex for one item",
+        "some and every for yes/no questions",
+        "reduce for totals, grouping and building objects (always pass an initial value)",
+        "sort with a compare function: (a, b) => a - b",
+        "Chaining: data.filter(...).map(...).reduce(...)"
+      ],
+      "resources": [
+        { "title": "javascript.info: Array methods", "url": "https://javascript.info/array-methods" },
+        { "title": "MDN: Array.prototype.reduce()", "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce" }
+      ]
+    },
+    "build": {
+      "task": "In day32/, use the starter movies array to write one function per question using map/filter/reduce/find/some/every/sort (no for loops): (1) titles of movies rated 8+; (2) average rating; (3) the longest movie; (4) are all movies after 1990?; (5) is any movie in Hindi?; (6) count of movies per genre as an object; (7) the top 3 by rating as 'Title (rating)' strings; (8) total runtime in hours and minutes. Print each answer with a label and add a check for each.",
+      "starterFiles": [
+        { "name": "day32/movies.js", "content": "const movies = [\n  { title: 'Inception', year: 2010, rating: 8.8, minutes: 148, genre: 'Sci-Fi', language: 'English' },\n  { title: '3 Idiots', year: 2009, rating: 8.4, minutes: 170, genre: 'Comedy', language: 'Hindi' },\n  { title: 'Interstellar', year: 2014, rating: 8.7, minutes: 169, genre: 'Sci-Fi', language: 'English' },\n  { title: 'Dangal', year: 2016, rating: 8.3, minutes: 161, genre: 'Drama', language: 'Hindi' },\n  { title: 'The Social Network', year: 2010, rating: 7.8, minutes: 120, genre: 'Drama', language: 'English' },\n  { title: 'Paddington 2', year: 2017, rating: 7.8, minutes: 103, genre: 'Comedy', language: 'English' },\n  { title: 'Spirited Away', year: 2001, rating: 8.6, minutes: 125, genre: 'Animation', language: 'Japanese' },\n  { title: 'Lagaan', year: 2001, rating: 8.1, minutes: 224, genre: 'Drama', language: 'Hindi' },\n];\n\nmodule.exports = { movies };\n" }
+      ],
+      "acceptance": [
+        "No for/while loops in the answer functions",
+        "All 8 questions answered by separate, well-named functions",
+        "reduce always has an initial value",
+        "Sorting doesn't change the original movies array (copy first or use toSorted)",
+        "Each answer has a passing check; average rating is rounded to 2 decimals"
+      ]
+    },
+    "hints": [
+      "Load the data with const { movies } = require('./movies.js'); at the top of your answers file.",
+      "Count per genre: movies.reduce((acc, m) => { acc[m.genre] = (acc[m.genre] ?? 0) + 1; return acc; }, {}).",
+      "Longest movie: reduce comparing minutes, starting with movies[0]. Top 3: [...movies].sort((a, b) => b.rating - a.rating).slice(0, 3)."
+    ],
+    "proof": "Commit with day32/ files.",
+    "explainBack": [
+      { "q": "Walk through your genre-count reduce step by step for the first two movies.", "lookFor": ["accumulator starts as {}", "first movie adds Sci-Fi: 1", "second adds Comedy: 1", "returns acc each time"] },
+      { "q": "Why must the sort compare function return a - b (or b - a)? What happens without it?", "lookFor": ["negative/positive/zero decides order", "default converts to strings", "numbers sort wrongly like 10 before 9"] }
+    ],
+    "lastHintExplanation": "reduce walks the array carrying an accumulator: it starts with the initial value you give (here {}), and each callback returns the updated accumulator for the next item. Without an initial value, the first element becomes the accumulator, which breaks object-building and crashes on empty arrays. sort's compare function returns negative to put a first, positive to put b first; without it, items are compared as strings.",
+    "predict": [
+      { "q": "console.log([1, 2, 3].map(n => { n * 2 }))", "options": ["[2, 4, 6]", "[undefined, undefined, undefined]", "[1, 2, 3]", "Error"], "answer": 1, "why": "With braces, an arrow function needs an explicit return." },
+      { "q": "console.log([].reduce((a, b) => a + b))", "options": ["0", "undefined", "TypeError", "[]"], "answer": 2, "why": "reduce on an empty array with no initial value throws a TypeError." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Arrays and hashing",
+      "note": "Count characters with a Map or a 26-length array.",
+      "problems": [
+        { "title": "LeetCode 387: First Unique Character in a String", "url": "https://leetcode.com/problems/first-unique-character-in-a-string/" },
+        { "title": "LeetCode 389: Find the Difference", "url": "https://leetcode.com/problems/find-the-difference/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Trains",
+      "questions": [
+        { "q": "A 200 m train at 72 km/h passes a pole. How long does it take?", "options": ["8 s", "10 s", "12 s", "15 s"], "answer": 1, "why": "72 km/h = 20 m/s, and 200 / 20 = 10 s." },
+        { "q": "A 150 m train at 54 km/h crosses a 300 m platform. How long does it take?", "options": ["20 s", "25 s", "30 s", "35 s"], "answer": 2, "why": "It covers 150 + 300 = 450 m at 15 m/s: 30 s." },
+        { "q": "Trains of 100 m and 150 m travel towards each other at 40 and 50 km/h. How long do they take to cross each other?", "options": ["10 s", "12 s", "15 s", "25 s"], "answer": 0, "why": "Relative speed is 90 km/h = 25 m/s. 250 / 25 = 10 s." },
+        { "q": "A train at 60 km/h passes a standing man in 9 seconds. How long is the train?", "options": ["120 m", "150 m", "180 m", "200 m"], "answer": 1, "why": "60 km/h = 50/3 m/s, and 50/3 × 9 = 150 m." },
+        { "q": "A 200 m train at 60 km/h overtakes a 300 m train moving at 40 km/h in the same direction. How long does it take?", "options": ["45 s", "60 s", "90 s", "120 s"], "answer": 2, "why": "Relative speed is 20 km/h = 50/9 m/s. 500 / (50/9) = 90 s." }
+      ]
+    },
+    "revision": ["Day 31: list 4 mutating and 4 non-mutating array methods from memory."]
+  },
+  {
+    "day": 33,
+    "module": "js-data",
+    "title": "Objects: properties, methods, destructuring and spread",
+    "goal": "Model real things as objects and copy, merge and read them safely with modern syntax.",
+    "learn": {
+      "concepts": [
+        "Object literals, dot vs bracket notation, dynamic keys",
+        "Methods and this (inside regular functions vs arrow functions)",
+        "Object.keys, Object.values, Object.entries, and for...of over entries",
+        "Destructuring objects and arrays, with defaults and renaming",
+        "Spread {...obj} for copying/merging and rest for collecting",
+        "Optional chaining ?. for safe deep reads",
+        "Shallow vs deep copy; structuredClone"
+      ],
+      "resources": [
+        { "title": "javascript.info: Objects", "url": "https://javascript.info/object" },
+        { "title": "javascript.info: Destructuring assignment", "url": "https://javascript.info/destructuring-assignment" },
+        { "title": "javascript.info: Optional chaining", "url": "https://javascript.info/optional-chaining" }
+      ]
+    },
+    "build": {
+      "task": "In day33/, build a tiny student-records module. Create createStudent({ name, rollNo, marks = {}, address }) returning an object with methods average(), best() (subject with highest mark), and summary(). Write updateMarks(student, subject, mark) that returns a NEW student object (original unchanged), mergeSettings(defaults, userSettings) using spread, and getCity(student) using optional chaining that returns 'Unknown' if there's no address. Show the shallow-copy trap: copy a student with spread, change a mark in the copy, and log that the original changed too; then fix it with structuredClone.",
+      "starterFiles": [],
+      "acceptance": [
+        "createStudent uses parameter destructuring with a default",
+        "Methods use this correctly (regular function syntax for methods)",
+        "updateMarks returns a new object; a check proves the original is unchanged",
+        "getCity works for students with and without an address (no crash)",
+        "Shallow-copy trap demonstrated and fixed with structuredClone, with comments",
+        "At least 10 passing checks"
+      ]
+    },
+    "hints": [
+      "Methods: average() { const vals = Object.values(this.marks); ... }. Arrow functions don't get their own this, so they don't work as methods here.",
+      "updateMarks: return { ...student, marks: { ...student.marks, [subject]: mark } }. The inner spread matters.",
+      "getCity: return student.address?.city ?? 'Unknown'."
+    ],
+    "proof": "Commit with day33/ files.",
+    "explainBack": [
+      { "q": "Why did updateMarks need a nested spread for marks? What breaks without it?", "lookFor": ["spread is shallow", "marks object would be shared", "changing it changes the original"] },
+      { "q": "Why didn't you use arrow functions for the methods?", "lookFor": ["arrow functions don't have their own this", "this would be the outer scope, not the object"] },
+      { "q": "What does ?. do in getCity?", "lookFor": ["stops and returns undefined if address is null/undefined", "avoids TypeError", "?? gives fallback"] }
+    ],
+    "lastHintExplanation": "Spread makes a shallow copy: the top-level properties are copied, but nested objects like marks are still shared references, so you must spread them too. Regular-function methods get this from the object they're called on; arrow functions take this from the surrounding scope, so they don't work as object methods. ?. returns undefined instead of throwing when the left side is null or undefined.",
+    "predict": [
+      { "q": "const a = { x: { y: 1 } }; const b = { ...a }; b.x.y = 2; console.log(a.x.y)", "options": ["1", "2", "undefined", "Error"], "answer": 1, "why": "Spread is shallow: a.x and b.x are the same object." },
+      { "q": "const { name: n = 'Anon' } = { name: undefined }; console.log(n)", "options": ["undefined", "Anon", "name", "Error"], "answer": 1, "why": "The default applies when the value is undefined; the variable is renamed to n." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Arrays and hashing",
+      "note": "Group items by a key you compute (sorted letters). Medium problem: think 10 minutes before coding.",
+      "problems": [
+        { "title": "LeetCode 49: Group Anagrams", "url": "https://leetcode.com/problems/group-anagrams/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Boats and streams",
+      "questions": [
+        { "q": "A boat goes 10 km/h in still water and the stream flows at 2 km/h. What is its downstream speed?", "options": ["8 km/h", "10 km/h", "12 km/h", "20 km/h"], "answer": 2, "why": "10 + 2 = 12." },
+        { "q": "A boat goes 15 km/h downstream and 9 km/h upstream. What is the stream's speed?", "options": ["3 km/h", "6 km/h", "12 km/h", "4 km/h"], "answer": 0, "why": "(15 − 9)/2 = 3." },
+        { "q": "A boat goes 24 km downstream in 2 hours and back upstream in 3 hours. What is its speed in still water?", "options": ["10 km/h", "12 km/h", "8 km/h", "9 km/h"], "answer": 0, "why": "Downstream 12, upstream 8. (12 + 8)/2 = 10." },
+        { "q": "A boat goes 8 km/h in still water and the stream flows at 2 km/h. How long does it take to go 30 km upstream?", "options": ["3 h", "4 h", "5 h", "6 h"], "answer": 2, "why": "Upstream speed is 6 km/h, so 30 / 6 = 5 h." },
+        { "q": "A man rows at 4 km/h in still water on a river flowing at 2 km/h. How long does a 6 km trip downstream and back take?", "options": ["3 h", "4 h", "5 h", "6 h"], "answer": 1, "why": "6/6 + 6/2 = 1 + 3 = 4 h." }
+      ]
+    },
+    "revision": ["Day 32: rewrite the genre-count reduce from memory."]
+  },
+  {
+    "day": 34,
+    "module": "js-data",
+    "title": "JSON and real data: build a sales report",
+    "goal": "Read a JSON dataset, clean it, and produce a useful report with everything you know about arrays and objects.",
+    "learn": {
+      "concepts": [
+        "JSON vs JavaScript objects: double quotes, no functions, no undefined",
+        "JSON.parse and JSON.stringify (with indentation)",
+        "Reading a JSON file in Node: fs.readFileSync + JSON.parse",
+        "Cleaning data: missing fields, wrong types, trimming strings",
+        "Grouping and aggregating with reduce",
+        "Formatting numbers: toFixed and Intl.NumberFormat for ₹"
+      ],
+      "resources": [
+        { "title": "javascript.info: JSON methods", "url": "https://javascript.info/json" },
+        { "title": "MDN: Intl.NumberFormat", "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat" }
+      ]
+    },
+    "build": {
+      "task": "In day34/, read sales.json (starter) in report.js. The data is messy on purpose. Clean it: trim names, convert string amounts to numbers, drop rows with no amount, and normalise city names' capitalisation. Then print a report: total revenue in ₹ (Indian format), number of valid orders, revenue per city sorted high to low, best-selling product by quantity, average order value, and the list of rows you dropped with the reason. Finally write the cleaned data to cleaned.json with 2-space indentation.",
+      "starterFiles": [
+        { "name": "day34/sales.json", "content": "[\n  { \"id\": 1, \"customer\": \" Asha \", \"city\": \"pune\", \"product\": \"Keyboard\", \"qty\": 2, \"amount\": 1800 },\n  { \"id\": 2, \"customer\": \"Ravi\", \"city\": \"Mumbai\", \"product\": \"Mouse\", \"qty\": 3, \"amount\": \"1050\" },\n  { \"id\": 3, \"customer\": \"Meena\", \"city\": \"PUNE\", \"product\": \"Monitor\", \"qty\": 1, \"amount\": 9500 },\n  { \"id\": 4, \"customer\": \"John\", \"city\": \"Delhi\", \"product\": \"Mouse\", \"qty\": 1, \"amount\": null },\n  { \"id\": 5, \"customer\": \"Fatima \", \"city\": \"mumbai \", \"product\": \"Keyboard\", \"qty\": 1, \"amount\": 900 },\n  { \"id\": 6, \"customer\": \"Kiran\", \"city\": \"Delhi\", \"product\": \"Webcam\", \"qty\": 2, \"amount\": \"2,400\" },\n  { \"id\": 7, \"customer\": \"Sara\", \"city\": \"Bengaluru\", \"product\": \"Mouse\", \"qty\": 4, \"amount\": 1400 },\n  { \"id\": 8, \"customer\": \"Arjun\", \"city\": \"bengaluru\", \"product\": \"Monitor\", \"qty\": 1 }\n]\n" }
+      ],
+      "acceptance": [
+        "Rows 4 and 8 are dropped with a printed reason; '2,400' is parsed as 2400",
+        "City names normalised (Pune, Mumbai, Delhi, Bengaluru)",
+        "Total revenue printed as ₹17,050 using Intl.NumberFormat('en-IN')",
+        "Revenue per city sorted high to low; best-selling product by quantity is Mouse (7 units)",
+        "cleaned.json written with 2-space indentation and numeric amounts only"
+      ]
+    },
+    "hints": [
+      "Read the file: const data = JSON.parse(require('fs').readFileSync(__dirname + '/sales.json', 'utf8'));",
+      "Clean amounts: Number(String(a).replaceAll(',', '')) and then check Number.isFinite(). null and undefined should be dropped.",
+      "Capitalise: s.trim().toLowerCase() then first letter toUpperCase. Revenue per city: Object.entries(totals).sort((a, b) => b[1] - a[1])."
+    ],
+    "proof": "Commit with day34/report.js and day34/cleaned.json.",
+    "explainBack": [
+      { "q": "Explain each cleaning step and which rows it fixed.", "lookFor": ["trim names", "string amounts converted (including comma)", "null/missing amounts dropped with reason", "city capitalisation"] },
+      { "q": "What's the difference between a JavaScript object and JSON text?", "lookFor": ["JSON is a string format", "keys must be double-quoted", "no functions/undefined/comments", "parse turns text into objects; stringify the reverse"] }
+    ],
+    "lastHintExplanation": "JSON is text: a string format with double-quoted keys and no functions, undefined or comments. JSON.parse turns that text into JavaScript values and JSON.stringify does the reverse. Real data is messy, so validate every field: strip commas before Number(), reject non-finite results, and normalise text before grouping, or 'pune' and 'PUNE' become separate cities.",
+    "predict": [
+      { "q": "console.log(JSON.stringify({ a: 1, b: undefined, c: () => 1 }))", "options": ["{\"a\":1,\"b\":undefined,\"c\":...}", "{\"a\":1}", "{\"a\":1,\"b\":null}", "Error"], "answer": 1, "why": "JSON.stringify skips undefined values and functions in objects." },
+      { "q": "console.log(Number('2,400'))", "options": ["2400", "2.4", "NaN", "2"], "answer": 2, "why": "A comma isn't valid in a number string, so the result is NaN." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Arrays and hashing",
+      "note": "Count frequencies, then pick the top k. Try bucket sort for O(n).",
+      "problems": [
+        { "title": "LeetCode 347: Top K Frequent Elements", "url": "https://leetcode.com/problems/top-k-frequent-elements/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Relative speed and races",
+      "questions": [
+        { "q": "Two people 100 km apart walk towards each other at 30 and 20 km/h. When do they meet?", "options": ["2 h", "2.5 h", "4 h", "5 h"], "answer": 0, "why": "Their combined speed is 50 km/h, and 100 / 50 = 2 h." },
+        { "q": "A thief runs at 8 km/h. A policeman starts 10 minutes later at 10 km/h. How long does he take to catch the thief?", "options": ["30 min", "40 min", "45 min", "60 min"], "answer": 1, "why": "The thief's lead is 8/6 = 4/3 km and the gap closes at 2 km/h, so it takes 2/3 h = 40 min." },
+        { "q": "Two cars leave the same point in opposite directions at 40 and 60 km/h. How far apart are they after 3 hours?", "options": ["60 km", "120 km", "300 km", "180 km"], "answer": 2, "why": "100 km/h × 3 = 300 km." },
+        { "q": "In a 400 m race, A beats B by 40 m. What is the ratio of A's speed to B's?", "options": ["9:10", "10:9", "11:10", "8:9"], "answer": 1, "why": "In the same time A runs 400 m and B runs 360 m." },
+        { "q": "Two runners on a 400 m track start together in the same direction at 5 m/s and 3 m/s. When do they first meet again?", "options": ["50 s", "100 s", "200 s", "80 s"], "answer": 2, "why": "The faster runner gains a full lap at 2 m/s: 400 / 2 = 200 s." }
+      ]
+    },
+    "revision": ["Day 33: write updateMarks with nested spread from memory."]
+  },
+  {
+    "day": 35,
+    "module": "js-data",
+    "title": "Strings and dates in JavaScript",
+    "goal": "Process text and dates correctly: search, split, format and calculate.",
+    "learn": {
+      "concepts": [
+        "Strings are immutable; methods return new strings",
+        "slice, substring, indexOf, includes, startsWith, endsWith",
+        "split and join; trim, padStart, repeat, replaceAll",
+        "toUpperCase/toLowerCase and simple regex with test and replace",
+        "Date: creating, getFullYear/getMonth (0-based!)/getDate, getDay",
+        "Date arithmetic with milliseconds; toLocaleDateString('en-IN')"
+      ],
+      "resources": [
+        { "title": "javascript.info: Strings", "url": "https://javascript.info/string" },
+        { "title": "javascript.info: Date and time", "url": "https://javascript.info/date" },
+        { "title": "MDN: Regular expressions guide", "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_expressions" }
+      ]
+    },
+    "build": {
+      "task": "In day35/, write text-tools.js with: slugify('Hello World! 2025') → 'hello-world-2025'; titleCase; countWords; maskPhone('9876543210') → '******3210'; isValidPincode (6 digits, not starting with 0) using a regex; and initials('asha rani verma') → 'ARV'. Then write date-tools.js with: daysUntil(dateString) from today; ageFromDob(dob); addWorkingDays(date, n, restDay) that skips one weekday (like this app does); and formatIndian(date) → '19 Nov 2026'. Add checks for all, including edge cases (empty string, extra spaces, month ends).",
+      "starterFiles": [],
+      "acceptance": [
+        "slugify handles punctuation, multiple spaces and capitals",
+        "isValidPincode uses a regex and rejects '012345', '12345' and 'abcdef'",
+        "ageFromDob is correct when the birthday hasn't happened yet this year",
+        "addWorkingDays skips the rest day and handles month/year boundaries",
+        "At least 16 passing checks, including edge cases"
+      ]
+    },
+    "hints": [
+      "slugify: lowercase, replace anything that isn't a-z or 0-9 with '-', then collapse repeated dashes and trim dashes from the ends: .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').",
+      "Pincode regex: /^[1-9][0-9]{5}$/. ^ and $ make it match the whole string.",
+      "Dates: months are 0-based (0 = January). To add a day, d.setDate(d.getDate() + 1); JavaScript rolls over month and year for you."
+    ],
+    "proof": "Commit with day35/ files.",
+    "explainBack": [
+      { "q": "Explain your pincode regex character by character.", "lookFor": ["^ start", "[1-9] first digit not zero", "[0-9]{5} five more digits", "$ end"] },
+      { "q": "How does your ageFromDob handle a birthday later this year?", "lookFor": ["subtract years", "then subtract 1 if this year's birthday hasn't come", "compare month then day"] }
+    ],
+    "lastHintExplanation": "In /^[1-9][0-9]{5}$/, ^ and $ anchor the whole string, [1-9] is a first digit that isn't zero, and [0-9]{5} is exactly five more digits. For age, subtract the birth year from this year, then subtract one more if this year's birthday hasn't happened yet (compare month, then day). JavaScript months are 0-based.",
+    "predict": [
+      { "q": "const d = new Date(2026, 0, 31); d.setDate(d.getDate() + 1); console.log(d.getMonth(), d.getDate())", "options": ["0 32", "1 1", "2 1", "Error"], "answer": 1, "why": "Jan 31 + 1 day rolls over to Feb 1: month 1 (0-based), day 1." },
+      { "q": "let s = 'hello'; s[0] = 'H'; console.log(s)", "options": ["Hello", "hello", "Error", "Hhello"], "answer": 1, "why": "Strings are immutable; the assignment is silently ignored." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Strings and hashing",
+      "note": "Map one string's characters to another's. Think about both directions.",
+      "problems": [
+        { "title": "LeetCode 383: Ransom Note", "url": "https://leetcode.com/problems/ransom-note/" },
+        { "title": "LeetCode 205: Isomorphic Strings", "url": "https://leetcode.com/problems/isomorphic-strings/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Average speed and late/early problems",
+      "questions": [
+        { "q": "A car covers half a distance at 40 km/h and the other half at 60 km/h. What is its average speed?", "options": ["50 km/h", "48 km/h", "45 km/h", "52 km/h"], "answer": 1, "why": "2 × 40 × 60 / (40 + 60) = 48." },
+        { "q": "A cyclist rides 30 km at 15 km/h, then 30 km at 30 km/h. What is the average speed?", "options": ["20 km/h", "22.5 km/h", "25 km/h", "18 km/h"], "answer": 0, "why": "60 km in 2 + 1 = 3 h is 20 km/h." },
+        { "q": "Travelling at 3/4 of his usual speed, a man arrives 20 minutes late. What is his usual time?", "options": ["40 min", "60 min", "80 min", "45 min"], "answer": 1, "why": "The new time is 4/3 of usual, so the extra 1/3 is 20 min and the usual time is 60 min." },
+        { "q": "A cyclist covers 12 km in 45 minutes. What is the speed?", "options": ["15 km/h", "16 km/h", "18 km/h", "20 km/h"], "answer": 1, "why": "12 / 0.75 = 16." },
+        { "q": "A bus leaves at 8:40 and travels 150 km at 60 km/h. When does it arrive?", "options": ["10:50", "11:10", "11:30", "11:00"], "answer": 1, "why": "The trip takes 2.5 h: 8:40 + 2:30 = 11:10." }
+      ]
+    },
+    "revision": ["Day 34: explain why '2,400' became NaN and how you fixed it."]
+  },
+  {
+    "day": 36,
+    "module": "js-data",
+    "title": "Debug lab: the broken order report, and week review",
+    "goal": "Find bugs caused by array methods, reduce and mutation, then review the week.",
+    "learn": {
+      "concepts": [
+        "Arrow functions with braces need return",
+        "reduce without an initial value",
+        "Default sort compares strings",
+        "undefined + number = NaN when building totals",
+        "Accidental mutation inside map"
+      ],
+      "resources": [
+        { "title": "MDN: Array.prototype.sort()", "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort" },
+        { "title": "javascript.info: Array methods (tasks)", "url": "https://javascript.info/array-methods#tasks" }
+      ]
+    },
+    "build": {
+      "task": "Copy the starter into day36/debug/report.js and run it. Expected output: revenue 1605; sorted amounts [1200, 980, 300, 250, 75]; perCustomer { Asha: 325, Meena: 980, Ravi: 300 }; discounted first amount 225; original first amount still 250. There are 5 bugs. Fix them one per commit, then add a check for each expected value. Write day36/week6-notes.md with one confident and one weak topic per day for Days 31–35.",
+      "starterFiles": [
+        { "name": "day36/debug/report.js", "content": "// Run: node day36/debug/report.js\nconst orders = [\n  { id: 1, customer: 'Asha', amount: 250, status: 'delivered' },\n  { id: 2, customer: 'Ravi', amount: 1200, status: 'cancelled' },\n  { id: 3, customer: 'Asha', amount: 75, status: 'delivered' },\n  { id: 4, customer: 'Meena', amount: 980, status: 'delivered' },\n  { id: 5, customer: 'Ravi', amount: 300, status: 'delivered' },\n];\n\n// 1. Revenue from delivered orders (expect 1605)\nconst delivered = orders.filter((o) => { o.status === 'delivered' });\nconst revenue = delivered.reduce((sum, o) => sum + o.amount);\n\n// 2. All amounts, high to low (expect [1200, 980, 300, 250, 75])\nconst sorted = orders.map((o) => o.amount).sort();\n\n// 3. Delivered spend per customer (expect { Asha: 325, Meena: 980, Ravi: 300 })\nconst perCustomer = {};\nfor (const o of delivered) {\n  perCustomer[o.customer] = perCustomer[o.customer] + o.amount;\n}\n\n// 4. 10% discount on every order, without changing the originals\nconst discounted = orders.map((o) => { o.amount = o.amount * 0.9; return o; });\n\nconsole.log('revenue', revenue);\nconsole.log('sorted', sorted);\nconsole.log('perCustomer', perCustomer);\nconsole.log('discounted first', discounted[0].amount); // expect 225\nconsole.log('original first', orders[0].amount);      // expect 250\n" }
+      ],
+      "acceptance": [
+        "All five expected outputs match",
+        "5 separate fix commits naming each bug",
+        "A check for each expected value",
+        "week6-notes.md covers Days 31–35"
+      ]
+    },
+    "hints": [
+      "Log delivered right after the filter. Is it empty? Look at the braces in the arrow function.",
+      "Once delivered has items, revenue looks strange. What does reduce use as sum on the first call when no initial value is given?",
+      "For perCustomer, log perCustomer['Asha'] before the first addition. For the discount, map should return a new object: ({ ...o, amount: o.amount * 0.9 })."
+    ],
+    "proof": "Link to your final fix commit.",
+    "explainBack": [
+      { "q": "List the 5 bugs and the one-line fix for each.", "lookFor": ["filter arrow with braces has no return", "reduce missing initial value 0", "sort without compare function / wrong direction", "undefined + amount → NaN, use ?? 0", "map mutates originals, return a copy"] },
+      { "q": "Why is mutation inside map a bug even if the discounted values are correct?", "lookFor": ["changes the original orders", "other code relying on originals breaks", "map should produce new values"] }
+    ],
+    "lastHintExplanation": "1) An arrow function with braces needs return, so the filter kept nothing. 2) reduce without an initial value uses the first order object as sum; pass 0. 3) .sort() compares strings and ascends; use (a, b) => b - a. 4) perCustomer[name] starts undefined, and undefined + n is NaN; use (perCustomer[name] ?? 0) + n. 5) map that assigns o.amount mutates the originals; return { ...o, amount: ... } instead.",
+    "predict": [
+      { "q": "const a = [{ v: 1 }]; const b = a.map(o => { o.v = 2; return o }); console.log(a[0].v)", "options": ["1", "2", "undefined", "Error"], "answer": 1, "why": "The callback mutates the original object; map's new array holds the same objects." }
+    ],
+    "debugLab": {
+      "title": "The broken order report",
+      "symptoms": [
+        "Revenue prints 0 or a strange string instead of 1605",
+        "Sorted amounts are in a weird order",
+        "Per-customer totals are NaN",
+        "After the discount, the original orders have changed too"
+      ],
+      "files": ["day36/debug/report.js"],
+      "bugCount": 5
+    },
+    "dsa": {
+      "pattern": "Arrays and hashing: prefix/suffix",
+      "note": "Build products from the left and right without division. Then re-solve Two Sum in under 10 minutes.",
+      "problems": [
+        { "title": "LeetCode 238: Product of Array Except Self", "url": "https://leetcode.com/problems/product-of-array-except-self/" },
+        { "title": "LeetCode 1: Two Sum (re-solve)", "url": "https://leetcode.com/problems/two-sum/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Timed mixed: speed, work, interest",
+      "questions": [
+        { "q": "What is 90 km/h in m/s?", "options": ["20", "25", "30", "15"], "answer": 1, "why": "90 × 5/18 = 25." },
+        { "q": "A 240 m train passes a pole in 12 seconds. What is its speed in km/h?", "options": ["60", "72", "80", "90"], "answer": 1, "why": "20 m/s × 18/5 = 72." },
+        { "q": "A boat goes 20 km/h downstream and 14 km/h upstream. What is the stream's speed?", "options": ["3 km/h", "6 km/h", "17 km/h", "4 km/h"], "answer": 0, "why": "(20 − 14)/2 = 3." },
+        { "q": "What is the simple interest on ₹6000 at 5% for 4 years?", "options": ["₹1000", "₹1200", "₹1500", "₹1300"], "answer": 1, "why": "6000 × 5 × 4 / 100 = 1200." },
+        { "q": "A takes 12 days and B takes 6 days. How long do they take together?", "options": ["3 days", "4 days", "6 days", "9 days"], "answer": 1, "why": "1/12 + 1/6 = 3/12 = 1/4." }
+      ]
+    },
+    "revision": ["Days 31–35: without notes, write map, filter and reduce versions of 'total price of items over ₹100'."]
+  }
+]

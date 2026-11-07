@@ -1,0 +1,77 @@
+[
+  { "pattern": "Basics", "problems": [
+    ["fizz-buzz", "Fizz Buzz", "Easy"],
+    ["running-sum-of-1d-array", "Running Sum of 1d Array", "Easy"],
+    ["concatenation-of-array", "Concatenation of Array", "Easy"],
+    ["richest-customer-wealth", "Richest Customer Wealth", "Easy"],
+    ["defanging-an-ip-address", "Defanging an IP Address", "Easy"],
+    ["to-lower-case", "To Lower Case", "Easy"],
+    ["shuffle-the-array", "Shuffle the Array", "Easy"],
+    ["final-value-of-variable-after-performing-operations", "Final Value of Variable After Performing Operations", "Easy"],
+    ["number-of-good-pairs", "Number of Good Pairs", "Easy"],
+    ["kids-with-the-greatest-number-of-candies", "Kids With the Greatest Number of Candies", "Easy"]
+  ]},
+  { "pattern": "Arrays and hashing", "problems": [
+    ["contains-duplicate", "Contains Duplicate", "Easy"],
+    ["valid-anagram", "Valid Anagram", "Easy"],
+    ["two-sum", "Two Sum", "Easy"],
+    ["group-anagrams", "Group Anagrams", "Medium"],
+    ["top-k-frequent-elements", "Top K Frequent Elements", "Medium"],
+    ["product-of-array-except-self", "Product of Array Except Self", "Medium"],
+    ["longest-consecutive-sequence", "Longest Consecutive Sequence", "Medium"]
+  ]},
+  { "pattern": "Two pointers", "problems": [
+    ["valid-palindrome", "Valid Palindrome", "Easy"],
+    ["two-sum-ii-input-array-is-sorted", "Two Sum II - Input Array Is Sorted", "Medium"],
+    ["3sum", "3Sum", "Medium"],
+    ["container-with-most-water", "Container With Most Water", "Medium"]
+  ]},
+  { "pattern": "Sliding window", "problems": [
+    ["best-time-to-buy-and-sell-stock", "Best Time to Buy and Sell Stock", "Easy"],
+    ["longest-substring-without-repeating-characters", "Longest Substring Without Repeating Characters", "Medium"],
+    ["longest-repeating-character-replacement", "Longest Repeating Character Replacement", "Medium"]
+  ]},
+  { "pattern": "Stack", "problems": [
+    ["valid-parentheses", "Valid Parentheses", "Easy"],
+    ["min-stack", "Min Stack", "Medium"],
+    ["daily-temperatures", "Daily Temperatures", "Medium"]
+  ]},
+  { "pattern": "Binary search", "problems": [
+    ["binary-search", "Binary Search", "Easy"],
+    ["search-a-2d-matrix", "Search a 2D Matrix", "Medium"],
+    ["find-minimum-in-rotated-sorted-array", "Find Minimum in Rotated Sorted Array", "Medium"]
+  ]},
+  { "pattern": "Linked list", "problems": [
+    ["reverse-linked-list", "Reverse Linked List", "Easy"],
+    ["merge-two-sorted-lists", "Merge Two Sorted Lists", "Easy"],
+    ["linked-list-cycle", "Linked List Cycle", "Easy"],
+    ["remove-nth-node-from-end-of-list", "Remove Nth Node From End of List", "Medium"]
+  ]},
+  { "pattern": "Trees", "problems": [
+    ["invert-binary-tree", "Invert Binary Tree", "Easy"],
+    ["maximum-depth-of-binary-tree", "Maximum Depth of Binary Tree", "Easy"],
+    ["same-tree", "Same Tree", "Easy"],
+    ["binary-tree-level-order-traversal", "Binary Tree Level Order Traversal", "Medium"],
+    ["validate-binary-search-tree", "Validate Binary Search Tree", "Medium"]
+  ]},
+  { "pattern": "Heap", "problems": [
+    ["last-stone-weight", "Last Stone Weight", "Easy"],
+    ["kth-largest-element-in-an-array", "Kth Largest Element in an Array", "Medium"]
+  ]},
+  { "pattern": "Graphs", "problems": [
+    ["number-of-islands", "Number of Islands", "Medium"],
+    ["clone-graph", "Clone Graph", "Medium"],
+    ["course-schedule", "Course Schedule", "Medium"]
+  ]},
+  { "pattern": "Backtracking", "problems": [
+    ["subsets", "Subsets", "Medium"],
+    ["permutations", "Permutations", "Medium"],
+    ["combination-sum", "Combination Sum", "Medium"]
+  ]},
+  { "pattern": "Dynamic programming", "problems": [
+    ["climbing-stairs", "Climbing Stairs", "Easy"],
+    ["house-robber", "House Robber", "Medium"],
+    ["coin-change", "Coin Change", "Medium"],
+    ["longest-increasing-subsequence", "Longest Increasing Subsequence", "Medium"]
+  ]}
+]

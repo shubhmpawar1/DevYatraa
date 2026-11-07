@@ -1,0 +1,394 @@
+[
+  {
+    "day": 145,
+    "module": "capstone-2",
+    "title": "Continuous integration with GitHub Actions",
+    "goal": "Run lint, tests and builds automatically on every push and pull request.",
+    "learn": {
+      "concepts": [
+        "CI: every change is checked automatically before it's merged",
+        "GitHub Actions: workflows, jobs, steps, runners, triggers (push, pull_request)",
+        "actions/checkout and actions/setup-node with npm caching",
+        "A matrix or separate jobs for api and web",
+        "Running the Firestore emulator (and a Postgres service container) in CI",
+        "Branch protection: require checks to pass before merging; status badges"
+      ],
+      "resources": [
+        { "title": "GitHub Actions: Quickstart", "url": "https://docs.github.com/en/actions/writing-workflows/quickstart" },
+        { "title": "GitHub Actions: Building and testing Node.js", "url": "https://docs.github.com/en/actions/use-cases-and-examples/building-and-testing/building-and-testing-nodejs" },
+        { "title": "GitHub Docs: About protected branches", "url": "https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches" }
+      ]
+    },
+    "build": {
+      "task": "In standupboard: add .github/workflows/ci.yml that runs on push and pull_request: job api (npm ci, lint, typecheck, tests), job web (npm ci, lint, tests, production build), and job rules (install the Firebase CLI and run the rules tests with firebase emulators:exec). Cache npm dependencies. Protect main so all three jobs must pass before merging, and add the CI badge to the README. Do the same for applytrack, with a postgres service container for its DB tests. Open a pull request that deliberately breaks a test, watch CI fail, fix it, then merge.",
+      "starterFiles": [
+        { "name": ".github/workflows/ci.yml", "content": "name: CI\non:\n  push:\n    branches: [main]\n  pull_request:\n\njobs:\n  api:\n    runs-on: ubuntu-latest\n    defaults:\n      run:\n        working-directory: api\n    steps:\n      - uses: actions/checkout@v4\n      - uses: actions/setup-node@v4\n        with:\n          node-version: 22\n          cache: npm\n          cache-dependency-path: api/package-lock.json\n      - run: npm ci\n      - run: npm run lint\n      - run: npm test\n\n  # TODO: web job (lint, test, build)\n  # TODO: rules job (firebase emulators:exec)\n" }
+      ],
+      "acceptance": [
+        "CI runs on every push and pull request with api, web and rules jobs",
+        "npm cache configured; runs finish in a few minutes",
+        "main is protected; failing checks block merging",
+        "A deliberately failing pull request was opened, fixed and merged",
+        "CI badges in both READMEs; ApplyTrack CI includes the Postgres DB tests"
+      ]
+    },
+    "hints": [
+      "Rules job: run npm i -g firebase-tools, then firebase emulators:exec --only firestore --project demo-test 'npm run test:rules'. A project id starting with demo- needs no real Firebase project or credentials.",
+      "Postgres in CI: services: postgres: { image: postgres:16, env: { POSTGRES_PASSWORD: postgres }, ports: ['5432:5432'], options: --health-cmd pg_isready --health-interval 5s }, then set DATABASE_URL in the job's env.",
+      "The Firestore emulator needs Java; ubuntu-latest runners already include it."
+    ],
+    "proof": "Link to a green CI run and to the pull request that failed first.",
+    "explainBack": [
+      { "q": "What problem does CI solve for a team?", "lookFor": ["catches broken code before merge", "same checks for everyone", "works on my machine problem", "fast feedback"] },
+      { "q": "Why use a demo- project id for the rules tests in CI?", "lookFor": ["emulator only, no real project", "no credentials/secrets needed in CI", "can't touch production data"] }
+    ],
+    "lastHintExplanation": "CI runs the same checks on a clean machine for every change, so 'it works on my machine' problems and broken tests are caught before they reach main, and branch protection makes that mandatory. A demo- project id tells the Firebase emulator not to contact any real project, so CI needs no secrets and can never touch production data.",
+    "predict": [],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "DP: edit distance",
+      "note": "dp[i][j] = the cost to turn the first i characters into the first j. If the characters match, copy the diagonal; otherwise 1 + min(insert, delete, replace).",
+      "problems": [
+        { "title": "LeetCode 72: Edit Distance", "url": "https://leetcode.com/problems/edit-distance/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Company-style test 7: quantitative (12 minutes)",
+      "questions": [
+        { "q": "A sum of money triples in 10 years at simple interest. What is the rate?", "options": ["20%", "30%", "15%", "10%"], "answer": 0, "why": "The interest is 200% over 10 years." },
+        { "q": "The average of 20 students is 15. When the teacher's age is included, the average becomes 16. How old is the teacher?", "options": ["36", "35", "31", "40"], "answer": 0, "why": "21 × 16 − 20 × 15 = 336 − 300." },
+        { "q": "How many ways can the letters of 'APPLE' be arranged?", "options": ["120", "60", "24", "30"], "answer": 1, "why": "5!/2!." },
+        { "q": "A train 120 m long crosses a bridge 180 m long in 15 seconds. What is its speed?", "options": ["72 km/h", "60 km/h", "54 km/h", "80 km/h"], "answer": 0, "why": "300/15 = 20 m/s." },
+        { "q": "If 20% of A equals 30% of B, what is A : B?", "options": ["2:3", "3:2", "1:1", "4:3"], "answer": 1, "why": "0.2A = 0.3B." }
+      ]
+    },
+    "revision": ["Day 144: list the 4 bugs in the trusting team API."]
+  },
+  {
+    "day": 146,
+    "module": "capstone-2",
+    "title": "Deploying StandupBoard (and a Forgejo mirror bonus)",
+    "goal": "Ship StandupBoard to production with a deploy pipeline, and optionally mirror your code to a self-hosted Git server.",
+    "learn": {
+      "concepts": [
+        "Firebase Hosting for the Angular app (free tier); rewrites for SPA routing",
+        "The Express API on Coolify (or any free container host) with the service account as a secret",
+        "Separate Firebase projects or emulators for dev and production",
+        "Deploying from GitHub Actions after CI passes (needs: [ci jobs])",
+        "Bonus: Forgejo, a free self-hosted Git forge; push mirrors to keep a copy of your repos"
+      ],
+      "resources": [
+        { "title": "Firebase Hosting: Get started", "url": "https://firebase.google.com/docs/hosting/quickstart" },
+        { "title": "Firebase Hosting: GitHub integration", "url": "https://firebase.google.com/docs/hosting/github-integration" },
+        { "title": "Forgejo documentation", "url": "https://forgejo.org/docs/latest/" },
+        { "title": "Forgejo: Repository mirrors", "url": "https://forgejo.org/docs/latest/user/repo-mirror/" }
+      ]
+    },
+    "build": {
+      "task": "Deploy StandupBoard: the web app on Firebase Hosting (firebase init hosting with the SPA rewrite to /index.html), Firestore rules deployed from the repo, the Express API on Coolify (or another host) with FIREBASE_SERVICE_ACCOUNT and CORS settings as platform secrets. Add a deploy workflow that runs only on main after CI passes and deploys hosting and rules with a service account stored in GitHub secrets. Add your production domain to Firebase authorised domains. Seed a demo team and two demo accounts listed in the README. Bonus: run Forgejo on your Coolify server (or use a free Codeberg account, which runs Forgejo) and set up a push mirror of standupboard and applytrack. Write docs/deployment.md.",
+      "starterFiles": [],
+      "acceptance": [
+        "Web app live on Firebase Hosting; deep links work",
+        "API live with HTTPS; secrets only in the platform and GitHub secrets",
+        "Deploys happen automatically from main only after CI passes",
+        "Production domain authorised for sign-in; Google sign-in works live",
+        "Demo accounts in the README; docs/deployment.md complete",
+        "Bonus: a working Forgejo or Codeberg mirror"
+      ]
+    },
+    "hints": [
+      "firebase.json: \"hosting\": { \"public\": \"web/dist/web/browser\", \"rewrites\": [{ \"source\": \"**\", \"destination\": \"/index.html\" }] }.",
+      "In the deploy workflow, use needs: [api, web, rules] in the same workflow, or trigger on workflow_run of CI with conclusion == 'success'.",
+      "A push mirror is configured on the source side: in GitHub, add a workflow that pushes to the mirror, or in Forgejo create a pull mirror that fetches from GitHub on a schedule. A pull mirror is simplest."
+    ],
+    "proof": "Live URLs for the web app and API (and the mirror link if you did the bonus).",
+    "explainBack": [
+      { "q": "Why should deploys only run after CI passes?", "lookFor": ["never ship broken code", "tests are the gate", "automation removes manual mistakes"] },
+      { "q": "Why might a developer keep a mirror of their repos on a self-hosted forge?", "lookFor": ["backup/independence from one provider", "control over data", "learning self-hosting"] }
+    ],
+    "lastHintExplanation": "Making deploys depend on CI means a red test stops a broken build reaching users, with no human needing to remember. A mirror on Forgejo or Codeberg keeps a full copy of your history outside GitHub, which protects against account problems and shows you can run your own infrastructure.",
+    "predict": [],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Backtracking: grid search",
+      "note": "DFS from each cell, marking visited cells and unmarking them on the way back.",
+      "problems": [
+        { "title": "LeetCode 79: Word Search", "url": "https://leetcode.com/problems/word-search/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Company-style test 8: logical reasoning (12 minutes)",
+      "questions": [
+        { "q": "In a family of six, A is B's father; C is A's mother; D is B's sister; E is C's husband; F is D's daughter. How is F related to E?", "options": ["Great-granddaughter", "Granddaughter", "Daughter", "Niece"], "answer": 0, "why": "E → A → D → F is three generations down." },
+        { "q": "Next in the series: 2, 5, 10, 17, 26, ?", "options": ["35", "37", "36", "39"], "answer": 1, "why": "n² + 1 for n = 6." },
+        { "q": "Coded as 'sky is blue' = 'ta na ka' and 'blue is nice' = 'na ka pa', what is the code for 'sky'?", "options": ["ta", "na", "ka", "pa"], "answer": 0, "why": "'is' and 'blue' share na and ka, so sky = ta." },
+        { "q": "Arrange in a meaningful order: 1. Seed 2. Fruit 3. Plant 4. Flower", "options": ["1, 3, 4, 2", "1, 4, 3, 2", "3, 1, 4, 2", "1, 3, 2, 4"], "answer": 0, "why": "Seed → plant → flower → fruit." },
+        { "q": "A clock gains 5 minutes every hour. Set right at 8 a.m., what time does it show at 8 p.m.?", "options": ["9:00 p.m.", "8:60 p.m.", "8:55 p.m.", "9:05 p.m."], "answer": 0, "why": "12 hours × 5 minutes = 60 minutes ahead." }
+      ]
+    },
+    "revision": ["Day 145: explain what branch protection does."]
+  },
+  {
+    "day": 147,
+    "module": "interview-prep",
+    "title": "Interview prep: your projects and your story",
+    "goal": "Prepare clear, confident answers about yourself and your projects for the first round of interviews.",
+    "learn": {
+      "concepts": [
+        "'Tell me about yourself': present (what you do), past (how you got here), future (why this role), in 60–90 seconds",
+        "Project deep dives: architecture, your decisions, problems, what you'd improve",
+        "STAR stories for common themes: a challenge, a mistake, learning something fast, teamwork, a deadline",
+        "Explaining a career path honestly and positively",
+        "Questions to ask the interviewer"
+      ],
+      "resources": [
+        { "title": "Tech Interview Handbook: Self introduction", "url": "https://www.techinterviewhandbook.org/self-introduction/" },
+        { "title": "Tech Interview Handbook: Behavioral interview questions", "url": "https://www.techinterviewhandbook.org/behavioral-interview-questions/" },
+        { "title": "Tech Interview Handbook: Questions to ask", "url": "https://www.techinterviewhandbook.org/final-questions/" }
+      ]
+    },
+    "build": {
+      "task": "In jobready-journey, write interview/story.md: a 'tell me about yourself' answer (under 90 seconds spoken), a 2-minute deep dive for ApplyTrack and for StandupBoard (problem, architecture, your hardest decision, a bug you're proud of fixing, what you'd change), 6 STAR stories (a challenge, a mistake, learning something new quickly, working with others, a tight deadline, handling feedback), and 5 questions to ask interviewers. Practise each answer aloud with a timer and record yourself once; note filler words and cut them.",
+      "starterFiles": [],
+      "acceptance": [
+        "'Tell me about yourself' under 90 seconds, practised aloud",
+        "Two project deep dives with architecture and trade-offs",
+        "6 STAR stories with specific, measurable results",
+        "5 thoughtful questions for interviewers",
+        "One recording reviewed and notes on what to improve"
+      ]
+    },
+    "hints": [
+      "Structure: 'I'm a full-stack developer working with Angular, Node and PostgreSQL. Over the last six months I built … My strongest project is … I'm looking for a role where …'",
+      "Your learning journey is itself a STAR story: 26 weeks, daily practice, real projects. Use it for 'learning something quickly'.",
+      "Good questions: 'What does a new developer's first month look like?', 'How do you review code here?', 'What would make someone successful in this role in six months?'"
+    ],
+    "proof": "Commit with interview/story.md.",
+    "explainBack": [
+      { "q": "Deliver your 'tell me about yourself' answer now.", "lookFor": ["present/past/future", "under 90 seconds", "mentions projects", "ends with what they want next"] },
+      { "q": "Tell your 'mistake' STAR story.", "lookFor": ["real mistake", "ownership", "specific fix", "what changed afterwards"] }
+    ],
+    "lastHintExplanation": "Most first rounds start with 'tell me about yourself' and a project discussion. A rehearsed, structured answer (present, past, future) shows clarity and confidence. STAR stories with specific results are easy to follow and believable. Asking good questions shows you're evaluating the company too.",
+    "predict": [],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Revision by pattern: arrays and hashing",
+      "note": "Timed: 20 minutes each, from a blank file, saying your approach out loud first as you would in an interview.",
+      "problems": [
+        { "title": "LeetCode 1: Two Sum (re-solve)", "url": "https://leetcode.com/problems/two-sum/" },
+        { "title": "LeetCode 49: Group Anagrams", "url": "https://leetcode.com/problems/group-anagrams/" },
+        { "title": "LeetCode 238: Product of Array Except Self", "url": "https://leetcode.com/problems/product-of-array-except-self/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Company-style test 9: verbal (12 minutes)",
+      "questions": [
+        { "q": "Choose the correct sentence.", "options": ["She suggested me to apply.", "She suggested that I apply.", "She suggested me applying.", "She suggested to me apply."], "answer": 1, "why": "'Suggest' is followed by a that-clause or an -ing form, not 'me to'." },
+        { "q": "Which word means the same as 'Inevitable'?", "options": ["Avoidable", "Unavoidable", "Uncertain", "Unlikely"], "answer": 1, "why": "Inevitable means certain to happen." },
+        { "q": "'He is used to ___ early.'", "options": ["wake", "waking", "woke", "wakes"], "answer": 1, "why": "be used to + -ing." },
+        { "q": "What does 'a blessing in disguise' mean?", "options": ["A hidden curse", "Something good that seemed bad at first", "A secret gift", "A religious event"], "answer": 1, "why": "It's an idiom for that." },
+        { "q": "Fill in the blank: 'The CEO's speech was so ___ that everyone felt motivated.'", "options": ["monotonous", "inspiring", "lengthy", "vague"], "answer": 1, "why": "Only 'inspiring' leads to motivation." }
+      ]
+    },
+    "revision": ["Day 146: explain why deploys wait for CI."]
+  },
+  {
+    "day": 148,
+    "module": "interview-prep",
+    "title": "JavaScript and TypeScript interview questions",
+    "goal": "Answer the most common JavaScript and TypeScript interview questions clearly, with small code examples.",
+    "learn": {
+      "concepts": [
+        "Scope, hoisting, the temporal dead zone (var vs let vs const)",
+        "Closures and a practical use (private state, once(), memoize)",
+        "this: in methods, arrow functions, and call/apply/bind",
+        "The event loop: call stack, microtasks (promises) vs macrotasks (setTimeout)",
+        "== vs ===, truthy/falsy, reference vs value copying (shallow vs deep)",
+        "Prototypes and classes; TypeScript: interface vs type, generics, unknown vs any, utility types"
+      ],
+      "resources": [
+        { "title": "javascript.info: Closures", "url": "https://javascript.info/closure" },
+        { "title": "javascript.info: Event loop", "url": "https://javascript.info/event-loop" },
+        { "title": "MDN: this", "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/this" },
+        { "title": "TypeScript Handbook: Generics", "url": "https://www.typescriptlang.org/docs/handbook/2/generics.html" }
+      ]
+    },
+    "build": {
+      "task": "In jobready-journey, create interview/js-questions.md with 25 questions and answers in your own words, each with a tiny code example you have run. Include output-prediction questions (event loop order, closures in loops with var vs let, this in callbacks). Then implement from scratch, with tests: debounce, throttle, once, memoize, deepClone (objects, arrays, Dates), a simple Promise.all, and a curry function. Time yourself: 15 minutes each.",
+      "starterFiles": [
+        { "name": "interview/predict.js", "content": "// Predict the output BEFORE running. Write your guess in a comment, then run it.\nconsole.log('1');\nsetTimeout(() => console.log('2'), 0);\nPromise.resolve().then(() => console.log('3'));\nqueueMicrotask(() => console.log('4'));\n(async () => {\n  console.log('5');\n  await null;\n  console.log('6');\n})();\nconsole.log('7');\n\nfor (var i = 0; i < 3; i++) setTimeout(() => console.log('var', i));\nfor (let j = 0; j < 3; j++) setTimeout(() => console.log('let', j));\n" }
+      ],
+      "acceptance": [
+        "25 questions answered in your own words with run examples",
+        "predict.js output predicted correctly (or the mistake explained)",
+        "7 utility functions implemented with tests",
+        "Each utility built in about 15 minutes",
+        "You can explain the event loop with a diagram"
+      ]
+    },
+    "hints": [
+      "predict.js prints 1, 5, 7, 3, 4, 6, 2, then 'var 3' three times, then 'let 0', 'let 1', 'let 2'. Work out why before you check.",
+      "Promise.all: return a new Promise; track results by index and a count of resolved values; reject on the first rejection; resolve when count === length (and immediately for an empty array).",
+      "Interviewers care about the explanation as much as the code. Practise saying 'the callback closes over the variable, not its value' and similar sentences aloud."
+    ],
+    "proof": "Commit with js-questions.md and the utilities with tests.",
+    "explainBack": [
+      { "q": "Explain why predict.js prints in that order.", "lookFor": ["synchronous code first (1, 5, 7)", "microtasks before macrotasks (3, 4, 6)", "setTimeout last (2)", "await schedules the rest as a microtask"] },
+      { "q": "Why does the var loop print 3 three times but the let loop prints 0, 1, 2?", "lookFor": ["var is function-scoped, one shared variable", "let creates a new binding per iteration", "closures capture the binding"] }
+    ],
+    "lastHintExplanation": "Synchronous code runs first (1, then 5 inside the async function up to await, then 7). Next, the microtask queue drains in order: 3, 4, then 6, which was scheduled by await. Only then does the setTimeout macrotask print 2. With var there's one shared i, which is 3 by the time the timers run; let creates a fresh j for each iteration.",
+    "predict": [
+      { "q": "const a = { x: 1 }; const b = { ...a }; b.x = 2; console.log(a.x)", "options": ["1", "2", "undefined", "Error"], "answer": 0, "why": "Spread makes a shallow copy; changing b.x doesn't affect a." },
+      { "q": "console.log([] == false, [] === false)", "options": ["true false", "false false", "true true", "false true"], "answer": 0, "why": "== coerces [] to '' and then to 0, which equals false; === compares types." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Revision by pattern: two pointers and sliding window",
+      "note": "Timed: 20 minutes each, talking through your approach first.",
+      "problems": [
+        { "title": "LeetCode 11: Container With Most Water (re-solve)", "url": "https://leetcode.com/problems/container-with-most-water/" },
+        { "title": "LeetCode 424: Longest Repeating Character Replacement (re-solve)", "url": "https://leetcode.com/problems/longest-repeating-character-replacement/" },
+        { "title": "LeetCode 76: Minimum Window Substring (attempt)", "url": "https://leetcode.com/problems/minimum-window-substring/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Company-style test 10: mixed (12 minutes)",
+      "questions": [
+        { "q": "A shop sells an item at ₹540 after a 10% discount. What is the marked price?", "options": ["₹594", "₹600", "₹580", "₹620"], "answer": 1, "why": "540/0.9." },
+        { "q": "Two numbers add up to 50 and differ by 10. What is their product?", "options": ["600", "625", "500", "575"], "answer": 0, "why": "30 × 20." },
+        { "q": "Odd one out: Java, Python, Oracle, Ruby", "options": ["Java", "Python", "Oracle", "Ruby"], "answer": 2, "why": "Oracle is a company and database, not a programming language." },
+        { "q": "If the day before yesterday was Thursday, what day is tomorrow?", "options": ["Saturday", "Sunday", "Monday", "Friday"], "answer": 1, "why": "Today is Saturday." },
+        { "q": "Choose the correctly spelt word.", "options": ["Occurence", "Occurrence", "Ocurrence", "Occurrance"], "answer": 1, "why": "Double c, double r, -ence." }
+      ]
+    },
+    "revision": ["Day 147: deliver 'tell me about yourself' in under 90 seconds."]
+  },
+  {
+    "day": 149,
+    "module": "interview-prep",
+    "title": "Angular, backend and SQL interview questions",
+    "goal": "Prepare clear answers to the framework, API and database questions junior full-stack interviews ask most.",
+    "learn": {
+      "concepts": [
+        "Angular: components, signals vs RxJS, change detection, DI and providers, lifecycle hooks, routing and guards, forms, interceptors, lazy loading, @defer",
+        "HTML/CSS: semantic HTML, the box model, flexbox vs grid, specificity, responsive design, accessibility basics",
+        "Backend: REST, status codes, middleware, authentication vs authorisation, JWT vs sessions, CORS, validation",
+        "SQL: joins, GROUP BY/HAVING, indexes, transactions and ACID, normalisation, SQL injection",
+        "Firebase: when to use it, security rules, real-time listeners"
+      ],
+      "resources": [
+        { "title": "Angular: Signals guide", "url": "https://angular.dev/guide/signals" },
+        { "title": "Angular: Dependency injection", "url": "https://angular.dev/guide/di" },
+        { "title": "PostgreSQL docs: Transactions", "url": "https://www.postgresql.org/docs/current/tutorial-transactions.html" }
+      ]
+    },
+    "build": {
+      "task": "In jobready-journey, write interview/stack-questions.md with 40 questions and answers in your own words, about 10 each for Angular, HTML/CSS, backend/API and SQL, each linked to a place in your own projects where you used the idea (e.g. 'Interceptors: ApplyTrack web/src/app/core/auth.interceptor.ts'). Then write 10 SQL queries from scratch against the ApplyTrack schema (e.g. the second most recent application per user, companies with more than 2 rejections, the average days from Applied to Interview) and check them in psql.",
+      "starterFiles": [],
+      "acceptance": [
+        "40 questions across 4 areas, in your own words",
+        "Each answer points to real code in your projects",
+        "10 SQL queries run successfully against ApplyTrack data",
+        "Includes at least one window-function query (ROW_NUMBER or LAG)",
+        "You can answer 'signals vs RxJS' and 'JWT vs sessions' without notes"
+      ]
+    },
+    "hints": [
+      "Linking answers to your code is powerful in interviews: 'I used a functional interceptor in ApplyTrack to attach the token and handle 401s globally.'",
+      "Second most recent per user: SELECT * FROM (SELECT a.*, ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY applied_on DESC) AS rn FROM applications a) t WHERE rn = 2;",
+      "Days from Applied to Interview: join application_status_history to itself on application_id, where one row's to_status is Applied and the other's is Interview, then AVG the date difference."
+    ],
+    "proof": "Commit with stack-questions.md and the SQL file.",
+    "explainBack": [
+      { "q": "Signals vs RxJS in Angular: when do you use each?", "lookFor": ["signals for synchronous state and derived values", "RxJS for event streams, async, cancellation (debounce, switchMap)", "toSignal/toObservable bridge"] },
+      { "q": "Explain a database transaction and ACID with an example from your projects.", "lookFor": ["all-or-nothing group of changes", "atomicity, consistency, isolation, durability", "status change + history insert example"] }
+    ],
+    "lastHintExplanation": "Signals hold state: current values, with computed values derived automatically. RxJS models streams of events over time, with operators for timing, cancellation and combining, which is why search uses debounceTime and switchMap. A transaction groups changes so they all happen or none do (atomicity). ApplyTrack's status update plus history insert is a perfect example to give.",
+    "predict": [
+      { "q": "SELECT COUNT(*) FROM a LEFT JOIN b ON a.id = b.a_id; where a has 3 rows and only one matches 2 rows in b. Result?", "options": ["3", "4", "2", "5"], "answer": 1, "why": "The matching row appears twice and the other 2 rows appear once each." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Revision by pattern: stacks, binary search, linked lists",
+      "note": "Timed: 20 minutes each, talking through your approach first.",
+      "problems": [
+        { "title": "LeetCode 20: Valid Parentheses (re-solve)", "url": "https://leetcode.com/problems/valid-parentheses/" },
+        { "title": "LeetCode 875: Koko Eating Bananas (re-solve)", "url": "https://leetcode.com/problems/koko-eating-bananas/" },
+        { "title": "LeetCode 143: Reorder List", "url": "https://leetcode.com/problems/reorder-list/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Company-style test 11: quantitative (12 minutes)",
+      "questions": [
+        { "q": "A man spends 40% of his income on rent and 30% of the remainder on food, and saves ₹8,400. What is his income?", "options": ["₹20,000", "₹24,000", "₹18,000", "₹22,000"], "answer": 0, "why": "Savings = 0.6 × 0.7 = 0.42 of income, so 8,400/0.42." },
+        { "q": "A and B together earn ₹5,000. A spends 80% and B spends 70%, and their savings are equal. What is A's income?", "options": ["₹3,000", "₹2,000", "₹2,500", "₹3,500"], "answer": 0, "why": "0.2A = 0.3B, so A : B = 3 : 2." },
+        { "q": "Speed of a boat in still water is 10 km/h and the stream is 2 km/h. How long does 24 km downstream take?", "options": ["2 hours", "2.4 hours", "3 hours", "1.5 hours"], "answer": 0, "why": "24/12." },
+        { "q": "What is the next prime after 89?", "options": ["91", "93", "97", "99"], "answer": 2, "why": "91 = 7 × 13, 93 = 3 × 31, 95 = 5 × 19." },
+        { "q": "A bag has 3 white, 5 black and 2 red balls. What is the probability that one drawn ball is not black?", "options": ["1/2", "3/10", "1/5", "2/5"], "answer": 0, "why": "5 of 10 balls are not black." }
+      ]
+    },
+    "revision": ["Day 148: explain the event loop order in predict.js."]
+  },
+  {
+    "day": 150,
+    "module": "interview-prep",
+    "title": "Mock interview 1: technical round",
+    "goal": "Experience a realistic technical interview, then turn the feedback into a focused plan.",
+    "learn": {
+      "concepts": [
+        "Typical junior full-stack round: intro (5 min), project discussion (15), concepts (15), live coding (20), your questions (5)",
+        "Thinking aloud during coding: clarify, give examples, state the approach, code, test",
+        "Handling nerves: slow down, restate the question, it's fine to pause",
+        "Free mock interview options: peers, mentors, communities, Pramp-style platforms"
+      ],
+      "resources": [
+        { "title": "Tech Interview Handbook: Coding interview cheatsheet", "url": "https://www.techinterviewhandbook.org/coding-interview-cheatsheet/" },
+        { "title": "Tech Interview Handbook: Mock interviews", "url": "https://www.techinterviewhandbook.org/mock-interviews/" }
+      ]
+    },
+    "build": {
+      "task": "Do a 60-minute mock interview with a real person if at all possible (friend in tech, mentor, college senior, or a peer-to-peer mock platform). Give them interview/mock1-script.md beforehand: your intro, questions about ApplyTrack, 6 concept questions (from Days 148–149), and one live coding task (e.g. 'group anagrams' or 'build a debounced search box'). If no one is available, record yourself answering on video with a timer. Afterwards write interview/mock1-review.md: scores 1–5 for communication, problem solving, code quality and project knowledge; the 3 weakest answers rewritten; and a 6-day plan for the final week.",
+      "starterFiles": [],
+      "acceptance": [
+        "A 60-minute mock done with a person, or recorded",
+        "Script shared with the interviewer beforehand",
+        "Live coding done while thinking aloud",
+        "mock1-review.md with honest scores and 3 rewritten answers",
+        "A concrete plan for the final week"
+      ]
+    },
+    "hints": [
+      "Live coding framework: 1) restate the problem, 2) ask about edge cases, 3) walk through an example, 4) explain the approach and its complexity, 5) code, 6) test with the example and edge cases.",
+      "Ask your mock interviewer to interrupt with follow-ups ('what if the input is huge?'), as real interviewers do.",
+      "Recording yourself is uncomfortable but very effective. You'll notice filler words and unclear explanations at once."
+    ],
+    "proof": "Commit with mock1-review.md.",
+    "explainBack": [
+      { "q": "What was your weakest moment in the mock, and what's your improved answer?", "lookFor": ["specific moment", "why it went badly", "better answer"] },
+      { "q": "Describe your live coding process step by step.", "lookFor": ["clarify", "examples/edge cases", "approach + complexity", "code", "test"] }
+    ],
+    "lastHintExplanation": "Interviewers judge how you think as much as whether you finish. A repeatable process (restate, clarify edge cases, walk through an example, explain the approach, code, then test) keeps you calm and shows structured thinking even when you get stuck. Honest scoring and rewritten answers turn one mock into real improvement.",
+    "predict": [],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Revision by pattern: trees and graphs",
+      "note": "Timed: 25 minutes each, talking through your approach first.",
+      "problems": [
+        { "title": "LeetCode 236: Lowest Common Ancestor of a Binary Tree", "url": "https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree/" },
+        { "title": "LeetCode 199: Binary Tree Right Side View", "url": "https://leetcode.com/problems/binary-tree-right-side-view/" },
+        { "title": "LeetCode 994: Rotting Oranges (re-solve)", "url": "https://leetcode.com/problems/rotting-oranges/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Company-style full test 1 (15 minutes)",
+      "questions": [
+        { "q": "A trader sells two items at ₹1,200 each, one at a 20% profit and the other at a 20% loss. What is the overall result?", "options": ["No profit, no loss", "4% loss", "4% profit", "2% loss"], "answer": 1, "why": "Equal selling prices with ±x% always give a loss of x²/100 = 4%." },
+        { "q": "A can complete a job in 15 days. After A works for 5 days, B finishes the rest in 10 days. How long would B take alone?", "options": ["15 days", "12 days", "20 days", "18 days"], "answer": 0, "why": "A does 1/3 of the job; B does 2/3 in 10 days." },
+        { "q": "Statements: All coders are thinkers. Some thinkers are writers. Conclusion I: Some coders are writers. Conclusion II: Some writers are thinkers.", "options": ["Only I follows", "Only II follows", "Both follow", "Neither follows"], "answer": 1, "why": "II follows from 'some thinkers are writers'; I doesn't necessarily." },
+        { "q": "Choose the word that best fits: 'Her ___ attitude made the team trust her.'", "options": ["reliable", "arrogant", "careless", "indifferent"], "answer": 0, "why": "Trust comes from reliability." },
+        { "q": "Next in the series: 1, 1, 2, 3, 5, 8, ?", "options": ["11", "13", "12", "15"], "answer": 1, "why": "Fibonacci: 5 + 8." }
+      ]
+    },
+    "revision": ["Day 149: answer 'signals vs RxJS' aloud without notes."]
+  }
+]

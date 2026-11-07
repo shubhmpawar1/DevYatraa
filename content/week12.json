@@ -1,0 +1,400 @@
+[
+  {
+    "day": 67,
+    "module": "angular-components",
+    "title": "Component inputs and outputs",
+    "goal": "Pass data into child components and send events back up to parents.",
+    "learn": {
+      "concepts": [
+        "input() and input.required() for data coming in (they're signals)",
+        "output() and .emit() for events going out",
+        "Binding in the parent: [course]=\"c\" and (saved)=\"onSaved($event)\"",
+        "model() for two-way binding [(value)]",
+        "Smart (container) vs presentational (dumb) components",
+        "Data flows down, events flow up"
+      ],
+      "resources": [
+        { "title": "Angular: Accepting data with input properties", "url": "https://angular.dev/guide/components/inputs" },
+        { "title": "Angular: Custom events with outputs", "url": "https://angular.dev/guide/components/outputs" },
+        { "title": "Angular: Two-way binding with model()", "url": "https://angular.dev/guide/templates/two-way-binding" }
+      ]
+    },
+    "build": {
+      "task": "In angular-playground, split course-list into: course-card (presentational: input.required<Course>(), outputs saveToggled and enrolled), course-filters (presentational: model() for query and level so the parent can use [(query)] and [(level)]), and course-page (smart: owns the signals and logic). Add a quantity-stepper component with model<number>() plus min/max inputs, and use it inside course-card for 'seats'. course-card must not import any service or change any state itself.",
+      "starterFiles": [],
+      "acceptance": [
+        "course-card uses input.required and emits outputs; it has no state of its own except UI-only state",
+        "course-filters uses model() and the parent binds with [( )]",
+        "course-page owns all state signals and handles events",
+        "quantity-stepper respects min and max inputs",
+        "Everything still works: filter, save toggle, counts"
+      ]
+    },
+    "hints": [
+      "Child: course = input.required<Course>(); saveToggled = output<number>(); In the template: (click)=\"saveToggled.emit(course().id)\".",
+      "Parent template: <app-course-card [course]=\"c\" (saveToggled)=\"toggle($event)\" />. $event is the emitted value.",
+      "model: query = model(''); in the child's input: (input)=\"query.set(...)\". Parent: <app-course-filters [(query)]=\"query\" /> where query is the parent's signal."
+    ],
+    "proof": "Commit with the new components.",
+    "explainBack": [
+      { "q": "Trace what happens from clicking 'Save' on a card to the saved count updating.", "lookFor": ["card emits output with id", "parent's handler runs", "parent updates its signal", "computed count recalculates", "new input flows down to card"] },
+      { "q": "Why shouldn't course-card change state itself?", "lookFor": ["single source of truth in the parent", "card reusable in other places", "easier to test", "data down, events up"] }
+    ],
+    "lastHintExplanation": "Data flows down through inputs and events flow up through outputs. The card emits 'saveToggled' with the id; the parent's handler updates its signal; computed values recalculate; and the new course object flows back down into the card's input. Keeping state in one smart parent makes cards reusable and predictable.",
+    "predict": [
+      { "q": "Child: name = input('Guest'). Parent uses <app-greet /> with no binding. What is name() in the child?", "options": ["undefined", "'Guest'", "''", "Error"], "answer": 1, "why": "The default value is used when the parent doesn't bind the input." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Stack",
+      "note": "New pattern. Push opening brackets, pop and match on closing ones.",
+      "problems": [
+        { "title": "LeetCode 20: Valid Parentheses", "url": "https://leetcode.com/problems/valid-parentheses/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Logical reasoning: ranking and order",
+      "questions": [
+        { "q": "Ravi is 7th from the left and 12th from the right in a row. How many people are in the row?", "options": ["18", "19", "20", "17"], "answer": 0, "why": "7 + 12 − 1 = 18." },
+        { "q": "Asha is 15th from the top in a class of 40. What is her rank from the bottom?", "options": ["25", "26", "27", "24"], "answer": 1, "why": "40 − 15 + 1 = 26." },
+        { "q": "A is taller than B, B is taller than C, and D is taller than A. Who is tallest?", "options": ["A", "B", "C", "D"], "answer": 3, "why": "D > A > B > C." },
+        { "q": "T > Q > P, and P > S > R. Who is in the middle?", "options": ["P", "Q", "S", "T"], "answer": 0, "why": "The order is T, Q, P, S, R." },
+        { "q": "Seema is 10th from the top among 35 students. How many students are below her?", "options": ["24", "25", "26", "10"], "answer": 1, "why": "35 − 10 = 25." }
+      ]
+    },
+    "revision": ["Day 66: explain why mutating inside a signal breaks computed."]
+  },
+  {
+    "day": 68,
+    "module": "angular-components",
+    "title": "Services and dependency injection",
+    "goal": "Move shared state and logic into services and inject them where needed.",
+    "learn": {
+      "concepts": [
+        "What a service is: a class for logic/state that isn't UI",
+        "@Injectable({ providedIn: 'root' }) gives one shared instance",
+        "inject(ServiceName) inside components and other services",
+        "Signal-based state in a service: private writable signal, public readonly",
+        "Why DI: testability and swapping implementations",
+        "Component-level providers (a new instance per component) — just know it exists"
+      ],
+      "resources": [
+        { "title": "Angular: Dependency injection overview", "url": "https://angular.dev/guide/di" },
+        { "title": "Angular: Creating an injectable service", "url": "https://angular.dev/guide/di/creating-injectable-service" }
+      ]
+    },
+    "build": {
+      "task": "Create CourseStore (ng g s course-store): it owns courses, query and level signals (private writable, exposed as readonly with asReadonly()), computed filtered and savedCount, and methods toggleSaved, enroll, setQuery and setLevel. It also persists saved ids with an effect. Refactor course-page to inject the store instead of owning state. Create a header-badge component that injects the same store and shows 'Saved: N' in the app header, proving both components share one instance. Write a short docs/di.md explaining DI with your own example.",
+      "starterFiles": [],
+      "acceptance": [
+        "State lives in CourseStore; components have no duplicated state",
+        "Writable signals are private; components only read via readonly signals and call methods",
+        "header-badge and course-page show consistent numbers (same instance)",
+        "Persistence still works",
+        "docs/di.md explains DI with your own example"
+      ]
+    },
+    "hints": [
+      "private readonly _courses = signal<Course[]>(...); readonly courses = this._courses.asReadonly();",
+      "In a component: private store = inject(CourseStore); then use store.filtered() in the template (make store protected or public so the template can see it).",
+      "providedIn: 'root' means Angular creates one instance the first time something injects it, and everyone gets that same one."
+    ],
+    "proof": "Commit with the store and refactored components.",
+    "explainBack": [
+      { "q": "Why expose readonly signals and methods instead of the writable signals?", "lookFor": ["only the store can change state", "all changes go through named methods", "easier to find bugs", "encapsulation"] },
+      { "q": "How do header-badge and course-page end up with the same data?", "lookFor": ["providedIn root creates a singleton", "both inject the same instance", "signals update both"] }
+    ],
+    "lastHintExplanation": "providedIn: 'root' registers one app-wide instance, so every inject(CourseStore) gets the same object, and both components read the same signals. Keeping writable signals private and exposing readonly ones plus methods means state only changes through named actions, which makes bugs easy to trace.",
+    "predict": [
+      { "q": "Two components inject a service marked providedIn: 'root'. Component A changes a signal in it. Does component B see the change?", "options": ["Yes", "No, each gets its own copy", "Only after reload", "Only if B is A's child"], "answer": 0, "why": "Root-provided services are singletons." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Stack",
+      "note": "Simulate the operations with an array used as a stack.",
+      "problems": [
+        { "title": "LeetCode 682: Baseball Game", "url": "https://leetcode.com/problems/baseball-game/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Logical reasoning: seating arrangement",
+      "questions": [
+        { "q": "A, B, C, D and E sit in a row facing north. C is in the middle, A is immediately left of C, B is at the right end and D is next to B. Who is at the left end?", "options": ["A", "D", "E", "C"], "answer": 2, "why": "From the left: E, A, C, D, B." },
+        { "q": "In a row, X is 3rd from the left and Y is 5th from the left. How many people are between them?", "options": ["1", "2", "3", "0"], "answer": 0, "why": "Only the 4th person." },
+        { "q": "Four friends sit around a square table facing the centre. A is opposite C and B is on A's right. Who is on C's right?", "options": ["A", "B", "D", "Nobody"], "answer": 2, "why": "Facing the centre, B is on A's right, so D is on C's right." },
+        { "q": "Five people sit in a row. R is at the right end, P is between Q and R, and S is somewhere left of Q. Who is in the middle?", "options": ["P", "Q", "R", "S"], "answer": 1, "why": "R is 5th, P is 4th, Q is 3rd." },
+        { "q": "Eight people sit evenly around a round table. How many are not next to a given person (not counting that person)?", "options": ["4", "5", "6", "3"], "answer": 1, "why": "8 − 1 − 2 = 5." }
+      ]
+    },
+    "revision": ["Day 67: explain 'data down, events up' using your course-card."]
+  },
+  {
+    "day": 69,
+    "module": "angular-components",
+    "title": "Building a task board with a signal store",
+    "goal": "Build a small Kanban-style task board with a service store and several cooperating components.",
+    "learn": {
+      "concepts": [
+        "Designing state for a feature: tasks with status columns",
+        "Derived state per column with computed",
+        "Moving items between lists immutably",
+        "Component tree: board → column → task-card, plus a new-task form",
+        "Persisting store state"
+      ],
+      "resources": [
+        { "title": "Angular: Signals — computed signals", "url": "https://angular.dev/guide/signals#computed-signals" },
+        { "title": "Angular: Component lifecycle (overview)", "url": "https://angular.dev/guide/components/lifecycle" }
+      ]
+    },
+    "build": {
+      "task": "In angular-playground, add a /board page (just render it in app for now; routing comes next week). TaskStore holds tasks: { id, title, status: 'todo' | 'doing' | 'done', priority: 'low' | 'medium' | 'high', createdAt }. Components: board (3 columns), column (input: status, title), task-card (shows priority colour, buttons ← → to move, delete), and new-task-form (title + priority). Show counts per column, sort each column by priority, and persist to localStorage. Bonus: drag and drop with the Angular CDK.",
+      "starterFiles": [],
+      "acceptance": [
+        "Tasks can be created, moved left/right between columns and deleted",
+        "Each column shows its own count and is sorted by priority (high first)",
+        "Store methods are the only way state changes; all updates immutable",
+        "Board survives reload",
+        "task-card is presentational (inputs/outputs only)"
+      ]
+    },
+    "hints": [
+      "Per-column computed: readonly byStatus = computed(() => ({ todo: this.sorted().filter(t => t.status === 'todo'), ... })).",
+      "Moving: const order = ['todo', 'doing', 'done'] as const; find the index and add ±1, clamped to 0..2.",
+      "Priority sort: const rank = { high: 0, medium: 1, low: 2 }; [...tasks].sort((a, b) => rank[a.priority] - rank[b.priority])."
+    ],
+    "proof": "Commit with the task board.",
+    "explainBack": [
+      { "q": "Explain how a task moves from 'todo' to 'doing' through your components and store.", "lookFor": ["card emits move event", "column/board passes it to the store method", "store updates the task immutably", "computed columns recalculate"] },
+      { "q": "Why is a priority rank map better than comparing strings?", "lookFor": ["'high' < 'low' alphabetically is wrong ordering", "explicit order", "easy to change"] }
+    ],
+    "lastHintExplanation": "The card only emits 'move right' with its id; the store finds the task, replaces it with a copy whose status is the next column, and sets a new array. Computed per-column lists recalculate and Angular updates just those columns. Sorting with a rank map makes the intended order explicit; alphabetically, 'high' < 'low' < 'medium', which is wrong.",
+    "predict": [
+      { "q": "console.log(['low', 'high', 'medium'].sort())", "options": ["['high', 'low', 'medium']", "['low', 'medium', 'high']", "['high', 'medium', 'low']", "Unchanged"], "answer": 0, "why": "Default sort is alphabetical." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Stack: design",
+      "note": "Keep a second stack (or pairs) so getMin is O(1).",
+      "problems": [
+        { "title": "LeetCode 155: Min Stack", "url": "https://leetcode.com/problems/min-stack/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Logical reasoning: syllogisms",
+      "questions": [
+        { "q": "All cats are animals. All animals breathe. Conclusion: All cats breathe.", "options": ["Definitely true", "Definitely false", "Can't say", "None of these"], "answer": 0, "why": "Cats ⊂ animals ⊂ breathing things." },
+        { "q": "Some pens are blue. All blue things are bright. Conclusion: Some pens are bright.", "options": ["Definitely true", "Definitely false", "Can't say", "None of these"], "answer": 0, "why": "The blue pens must be bright." },
+        { "q": "All roses are flowers. Some flowers fade quickly. Conclusion: Some roses fade quickly.", "options": ["Definitely true", "Definitely false", "Can't say", "None of these"], "answer": 2, "why": "The flowers that fade quickly might not be roses." },
+        { "q": "No dog is a cat. All cats are pets. Conclusion: No dog is a pet.", "options": ["Definitely true", "Definitely false", "Can't say", "None of these"], "answer": 2, "why": "Dogs could still be pets; the statements don't tell us." },
+        { "q": "All engineers are graduates. Ravi is not a graduate. Conclusion: Ravi is not an engineer.", "options": ["Definitely true", "Definitely false", "Can't say", "None of these"], "answer": 0, "why": "If he were an engineer, he would be a graduate." }
+      ]
+    },
+    "revision": ["Day 68: explain why the store exposes readonly signals."]
+  },
+  {
+    "day": 70,
+    "module": "angular-components",
+    "title": "Reusable UI components and content projection",
+    "goal": "Build a small set of reusable UI components (button, card, modal, badge) with Tailwind and <ng-content>.",
+    "learn": {
+      "concepts": [
+        "Content projection with <ng-content> and named slots (select=\"[slot=footer]\")",
+        "Variant inputs: variant = input<'primary' | 'secondary' | 'danger'>('primary')",
+        "Computing classes from inputs with computed()",
+        "host bindings for component root element classes",
+        "Accessible modal: role=\"dialog\", aria-modal, Escape to close, focus on open",
+        "Keep UI components presentational and app-agnostic"
+      ],
+      "resources": [
+        { "title": "Angular: Content projection with ng-content", "url": "https://angular.dev/guide/components/content-projection" },
+        { "title": "Angular: Component host elements", "url": "https://angular.dev/guide/components/host-elements" },
+        { "title": "WAI-ARIA: Dialog (modal) pattern", "url": "https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/" }
+      ]
+    },
+    "build": {
+      "task": "Create src/app/ui/ with: ui-button (variant and size inputs, disabled, projects its label), ui-card (header, body and footer slots), ui-badge (tone input), and ui-modal (open via model<boolean>(), title input, projected body and footer; closes on Escape and backdrop click; focuses the dialog on open). Build a /ui showcase in the app showing every variant. Then replace the hand-written buttons, cards and badges in your task board with these components.",
+      "starterFiles": [],
+      "acceptance": [
+        "ui-button supports 3 variants and 2 sizes, with classes computed from inputs",
+        "ui-card uses named slots via ng-content select",
+        "ui-modal is accessible: role=dialog, aria-modal, aria-labelledby, Escape closes, focus moves in",
+        "Showcase page shows all variants",
+        "Task board refactored to use the UI components"
+      ]
+    },
+    "hints": [
+      "Named slots: in ui-card's template <ng-content select=\"[card-header]\" /> and in use <h3 card-header>Title</h3>.",
+      "Classes: classes = computed(() => base + ' ' + variants[this.variant()] + ' ' + sizes[this.size()]); then [class]=\"classes()\" on the inner <button>.",
+      "Escape: host: { '(document:keydown.escape)': 'close()' } in the @Component metadata, only acting when open() is true."
+    ],
+    "proof": "Commit with src/app/ui/ and the showcase page.",
+    "explainBack": [
+      { "q": "Explain how content projection works in your ui-card.", "lookFor": ["parent places content between tags", "ng-content marks where it appears", "select picks content by attribute for slots"] },
+      { "q": "What makes your modal accessible?", "lookFor": ["role dialog and aria-modal", "labelled by its title", "Escape closes", "focus moves into the dialog (and ideally returns)"] }
+    ],
+    "lastHintExplanation": "<ng-content> marks where content written between the component's tags appears, and select=\"[card-header]\" routes matching elements into a specific slot. An accessible modal announces itself (role=\"dialog\", aria-modal, aria-labelledby), moves focus into itself when it opens, and closes on Escape, so keyboard and screen-reader users aren't trapped or lost.",
+    "predict": [
+      { "q": "ui-card has only <ng-content select=\"[card-header]\" /> and no default <ng-content />. You put a <p> without that attribute inside. What happens?", "options": ["The <p> shows in the header", "The <p> isn't shown", "Error", "The <p> shows at the end"], "answer": 1, "why": "Content that matches no slot is only shown if there's a default <ng-content />." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Stack",
+      "note": "Process '#' as a backspace using a stack, then try the O(1) space two-pointer version from the end.",
+      "problems": [
+        { "title": "LeetCode 844: Backspace String Compare", "url": "https://leetcode.com/problems/backspace-string-compare/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Odd one out and analogies",
+      "questions": [
+        { "q": "Odd one out: 3, 5, 7, 9, 11", "options": ["3", "5", "9", "11"], "answer": 2, "why": "9 is the only one that isn't prime." },
+        { "q": "Odd one out: Apple, Mango, Potato, Banana", "options": ["Apple", "Mango", "Potato", "Banana"], "answer": 2, "why": "Potato is a vegetable; the others are fruits." },
+        { "q": "Book : Author :: Song : ?", "options": ["Composer", "Listener", "Radio", "Album"], "answer": 0, "why": "The creator of a song is its composer." },
+        { "q": "4 : 16 :: 6 : ?", "options": ["12", "24", "36", "30"], "answer": 2, "why": "Squares." },
+        { "q": "Odd one out: 121, 144, 169, 196, 200", "options": ["121", "144", "196", "200"], "answer": 3, "why": "200 is the only one that isn't a perfect square." }
+      ]
+    },
+    "revision": ["Day 69: list your task board's store methods from memory."]
+  },
+  {
+    "day": 71,
+    "module": "angular-components",
+    "title": "Pipes and formatting",
+    "goal": "Format dates, money and text in templates with built-in and custom pipes.",
+    "learn": {
+      "concepts": [
+        "Built-in pipes: date, currency, number/decimal, percent, uppercase, titlecase, json, slice",
+        "Pipe parameters: {{ amount | currency:'INR':'symbol':'1.0-0' }}",
+        "Locale: registering en-IN for Indian number grouping",
+        "Writing a custom pure pipe with @Pipe and transform()",
+        "Pure pipes vs calling methods in templates (performance)",
+        "Chaining pipes"
+      ],
+      "resources": [
+        { "title": "Angular: Pipes overview", "url": "https://angular.dev/guide/templates/pipes" },
+        { "title": "Angular: Creating custom pipes", "url": "https://angular.dev/guide/templates/pipes#creating-custom-pipes" },
+        { "title": "Angular: Internationalization — locale data", "url": "https://angular.dev/guide/i18n/format-data-locale" }
+      ]
+    },
+    "build": {
+      "task": "In angular-playground: format course prices with the currency pipe in INR with Indian grouping (register en-IN locale data and set LOCALE_ID), task dates with the date pipe ('d MMM y, h:mm a'), and progress with percent. Write 3 custom pure pipes with unit tests in their .spec.ts files: timeAgo (Date → '5 minutes ago'), initials ('Asha Rani' → 'AR'), and truncate (text, max = 40, with '…'). Use each somewhere in the app.",
+      "starterFiles": [],
+      "acceptance": [
+        "Prices show like ₹1,49,999 (Indian grouping) using the currency pipe",
+        "Dates and percentages formatted with built-in pipes",
+        "3 custom pure pipes, each used in a template",
+        "Each custom pipe has at least 3 passing tests (ng test)",
+        "No method calls in templates that just format values"
+      ]
+    },
+    "hints": [
+      "Locale: in app.config.ts add registerLocaleData(localeEnIn) (import localeEnIn from '@angular/common/locales/en-IN') and provide { provide: LOCALE_ID, useValue: 'en-IN' }.",
+      "Pipe skeleton: @Pipe({ name: 'initials' }) export class InitialsPipe implements PipeTransform { transform(v: string): string { ... } } and add it to the component's imports.",
+      "Pipe test: const pipe = new InitialsPipe(); expect(pipe.transform('Asha Rani')).toBe('AR'); Run ng test."
+    ],
+    "proof": "Commit with pipes and passing tests (paste the ng test summary in the commit message).",
+    "explainBack": [
+      { "q": "Why is a pure pipe better than calling formatPrice(price) in a template?", "lookFor": ["pure pipe re-runs only when its input changes", "method calls run on every change detection", "reusable and testable"] },
+      { "q": "How did you get Indian number grouping?", "lookFor": ["registered en-IN locale data", "LOCALE_ID or locale parameter", "currency pipe uses the locale"] }
+    ],
+    "lastHintExplanation": "A pure pipe is re-run only when its input value changes, while a method call in a template runs on every change detection pass. Pipes are also reusable and easy to unit test. Number formats depend on locale data, so registering en-IN and setting LOCALE_ID makes the currency pipe group digits as 1,49,999.",
+    "predict": [
+      { "q": "{{ 'hello world' | titlecase }}", "options": ["HELLO WORLD", "Hello world", "Hello World", "hello world"], "answer": 2, "why": "titlecase capitalises the first letter of each word." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Stack: expression evaluation",
+      "note": "Numbers are pushed; operators pop two, apply, push the result. Watch the order for - and /.",
+      "problems": [
+        { "title": "LeetCode 150: Evaluate Reverse Polish Notation", "url": "https://leetcode.com/problems/evaluate-reverse-polish-notation/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Puzzles and lateral thinking",
+      "questions": [
+        { "q": "A clock reads 3:15. What time does its mirror image show?", "options": ["8:45", "9:45", "3:45", "9:15"], "answer": 0, "why": "Mirror time = 11:60 − 3:15 = 8:45." },
+        { "q": "A farmer has 17 sheep and all but 9 die. How many are left?", "options": ["8", "9", "17", "0"], "answer": 1, "why": "'All but 9' means 9 survive." },
+        { "q": "How many squares of all sizes are there in a 3×3 grid?", "options": ["9", "13", "14", "10"], "answer": 2, "why": "9 small + 4 of size 2×2 + 1 of size 3×3." },
+        { "q": "The day after tomorrow is Sunday. What day was yesterday?", "options": ["Thursday", "Friday", "Wednesday", "Saturday"], "answer": 0, "why": "Today is Friday." },
+        { "q": "Rearrange CIFAIPC to get the name of a(n):", "options": ["City", "Animal", "Ocean", "Country"], "answer": 2, "why": "PACIFIC." }
+      ]
+    },
+    "revision": ["Day 70: explain named slots with ng-content select."]
+  },
+  {
+    "day": 72,
+    "module": "angular-components",
+    "title": "Debug lab: broken parent-child communication, and week review",
+    "goal": "Fix input/output and binding mistakes between parent and child components.",
+    "learn": {
+      "concepts": [
+        "value=\"x\" passes a string; [value]=\"x\" passes an expression",
+        "Output names must match the parent's (event) binding",
+        "Inputs are read-only signals in the child",
+        "Reading inputs too early (field initialisers) vs computed",
+        "Strict template type checking errors and how to read them"
+      ],
+      "resources": [
+        { "title": "Angular: Template type checking", "url": "https://angular.dev/tools/cli/template-typecheck" },
+        { "title": "Angular: Inputs (reading input values)", "url": "https://angular.dev/guide/components/inputs" }
+      ]
+    },
+    "build": {
+      "task": "Add the two starter files to angular-playground (src/app/debug-rating/) and show <app-rating-demo /> on a page. Expected: 10 stars, the first 3 highlighted; clicking star 7 highlights 7 and the text says 'You rated 7 / 10'. There are 5 bugs across both files; some show up as compile errors. Fix each in its own commit. Write docs/week12-notes.md (Days 67–71: one confident and one weak topic each).",
+      "starterFiles": [
+        { "name": "src/app/debug-rating/star-rating.ts", "content": "import { Component, input, output } from '@angular/core';\n\n@Component({\n  selector: 'app-star-rating',\n  template: `\n    @for (star of stars; track star) {\n      <button type=\"button\" class=\"text-2xl text-slate-300\" (click)=\"select(star)\" [class.text-amber-500]=\"star <= value\">★</button>\n    }\n  `,\n})\nexport class StarRating {\n  value = input(0);\n  max = input(5);\n  stars = Array.from({ length: this.max() }, (_, i) => i + 1);\n  changed = output<number>();\n\n  select(star: number) {\n    this.value = star;\n  }\n}\n" },
+        { "name": "src/app/debug-rating/rating-demo.ts", "content": "import { Component, signal } from '@angular/core';\nimport { StarRating } from './star-rating';\n\n@Component({\n  selector: 'app-rating-demo',\n  imports: [StarRating],\n  template: `\n    <app-star-rating value=\"rating()\" [max]=\"10\" (change)=\"rating.set($event)\" />\n    <p>You rated {{ rating() }} / 10</p>\n  `,\n})\nexport class RatingDemo {\n  rating = signal(3);\n}\n" }
+      ],
+      "acceptance": [
+        "10 stars render (max input respected)",
+        "Initial highlight shows 3 stars; clicking updates both stars and text",
+        "Child never assigns to its input; it emits an output",
+        "Parent binds with [value] and listens to the correct output name",
+        "5 fix commits; week12-notes.md written"
+      ]
+    },
+    "hints": [
+      "Start with the compile errors in the terminal. Assigning to this.value and comparing star <= value are both type errors: value is a signal, so read it with value().",
+      "Only 5 stars appear: stars is calculated once, when the class is created, before the parent's [max] arrives. Make it computed(() => ...) and use stars() in the template.",
+      "In the parent, value=\"rating()\" without brackets is the literal string 'rating()'. The output is called changed, so (change) listens to the wrong event."
+    ],
+    "proof": "Link to your final fix commit.",
+    "explainBack": [
+      { "q": "List the 5 bugs and fixes.", "lookFor": ["stars from max() at field init → computed", "template compares signal → value()", "select assigns to input → changed.emit(star)", "value=\"rating()\" → [value]=\"rating()\"", "(change) → (changed)"] },
+      { "q": "Why can't a child component set its own input?", "lookFor": ["inputs are owned by the parent", "one-way data flow", "child emits an event, parent updates state"] }
+    ],
+    "lastHintExplanation": "1) stars is built once in a field initialiser, before the parent sets max; use computed(() => ...). 2) In the template, value is a signal and must be read as value(). 3) A child can't assign to its input; emit changed.emit(star) instead. 4) value=\"rating()\" passes the literal text; use [value]=\"rating()\". 5) The output is named changed, so the parent must listen with (changed).",
+    "predict": [
+      { "q": "Parent: <app-x title=\"name\" />. Child: title = input(''). What is title()?", "options": ["The parent's name variable", "The string 'name'", "''", "undefined"], "answer": 1, "why": "Without brackets, it's a static string attribute." }
+    ],
+    "debugLab": {
+      "title": "Broken parent-child communication",
+      "symptoms": [
+        "The terminal shows template and TypeScript errors",
+        "Only 5 stars render instead of 10",
+        "Clicking a star doesn't change the text in the parent"
+      ],
+      "files": ["src/app/debug-rating/star-rating.ts", "src/app/debug-rating/rating-demo.ts"],
+      "bugCount": 5
+    },
+    "dsa": {
+      "pattern": "Stack: review",
+      "note": "Solve the new one, then re-solve Valid Parentheses from a blank file in under 10 minutes.",
+      "problems": [
+        { "title": "LeetCode 1047: Remove All Adjacent Duplicates In String", "url": "https://leetcode.com/problems/remove-all-adjacent-duplicates-in-string/" },
+        { "title": "LeetCode 20: Valid Parentheses (re-solve)", "url": "https://leetcode.com/problems/valid-parentheses/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Timed mixed: reasoning",
+      "questions": [
+        { "q": "Someone is 8th from the top and 20th from the bottom. How many people are there?", "options": ["26", "27", "28", "29"], "answer": 1, "why": "8 + 20 − 1." },
+        { "q": "All A are B and all B are C. Conclusion: All A are C.", "options": ["Definitely true", "Definitely false", "Can't say", "Only some A"], "answer": 0, "why": "A ⊂ B ⊂ C." },
+        { "q": "Odd one out: Mercury, Venus, Moon, Mars", "options": ["Mercury", "Venus", "Moon", "Mars"], "answer": 2, "why": "The Moon is a satellite; the others are planets." },
+        { "q": "Facing east, you turn left twice. Which way are you facing?", "options": ["North", "South", "West", "East"], "answer": 2, "why": "E → N → W." },
+        { "q": "5 : 25 :: 7 : ?", "options": ["35", "42", "49", "14"], "answer": 2, "why": "Squares." }
+      ]
+    },
+    "revision": ["Days 67–71: draw your component tree for the task board with inputs/outputs labelled."]
+  }
+]

@@ -1,0 +1,408 @@
+[
+  {
+    "day": 97,
+    "module": "postgres",
+    "title": "PostgreSQL: databases, tables and types",
+    "goal": "Install PostgreSQL, use psql, and design tables with the right types and constraints.",
+    "learn": {
+      "concepts": [
+        "Why a relational database: structure, constraints, transactions, queries",
+        "Installing PostgreSQL; psql basics: \\l, \\c, \\dt, \\d table, \\q",
+        "CREATE DATABASE and CREATE TABLE",
+        "Types: integer, bigint, serial/identity, text, varchar, boolean, numeric, date, timestamptz, uuid, jsonb",
+        "Constraints: PRIMARY KEY, NOT NULL, UNIQUE, CHECK, DEFAULT",
+        "Keeping schema in a .sql file you can re-run"
+      ],
+      "resources": [
+        { "title": "PostgreSQL Tutorial: Getting started", "url": "https://www.postgresql.org/docs/current/tutorial-start.html" },
+        { "title": "PostgreSQL docs: Data types", "url": "https://www.postgresql.org/docs/current/datatype.html" },
+        { "title": "PostgreSQL docs: Constraints", "url": "https://www.postgresql.org/docs/current/ddl-constraints.html" }
+      ]
+    },
+    "build": {
+      "task": "Install PostgreSQL 16+ (or run it in Docker if you prefer). Create a database taskmanager. In api-starter, create db/schema.sql for projects (id uuid PK with default gen_random_uuid(), name unique, created_at timestamptz default now()) and tasks (id uuid, project_id uuid, title, status with a CHECK of todo/doing/done, priority CHECK low/medium/high, due_date date nullable, created_at, updated_at). Run it with psql -f. Then deliberately try inserts that break each constraint (NOT NULL, UNIQUE, CHECK) and save the error messages with explanations in docs/constraints.md.",
+      "starterFiles": [],
+      "acceptance": [
+        "PostgreSQL installed; database taskmanager exists",
+        "db/schema.sql creates both tables and can be re-run (DROP IF EXISTS or IF NOT EXISTS)",
+        "Correct types chosen: uuid ids, timestamptz times, date for due_date",
+        "CHECK constraints on status and priority; UNIQUE on project name",
+        "docs/constraints.md shows at least 4 real constraint errors with explanations"
+      ]
+    },
+    "hints": [
+      "Connect: psql -U postgres, then CREATE DATABASE taskmanager; and \\c taskmanager. Run a file: psql -d taskmanager -f db/schema.sql.",
+      "On PostgreSQL 13+, gen_random_uuid() is built in: id uuid PRIMARY KEY DEFAULT gen_random_uuid().",
+      "Use timestamptz (with time zone) for moments in time, and date for calendar days like due dates."
+    ],
+    "proof": "Commit with db/schema.sql and docs/constraints.md.",
+    "explainBack": [
+      { "q": "Why put rules like CHECK and UNIQUE in the database when the API already validates?", "lookFor": ["last line of defence", "other code/scripts may write data", "race conditions (two inserts at once)", "data stays valid"] },
+      { "q": "Why timestamptz instead of timestamp for created_at?", "lookFor": ["stores an absolute moment", "handles time zones correctly", "avoids ambiguity between servers/users"] }
+    ],
+    "lastHintExplanation": "API validation can be bypassed by a script, a bug or two requests racing each other. Database constraints are the last line of defence and keep data valid no matter who writes it. timestamptz stores an absolute moment (converted to UTC internally), so times stay correct across servers and users in different time zones.",
+    "predict": [
+      { "q": "Table has name TEXT UNIQUE. You insert 'Website' twice. What happens?", "options": ["Two rows", "Second insert fails with a unique violation", "Second replaces the first", "Silently ignored"], "answer": 1, "why": "UNIQUE rejects duplicates with an error." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Linked list",
+      "note": "New pattern. Draw the nodes and arrows on paper. Reverse with prev, curr and next pointers.",
+      "problems": [
+        { "title": "LeetCode 206: Reverse Linked List", "url": "https://leetcode.com/problems/reverse-linked-list/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Data interpretation: marks table",
+      "questions": [
+        { "q": "Marks (Maths, Science, English) — A: 80, 70, 60; B: 90, 85, 75; C: 60, 65, 80; D: 70, 90, 85; E: 85, 60, 70. Who has the highest total?", "options": ["A", "B", "D", "E"], "answer": 1, "why": "B has 250; D has 245." },
+        { "q": "Same table: what is the average Maths mark?", "options": ["75", "77", "79", "80"], "answer": 1, "why": "385/5." },
+        { "q": "Same table: who scored highest in Science?", "options": ["B", "D", "A", "C"], "answer": 1, "why": "D scored 90." },
+        { "q": "Same table: about what percent of C's total comes from English?", "options": ["39.0%", "35.5%", "40.5%", "33.3%"], "answer": 0, "why": "80/205 ≈ 39%." },
+        { "q": "Same table: how many students scored above 75 in English?", "options": ["1", "2", "3", "4"], "answer": 1, "why": "C (80) and D (85); B's 75 isn't above 75." }
+      ]
+    },
+    "revision": ["Day 96: explain why query values like done=false are strings."]
+  },
+  {
+    "day": 98,
+    "module": "postgres",
+    "title": "SQL: reading and changing data",
+    "goal": "Write SELECT, INSERT, UPDATE and DELETE queries confidently, with filtering, sorting and paging.",
+    "learn": {
+      "concepts": [
+        "SELECT columns FROM table WHERE ... ORDER BY ... LIMIT ... OFFSET ...",
+        "Operators: =, <>, <, IN, BETWEEN, LIKE/ILIKE, IS NULL",
+        "INSERT ... VALUES ... RETURNING *",
+        "UPDATE ... SET ... WHERE ... RETURNING * (never forget WHERE)",
+        "DELETE ... WHERE ...",
+        "Transactions: BEGIN, COMMIT, ROLLBACK (try a mistake and roll it back)"
+      ],
+      "resources": [
+        { "title": "PostgreSQL Tutorial: Querying a table", "url": "https://www.postgresql.org/docs/current/tutorial-select.html" },
+        { "title": "PostgreSQL docs: UPDATE", "url": "https://www.postgresql.org/docs/current/sql-update.html" },
+        { "title": "SQLBolt: interactive SQL lessons", "url": "https://sqlbolt.com/" }
+      ]
+    },
+    "build": {
+      "task": "Write db/seed.sql that inserts 3 projects and 30 tasks with varied statuses, priorities and due dates (some null). Then write db/queries-day98.sql with 15 numbered queries and a comment above each saying what it answers: e.g. overdue tasks, tasks due this week, high-priority tasks not done, titles containing 'fix' (case-insensitive), page 2 of tasks sorted by due date (nulls last), tasks with no due date, mark all overdue tasks as high priority (inside a transaction you roll back first, then commit), delete done tasks older than 30 days, and so on. Run each and paste a short result summary as a comment.",
+      "starterFiles": [],
+      "acceptance": [
+        "seed.sql creates realistic varied data and can be re-run",
+        "15 queries, each with a comment saying what question it answers",
+        "Uses WHERE, ORDER BY, LIMIT/OFFSET, ILIKE, IS NULL, IN and BETWEEN",
+        "At least 2 UPDATE and 1 DELETE with RETURNING, all with WHERE clauses",
+        "One transaction rolled back on purpose, then re-run and committed"
+      ]
+    },
+    "hints": [
+      "Overdue: WHERE due_date < CURRENT_DATE AND status <> 'done'. This week: due_date BETWEEN CURRENT_DATE AND CURRENT_DATE + 6.",
+      "Nulls last: ORDER BY due_date ASC NULLS LAST. Page 2 with 10 per page: LIMIT 10 OFFSET 10.",
+      "Safety habit: write the SELECT with your WHERE first, check the rows, then turn it into UPDATE/DELETE with the same WHERE."
+    ],
+    "proof": "Commit with db/seed.sql and db/queries-day98.sql.",
+    "explainBack": [
+      { "q": "What happens if you run UPDATE tasks SET status = 'done' without WHERE? How do you protect yourself?", "lookFor": ["every row is updated", "check with SELECT first", "use a transaction and ROLLBACK", "RETURNING to see affected rows"] },
+      { "q": "Why can't you use = NULL to find rows with no due date?", "lookFor": ["NULL means unknown", "comparisons with NULL return NULL, not true", "use IS NULL"] }
+    ],
+    "lastHintExplanation": "Without WHERE, UPDATE and DELETE hit every row in the table. Write the SELECT with your WHERE first, check the rows, and run risky changes inside BEGIN … ROLLBACK until you're sure. NULL means 'unknown', so NULL = NULL isn't true; any comparison with NULL gives NULL. Use IS NULL and IS NOT NULL.",
+    "predict": [
+      { "q": "SELECT COUNT(*) FROM tasks WHERE due_date = NULL; with 5 rows where due_date is null. Result?", "options": ["5", "0", "Error", "NULL"], "answer": 1, "why": "= NULL is never true; use IS NULL." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Linked list: fast and slow pointers",
+      "note": "Move slow by 1 and fast by 2. When fast reaches the end, slow is in the middle.",
+      "problems": [
+        { "title": "LeetCode 876: Middle of the Linked List", "url": "https://leetcode.com/problems/middle-of-the-linked-list/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Verbal ability: spotting errors",
+      "questions": [
+        { "q": "Find the error: 'He go to school every day.'", "options": ["He", "go", "to school", "every day"], "answer": 1, "why": "It should be 'goes'." },
+        { "q": "Find the error: 'The informations you gave were useful.'", "options": ["The informations", "you gave", "were", "useful"], "answer": 0, "why": "'Information' is uncountable: 'The information you gave was useful.'" },
+        { "q": "Find the error: 'She is more smarter than her brother.'", "options": ["She is", "more smarter", "than", "her brother"], "answer": 1, "why": "That's a double comparative; just 'smarter'." },
+        { "q": "Find the error: 'I have seen him yesterday.'", "options": ["I", "have seen", "him", "yesterday"], "answer": 1, "why": "Use the past simple ('saw') with a finished time like 'yesterday'." },
+        { "q": "Find the error: 'One of my friend is a doctor.'", "options": ["One of", "my friend", "is", "a doctor"], "answer": 1, "why": "'One of' takes a plural: 'my friends'." }
+      ]
+    },
+    "revision": ["Day 97: explain why constraints belong in the database too."]
+  },
+  {
+    "day": 99,
+    "module": "postgres",
+    "title": "Relationships and JOINs",
+    "goal": "Connect tables with foreign keys and combine them with JOINs.",
+    "learn": {
+      "concepts": [
+        "One-to-many: tasks.project_id REFERENCES projects(id)",
+        "ON DELETE CASCADE vs RESTRICT vs SET NULL",
+        "Many-to-many with a join table (task_tags)",
+        "INNER JOIN: only matching rows",
+        "LEFT JOIN: all rows from the left, NULLs where no match",
+        "Table aliases and selecting columns from both tables"
+      ],
+      "resources": [
+        { "title": "PostgreSQL Tutorial: Joins between tables", "url": "https://www.postgresql.org/docs/current/tutorial-join.html" },
+        { "title": "PostgreSQL docs: Foreign keys", "url": "https://www.postgresql.org/docs/current/ddl-constraints.html#DDL-CONSTRAINTS-FK" },
+        { "title": "Visual guide to SQL joins", "url": "https://blog.codinghorror.com/a-visual-explanation-of-sql-joins/" }
+      ]
+    },
+    "build": {
+      "task": "Update db/schema.sql: add the foreign key tasks.project_id → projects(id) ON DELETE CASCADE, a tags table (id, name unique) and a task_tags join table (task_id, tag_id, composite primary key, both FKs with CASCADE). Seed tags and links. Write db/queries-day99.sql with 10 queries: tasks with their project names (INNER JOIN); all projects with their tasks including empty projects (LEFT JOIN); tasks with a given tag; each task with a comma-separated list of its tags (string_agg); projects that have no tasks; and so on. Prove CASCADE works by deleting a project inside a transaction and counting tasks before and after, then rolling back.",
+      "starterFiles": [],
+      "acceptance": [
+        "Foreign keys with explicit ON DELETE behaviour",
+        "Many-to-many via task_tags with a composite primary key",
+        "Inserting a task with a non-existent project_id fails (show the error)",
+        "10 join queries, including at least 3 LEFT JOINs and one 'no matches' query",
+        "CASCADE demonstrated in a rolled-back transaction"
+      ]
+    },
+    "hints": [
+      "Projects without tasks: SELECT p.* FROM projects p LEFT JOIN tasks t ON t.project_id = p.id WHERE t.id IS NULL;",
+      "Tags per task: SELECT t.title, string_agg(g.name, ', ' ORDER BY g.name) AS tags FROM tasks t LEFT JOIN task_tags tt ON tt.task_id = t.id LEFT JOIN tags g ON g.id = tt.tag_id GROUP BY t.id, t.title;",
+      "Composite key: PRIMARY KEY (task_id, tag_id) stops the same tag being linked twice to one task."
+    ],
+    "proof": "Commit with the updated schema and queries.",
+    "explainBack": [
+      { "q": "When did you need LEFT JOIN instead of INNER JOIN? Use one of your queries.", "lookFor": ["when rows without matches must still appear", "INNER drops unmatched rows", "example: projects with zero tasks"] },
+      { "q": "What does ON DELETE CASCADE do, and when might it be dangerous?", "lookFor": ["deleting parent deletes children", "can remove lots of data unexpectedly", "RESTRICT prevents deleting parents with children"] }
+    ],
+    "lastHintExplanation": "INNER JOIN keeps only rows that match on both sides, so a project with no tasks disappears. LEFT JOIN keeps every row from the left table and fills the right side with NULLs when there's no match, which also lets you find 'rows with no match' using WHERE right.id IS NULL. CASCADE deletes children with the parent: convenient, but one DELETE can remove far more data than expected.",
+    "predict": [
+      { "q": "3 projects, one with no tasks. SELECT p.name, t.title FROM projects p JOIN tasks t ON t.project_id = p.id. Does the empty project appear?", "options": ["Yes, with NULL title", "No", "Yes, twice", "Error"], "answer": 1, "why": "INNER JOIN drops rows with no match." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Linked list: merging",
+      "note": "Use a dummy head node so you don't need special cases for the first node.",
+      "problems": [
+        { "title": "LeetCode 21: Merge Two Sorted Lists", "url": "https://leetcode.com/problems/merge-two-sorted-lists/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Data interpretation: percentage breakdown",
+      "questions": [
+        { "q": "A company of 800 has IT 35%, HR 10%, Sales 25%, Ops 20% and Finance 10%. How many work in IT?", "options": ["260", "280", "300", "320"], "answer": 1, "why": "35% of 800." },
+        { "q": "Same company: how many more people work in Sales than in HR?", "options": ["100", "120", "140", "160"], "answer": 1, "why": "15% of 800." },
+        { "q": "Same company: what is the ratio of Ops to Finance?", "options": ["2:1", "1:2", "4:1", "3:2"], "answer": 0, "why": "20:10." },
+        { "q": "Same company: HR grows by 25%. What is the new HR headcount?", "options": ["90", "100", "110", "120"], "answer": 1, "why": "80 × 1.25." },
+        { "q": "Same company: how many departments have more than 150 people?", "options": ["2", "3", "4", "1"], "answer": 1, "why": "IT 280, Sales 200 and Ops 160." }
+      ]
+    },
+    "revision": ["Day 98: write a safe UPDATE workflow (SELECT, transaction, RETURNING) from memory."]
+  },
+  {
+    "day": 100,
+    "module": "postgres",
+    "title": "Aggregates, GROUP BY and indexes",
+    "goal": "Summarise data with aggregates and make queries fast with the right indexes.",
+    "learn": {
+      "concepts": [
+        "COUNT, SUM, AVG, MIN, MAX; COUNT(*) vs COUNT(column)",
+        "GROUP BY and the rule: selected columns must be grouped or aggregated",
+        "HAVING filters groups (WHERE filters rows)",
+        "FILTER (WHERE ...) for conditional counts",
+        "Indexes: what they are, when they help, their cost on writes",
+        "EXPLAIN ANALYZE: Seq Scan vs Index Scan"
+      ],
+      "resources": [
+        { "title": "PostgreSQL Tutorial: Aggregate functions", "url": "https://www.postgresql.org/docs/current/tutorial-agg.html" },
+        { "title": "Use The Index, Luke (SQL indexing guide)", "url": "https://use-the-index-luke.com/" },
+        { "title": "PostgreSQL docs: Using EXPLAIN", "url": "https://www.postgresql.org/docs/current/using-explain.html" }
+      ]
+    },
+    "build": {
+      "task": "Write db/queries-day100.sql with: tasks per project with counts per status in one row each (COUNT(*) FILTER (WHERE status = 'done')), completion percentage per project, projects with more than 5 open tasks (HAVING), average days overdue for overdue tasks, and the busiest tag. Then generate 200,000 fake tasks with generate_series, run EXPLAIN ANALYZE on 'tasks for one project ordered by due_date', add an index on (project_id, due_date), run it again, and record both plans and timings in docs/indexes.md with your explanation.",
+      "starterFiles": [],
+      "acceptance": [
+        "Per-project summary in one query using FILTER",
+        "HAVING used correctly to filter groups",
+        "200k rows generated with generate_series",
+        "EXPLAIN ANALYZE before and after the index shows Seq Scan → Index Scan and a faster time",
+        "docs/indexes.md explains why the index helps and what it costs"
+      ]
+    },
+    "hints": [
+      "Fake rows: INSERT INTO tasks (project_id, title, status, priority, due_date) SELECT (SELECT id FROM projects ORDER BY random() LIMIT 1), 'Task ' || g, (ARRAY['todo','doing','done'])[1 + floor(random()*3)::int], 'medium', CURRENT_DATE + (random()*60)::int FROM generate_series(1, 200000) g; (the project subquery runs once, so all rows go to one project; that's fine, or mix it up with a CASE).",
+      "CREATE INDEX tasks_project_due_idx ON tasks (project_id, due_date); then ANALYZE tasks; before re-running EXPLAIN ANALYZE.",
+      "The column order in a composite index matters: (project_id, due_date) helps 'WHERE project_id = ? ORDER BY due_date', but not 'WHERE due_date = ?' on its own."
+    ],
+    "proof": "Commit with queries and docs/indexes.md.",
+    "explainBack": [
+      { "q": "WHERE vs HAVING: explain with one of your queries.", "lookFor": ["WHERE filters rows before grouping", "HAVING filters groups after aggregation", "can't use aggregates in WHERE"] },
+      { "q": "Why not add an index on every column?", "lookFor": ["indexes slow down inserts/updates", "use disk space", "only help queries that use them"] }
+    ],
+    "lastHintExplanation": "WHERE filters individual rows before grouping; HAVING filters whole groups after aggregates are calculated, which is why HAVING COUNT(*) > 5 works and WHERE COUNT(*) > 5 doesn't. An index is a sorted structure that lets Postgres jump to matching rows instead of scanning the table. Every insert and update must maintain it too, so add indexes for real query patterns only.",
+    "predict": [
+      { "q": "SELECT project_id, title, COUNT(*) FROM tasks GROUP BY project_id;", "options": ["Works", "Error: title must appear in GROUP BY or be aggregated", "Returns one row", "Ignores title"], "answer": 1, "why": "Every selected column must be grouped or aggregated." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Linked list: cycle detection",
+      "note": "Floyd's algorithm: if fast ever equals slow, there's a cycle.",
+      "problems": [
+        { "title": "LeetCode 141: Linked List Cycle", "url": "https://leetcode.com/problems/linked-list-cycle/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Verbal ability: words in context",
+      "questions": [
+        { "q": "'The manager gave a lucid explanation.' What does lucid mean?", "options": ["Confusing", "Clear", "Long", "Funny"], "answer": 1, "why": "Lucid means easy to understand." },
+        { "q": "'The project was abandoned.' What does abandoned mean?", "options": ["Completed", "Given up", "Started", "Praised"], "answer": 1, "why": "To abandon is to give up completely." },
+        { "q": "'She was reluctant to speak.' What does reluctant mean?", "options": ["Eager", "Unwilling", "Ready", "Proud"], "answer": 1, "why": "Reluctant means unwilling or hesitant." },
+        { "q": "'The results were ambiguous.' What does ambiguous mean?", "options": ["Certain", "Open to more than one meaning", "Excellent", "Late"], "answer": 1, "why": "Ambiguous means unclear or open to more than one meaning." },
+        { "q": "'He made a candid remark.' What does candid mean?", "options": ["Rude", "Frank", "Hidden", "Sweet"], "answer": 1, "why": "Candid means honest and direct." }
+      ]
+    },
+    "revision": ["Day 99: explain INNER vs LEFT JOIN with a project/tasks example."]
+  },
+  {
+    "day": 101,
+    "module": "postgres",
+    "title": "Connecting Express to PostgreSQL with pg",
+    "goal": "Replace your in-memory repos with PostgreSQL using parameterised queries, and understand SQL injection.",
+    "learn": {
+      "concepts": [
+        "node-postgres (pg): Pool, pool.query(text, values)",
+        "Parameterised queries ($1, $2) vs string concatenation",
+        "SQL injection: what it is and how parameters prevent it",
+        "Mapping snake_case rows to camelCase objects",
+        "pg returns COUNT/bigint and numeric as strings: cast in SQL or convert",
+        "Transactions with a dedicated client (BEGIN/COMMIT/ROLLBACK)",
+        "Simple migrations: numbered .sql files applied in order"
+      ],
+      "resources": [
+        { "title": "node-postgres: Pooling", "url": "https://node-postgres.com/features/pooling" },
+        { "title": "node-postgres: Queries (parameterized)", "url": "https://node-postgres.com/features/queries" },
+        { "title": "OWASP: SQL Injection Prevention Cheat Sheet", "url": "https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html" }
+      ]
+    },
+    "build": {
+      "task": "In api-starter: npm i pg (and -D @types/pg). Add DATABASE_URL to config. Create src/db.ts with a Pool and a tiny query<T>() helper. Move schema into db/migrations/001_init.sql and 002_tags.sql and write a scripts/migrate.ts that applies unapplied migrations in order, recording them in a schema_migrations table. Implement PostgresProjectsRepo and PostgresTasksRepo (same interfaces as before), including filtering, whitelisted sorting and pagination with a total count, all with parameters. Creating a task with tags must run in a transaction. Your Angular app should keep working unchanged.",
+      "starterFiles": [],
+      "acceptance": [
+        "Every query uses $1-style parameters; no user input is concatenated into SQL",
+        "npm run migrate applies migrations once and is safe to re-run",
+        "Repos implement the same interfaces; services and controllers unchanged",
+        "List endpoint returns correct data and meta from SQL (LIMIT/OFFSET plus a COUNT)",
+        "Task + tags creation is atomic (prove rollback by forcing an error)",
+        "Angular frontend works against the PostgreSQL-backed API"
+      ]
+    },
+    "hints": [
+      "Dynamic filters: build arrays of SQL fragments and values together: if (status) { values.push(status); where.push(`status = $${values.length}`); }. Sort columns come from your whitelist map, never from raw input.",
+      "Transaction: const client = await pool.connect(); try { await client.query('BEGIN'); ...; await client.query('COMMIT'); } catch (e) { await client.query('ROLLBACK'); throw e; } finally { client.release(); }",
+      "COUNT(*) comes back as a string (bigint). Use COUNT(*)::int in SQL."
+    ],
+    "proof": "Commit with db.ts, migrations, migrate script and Postgres repos.",
+    "explainBack": [
+      { "q": "Show how SQL injection would work against a concatenated query, and why $1 prevents it.", "lookFor": ["input like ' OR 1=1 -- changes the query's meaning", "parameters are sent separately from SQL text", "database treats them as values, never code"] },
+      { "q": "Why didn't the services and controllers need to change when you switched to PostgreSQL?", "lookFor": ["they depend on the repo interface", "only the implementation changed", "dependency on abstraction"] }
+    ],
+    "lastHintExplanation": "With concatenation, input like x' OR '1'='1 becomes part of the SQL and changes what the query does. With $1 parameters, the SQL text and the values travel separately, so the database always treats input as data, never as code. Because services only depend on the repo interface, swapping the in-memory Map for Postgres changed one layer.",
+    "predict": [
+      { "q": "pool.query('SELECT COUNT(*) AS n FROM tasks'). What is typeof rows[0].n in JavaScript?", "options": ["'number'", "'string'", "'bigint'", "'object'"], "answer": 1, "why": "pg returns bigint (int8) as a string to avoid precision loss." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Linked list: removing nodes",
+      "note": "A dummy node makes removing the head easy.",
+      "problems": [
+        { "title": "LeetCode 203: Remove Linked List Elements", "url": "https://leetcode.com/problems/remove-linked-list-elements/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Data interpretation: caselet",
+      "questions": [
+        { "q": "A store had 1,200 orders in a month: 45% UPI, 30% card, the rest cash on delivery. The average order is ₹800, and 10% of COD orders were returned. How many COD orders were there?", "options": ["250", "300", "350", "360"], "answer": 1, "why": "25% of 1,200." },
+        { "q": "Same store: what was the total revenue from all orders?", "options": ["₹9,60,000", "₹9,00,000", "₹8,40,000", "₹10,00,000"], "answer": 0, "why": "1,200 × 800." },
+        { "q": "Same store: how many UPI orders?", "options": ["500", "540", "560", "600"], "answer": 1, "why": "45% of 1,200." },
+        { "q": "Same store: how many COD orders were returned?", "options": ["25", "30", "36", "60"], "answer": 1, "why": "10% of 300." },
+        { "q": "Same store: how many more card orders than COD orders?", "options": ["40", "60", "80", "100"], "answer": 1, "why": "360 − 300." }
+      ]
+    },
+    "revision": ["Day 100: explain WHERE vs HAVING."]
+  },
+  {
+    "day": 102,
+    "module": "postgres",
+    "title": "Debug lab: the dangerous repository, and week review",
+    "goal": "Find SQL bugs that cause crashes, wrong results, security holes and data loss.",
+    "learn": {
+      "concepts": [
+        "SQL injection through template strings",
+        "UPDATE without WHERE",
+        "INNER JOIN silently dropping rows",
+        "GROUP BY errors",
+        "COUNT returning strings from pg"
+      ],
+      "resources": [
+        { "title": "node-postgres: Data types (why bigint is a string)", "url": "https://node-postgres.com/features/types" },
+        { "title": "PostgreSQL docs: GROUP BY", "url": "https://www.postgresql.org/docs/current/queries-table-expressions.html#QUERIES-GROUP" }
+      ]
+    },
+    "build": {
+      "task": "In node-playground, create day102-debug/ with the starter files. Create a database (createdb jobready_debug), run psql -d jobready_debug -f day102-debug/schema.sql, npm install, then DATABASE_URL=postgres://localhost/jobready_debug node check.js (on Windows set the variable first). Expected output: search 'page' → ['Design homepage', 'Write about page']; search with a quote (it's) → 0 results, no crash; counts → Hiring 0, Mobile app 2, Website 3 (numbers, not strings); open by priority → high 2, medium 1; after completing task 1 → open titles ['Fix footer links', 'Set up push notifications']. There are 5 bugs. Fix each in its own commit (re-run schema.sql to reset data). Write week17-notes.md (Days 97–101).",
+      "starterFiles": [
+        { "name": "day102-debug/package.json", "content": "{\n  \"name\": \"day102-debug\",\n  \"type\": \"module\",\n  \"dependencies\": { \"pg\": \"^8.13.0\" }\n}\n" },
+        { "name": "day102-debug/schema.sql", "content": "DROP TABLE IF EXISTS tasks;\nDROP TABLE IF EXISTS projects;\n\nCREATE TABLE projects (\n  id SERIAL PRIMARY KEY,\n  name TEXT NOT NULL UNIQUE\n);\n\nCREATE TABLE tasks (\n  id SERIAL PRIMARY KEY,\n  project_id INT NOT NULL REFERENCES projects(id) ON DELETE CASCADE,\n  title TEXT NOT NULL,\n  priority TEXT NOT NULL CHECK (priority IN ('low', 'medium', 'high')),\n  done BOOLEAN NOT NULL DEFAULT false\n);\n\nINSERT INTO projects (name) VALUES ('Website'), ('Mobile app'), ('Hiring');\n\nINSERT INTO tasks (project_id, title, priority, done) VALUES\n  (1, 'Design homepage', 'high', false),\n  (1, 'Write about page', 'low', true),\n  (1, 'Fix footer links', 'medium', false),\n  (2, 'Set up push notifications', 'high', false),\n  (2, 'Login screen', 'medium', true);\n" },
+        { "name": "day102-debug/tasks.repo.js", "content": "import pg from 'pg';\n\nexport const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });\n\n// Search tasks by title, case-insensitive. Must be safe for any input.\nexport async function searchTasks(term) {\n  const { rows } = await pool.query(`SELECT * FROM tasks WHERE title ILIKE '%${term}%' ORDER BY id`);\n  return rows;\n}\n\n// Mark ONE task as done.\nexport async function completeTask(id) {\n  await pool.query('UPDATE tasks SET done = true');\n}\n\n// ALL projects with their task counts (including projects with 0 tasks).\nexport async function projectsWithCounts() {\n  const { rows } = await pool.query(`\n    SELECT p.name, COUNT(t.id) AS task_count\n    FROM projects p\n    JOIN tasks t ON t.project_id = p.id\n    GROUP BY p.id, p.name\n    ORDER BY p.name`);\n  return rows;\n}\n\n// Number of open (not done) tasks per priority.\nexport async function openByPriority() {\n  const { rows } = await pool.query(`\n    SELECT priority, COUNT(*)::int AS open_count\n    FROM tasks\n    WHERE done = false`);\n  return rows;\n}\n\n// This one is correct.\nexport async function openTitles() {\n  const { rows } = await pool.query('SELECT title FROM tasks WHERE done = false ORDER BY id');\n  return rows.map((r) => r.title);\n}\n" },
+        { "name": "day102-debug/check.js", "content": "import * as repo from './tasks.repo.js';\n\nconsole.log('search page:', (await repo.searchTasks('page')).map((t) => t.title));\nconsole.log('search quote:', (await repo.searchTasks(\"it's\")).length);\nconsole.log('counts:', await repo.projectsWithCounts());\nconsole.log('open by priority:', await repo.openByPriority());\nawait repo.completeTask(1);\nconsole.log('open titles:', await repo.openTitles());\nawait repo.pool.end();\n" }
+      ],
+      "acceptance": [
+        "searchTasks is parameterised; a quote in the term doesn't crash; the ILIKE wildcards still work",
+        "completeTask only updates the given task",
+        "Hiring appears with 0 tasks; counts are numbers",
+        "openByPriority returns one row per priority",
+        "5 fix commits; week17-notes.md written"
+      ]
+    },
+    "hints": [
+      "Searching it's crashes with a syntax error: the quote ends the SQL string early. That same hole lets an attacker run their own SQL. Pass the term as $1 and build the wildcard pattern in JavaScript: ['%' + term + '%'].",
+      "After completeTask(1), the open titles list is empty. Read the UPDATE carefully.",
+      "Hiring is missing from counts (which join type keeps unmatched rows?), and the counts print with quotes ('3'). openByPriority errors about grouping."
+    ],
+    "proof": "Link to your last fix commit and the final check.js output in the commit message.",
+    "explainBack": [
+      { "q": "List the 5 bugs and fixes.", "lookFor": ["string-built ILIKE → $1 with '%' + term + '%'", "UPDATE without WHERE id = $1", "JOIN → LEFT JOIN for zero-task projects", "COUNT as string → ::int", "missing GROUP BY priority"] },
+      { "q": "Which of these bugs would be the most damaging in production, and why?", "lookFor": ["SQL injection (data theft/deletion) or UPDATE without WHERE (data loss)", "reasoned choice"] }
+    ],
+    "lastHintExplanation": "1) The search builds SQL from input, so a quote breaks it and an attacker could inject SQL; use $1 with the % wildcards added in JS. 2) UPDATE without WHERE marks every task done. 3) INNER JOIN drops Hiring; use LEFT JOIN and COUNT(t.id). 4) COUNT is bigint, which pg returns as a string; cast with ::int. 5) Selecting priority with COUNT needs GROUP BY priority.",
+    "predict": [
+      { "q": "pool.query(\"SELECT * FROM users WHERE name = '\" + input + \"'\") with input = \"x' OR '1'='1\". What is returned?", "options": ["No rows", "Every user", "An error always", "Only x"], "answer": 1, "why": "The condition becomes name = 'x' OR '1'='1', which is true for all rows." }
+    ],
+    "debugLab": {
+      "title": "The dangerous repository",
+      "symptoms": [
+        "Searching for it's crashes with a SQL syntax error",
+        "Completing task 1 marks every task done",
+        "Hiring is missing from the project counts, and counts print as strings",
+        "openByPriority throws a grouping error"
+      ],
+      "files": ["day102-debug/package.json", "day102-debug/schema.sql", "day102-debug/tasks.repo.js", "day102-debug/check.js"],
+      "bugCount": 5
+    },
+    "dsa": {
+      "pattern": "Linked list: two pointers with a gap",
+      "note": "Move one pointer n steps ahead, then move both. Then re-solve Reverse Linked List from a blank file.",
+      "problems": [
+        { "title": "LeetCode 19: Remove Nth Node From End of List", "url": "https://leetcode.com/problems/remove-nth-node-from-end-of-list/" },
+        { "title": "LeetCode 206: Reverse Linked List (re-solve)", "url": "https://leetcode.com/problems/reverse-linked-list/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Verbal ability: mixed",
+      "questions": [
+        { "q": "Which word means the opposite of 'Scarce'?", "options": ["Rare", "Abundant", "Few", "Little"], "answer": 1, "why": "Scarce means in short supply." },
+        { "q": "'Neither of the answers ___ correct.'", "options": ["are", "is", "were", "have"], "answer": 1, "why": "'Neither' takes a singular verb." },
+        { "q": "What is the fear of heights called?", "options": ["Claustrophobia", "Acrophobia", "Hydrophobia", "Agoraphobia"], "answer": 1, "why": "Acro- means height." },
+        { "q": "What does 'spill the beans' mean?", "options": ["Waste food", "Reveal a secret", "Cook", "Make a mess"], "answer": 1, "why": "It means to let a secret out." },
+        { "q": "Which word is spelt correctly?", "options": ["Definately", "Definitely", "Definitly", "Defenitely"], "answer": 1, "why": "de-fin-ite-ly." }
+      ]
+    },
+    "revision": ["Days 97–101: write from memory a LEFT JOIN with GROUP BY and a parameterised insert in pg."]
+  }
+]

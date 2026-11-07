@@ -1,0 +1,375 @@
+[
+  {
+    "day": 121,
+    "module": "capstone-1",
+    "title": "Frontend shell: layout, routing and design tokens",
+    "goal": "Set up the ApplyTrack Angular app with a clean layout, lazy routes and a small design system.",
+    "learn": {
+      "concepts": [
+        "Angular + Tailwind in web/; proxy to the API in development",
+        "App shell: header, sidebar (desktop) / bottom nav (mobile), content area",
+        "Lazy-loaded feature routes: auth, applications, dashboard, settings",
+        "Design tokens with Tailwind theme (colours per status, spacing, radius)",
+        "Shared UI components: button, input, badge, card, empty state, skeleton",
+        "Dark mode with the class strategy"
+      ],
+      "resources": [
+        { "title": "Tailwind CSS: Theme variables", "url": "https://tailwindcss.com/docs/theme" },
+        { "title": "Tailwind CSS: Dark mode", "url": "https://tailwindcss.com/docs/dark-mode" },
+        { "title": "Angular: Lazy-loading routes", "url": "https://angular.dev/guide/routing/define-routes#lazily-loaded-components-and-routes" }
+      ]
+    },
+    "build": {
+      "task": "In applytrack/web: create the Angular app with Tailwind and proxy.conf.json to the API. Build the shell (responsive: sidebar at md and up, bottom nav on mobile), lazy routes (/login, /register, /applications, /applications/:id, /dashboard, /settings) with placeholder pages, a 404 page, and shared components in src/app/ui/: Button (variants and loading state), TextField (label, error), StatusBadge (one colour per status), Card, EmptyState and Skeleton. Add a dark-mode toggle saved in localStorage. Build a /styleguide route showing every shared component.",
+      "starterFiles": [],
+      "acceptance": [
+        "Responsive shell works at 375 px and 1280 px",
+        "All routes lazy-loaded (check separate chunks in the build output)",
+        "Six shared UI components, each used on /styleguide",
+        "StatusBadge colours defined once, in the theme",
+        "Dark mode toggle persists and covers every component",
+        "Keyboard focus is visible on all interactive elements"
+      ]
+    },
+    "hints": [
+      "Define status colours once: a map in one file like { Wishlist: 'bg-slate-100 text-slate-700', Applied: 'bg-blue-100 text-blue-700', ... } used by StatusBadge and the dashboard.",
+      "Use Tailwind's @custom-variant dark (&:where(.dark, .dark *)); and toggle the 'dark' class on <html>.",
+      "A /styleguide page is a great review tool: you see every component state at once, and it impresses in interviews."
+    ],
+    "proof": "Commit with the shell, routes, shared UI and styleguide.",
+    "explainBack": [
+      { "q": "Why build shared UI components before the feature pages?", "lookFor": ["consistency", "less duplication", "faster feature work", "one place to fix styles"] },
+      { "q": "How do you know the routes are lazy-loaded?", "lookFor": ["separate chunk files in the build output", "Network tab loads chunks on navigation", "loadComponent/loadChildren"] }
+    ],
+    "lastHintExplanation": "Shared components (buttons, fields, badges) give every page the same look and behaviour, and make feature pages faster to build. A style fix happens in one place. Lazy routes appear as separate chunk files in the ng build output and load in the Network tab only when you navigate to them.",
+    "predict": [],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Heaps / priority queues",
+      "note": "New pattern. JavaScript has no built-in heap: write a small MinHeap class (push, pop, peek, size), or sort for small inputs. Keep a min-heap of size k.",
+      "problems": [
+        { "title": "LeetCode 703: Kth Largest Element in a Stream", "url": "https://leetcode.com/problems/kth-largest-element-in-a-stream/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Timed mixed test 7 (10 minutes)",
+      "questions": [
+        { "q": "Successive discounts of 20% and 10% are the same as a single discount of:", "options": ["30%", "28%", "25%", "32%"], "answer": 1, "why": "0.8 × 0.9 = 0.72." },
+        { "q": "A can do a job in 12 days. A and B together take 8 days. How long does B take alone?", "options": ["20 days", "24 days", "16 days", "18 days"], "answer": 1, "why": "1/8 − 1/12 = 1/24." },
+        { "q": "Next in the series: 2, 6, 12, 20, 30, ?", "options": ["40", "42", "44", "36"], "answer": 1, "why": "n(n + 1) for n = 6." },
+        { "q": "Pointing at a man, Riya says, 'His mother is my mother's only daughter.' How is the man related to Riya?", "options": ["Brother", "Son", "Nephew", "Father"], "answer": 1, "why": "Her mother's only daughter is Riya herself." },
+        { "q": "What is 3/8 as a percentage?", "options": ["37.5%", "35%", "38%", "32.5%"], "answer": 0, "why": "0.375." }
+      ]
+    },
+    "revision": ["Day 120: name the three test levels you used and one example of each."]
+  },
+  {
+    "day": 122,
+    "module": "capstone-1",
+    "title": "Auth pages and session handling",
+    "goal": "Give ApplyTrack a polished sign-up and login experience with robust session handling.",
+    "learn": {
+      "concepts": [
+        "AuthService with signals; restoring the session on startup (provideAppInitializer)",
+        "Auth and error interceptors; authGuard and guestGuard (logged-in users skip /login)",
+        "Showing server errors on forms (409 duplicate email, 401 invalid login)",
+        "Password strength hints and a show/hide toggle",
+        "Accessible forms: labels, aria-describedby for errors, autocomplete attributes"
+      ],
+      "resources": [
+        { "title": "Angular: provideAppInitializer", "url": "https://angular.dev/api/core/provideAppInitializer" },
+        { "title": "MDN: autocomplete attribute values", "url": "https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/autocomplete" },
+        { "title": "web.dev: Sign-in form best practices", "url": "https://web.dev/articles/sign-in-form-best-practices" }
+      ]
+    },
+    "build": {
+      "task": "In applytrack/web: login and register pages using your shared components and reactive forms; server errors mapped to the right field or a form-level message; password show/hide and strength hint; correct autocomplete attributes (email, current-password, new-password). AuthService restores the session at startup via /api/auth/me before routing (no flash of the login page). Interceptors attach the token and handle 401 by logging out and redirecting with returnUrl. guestGuard sends logged-in users from /login to /applications. Add a Settings page to edit your name and change your password.",
+      "starterFiles": [],
+      "acceptance": [
+        "Register, login, logout and settings work end to end",
+        "Reload on a private page stays on that page (no login flash)",
+        "Server errors appear in the right place on the form",
+        "autocomplete attributes let the browser's password manager work",
+        "Forms are fully usable with keyboard and screen reader labels"
+      ]
+    },
+    "hints": [
+      "provideAppInitializer(() => inject(AuthService).restoreSession()): Angular waits for the returned promise before the first navigation.",
+      "Map a 409 on register to the email field: this.form.controls.email.setErrors({ server: 'This email is already registered' }).",
+      "Link errors to inputs: <input [attr.aria-describedby]=\"hasError ? 'email-error' : null\"> <p id=\"email-error\">...</p>"
+    ],
+    "proof": "Commit with auth pages, session handling and settings.",
+    "explainBack": [
+      { "q": "Why restore the session in an app initializer instead of in a component?", "lookFor": ["runs before routing", "guards know the auth state", "avoids flash/redirect to login"] },
+      { "q": "What do the autocomplete attributes do for the user?", "lookFor": ["password managers fill/save correctly", "new-password suggests strong passwords", "faster login"] }
+    ],
+    "lastHintExplanation": "If the session is restored after routing starts, the guard sees 'logged out' for a moment and bounces the user to /login. An app initializer makes Angular wait until /auth/me answers. autocomplete='current-password' and 'new-password' tell password managers what each field is, so they fill and save credentials correctly.",
+    "predict": [],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Heaps: simulation",
+      "note": "Repeatedly take the two largest. A max-heap is ideal; sorting each round is fine for small inputs.",
+      "problems": [
+        { "title": "LeetCode 1046: Last Stone Weight", "url": "https://leetcode.com/problems/last-stone-weight/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Timed mixed test 8 (10 minutes)",
+      "questions": [
+        { "q": "₹2,000 at 5% simple interest per year amounts to ₹2,500 in how many years?", "options": ["4", "5", "6", "10"], "answer": 1, "why": "500 = 2,000 × 0.05 × t." },
+        { "q": "A rectangle is 12 m by 5 m. What is its diagonal?", "options": ["13 m", "17 m", "14 m", "11 m"], "answer": 0, "why": "√(144 + 25)." },
+        { "q": "The ratio of boys to girls is 5:3 and there are 40 boys. How many girls?", "options": ["24", "30", "15", "20"], "answer": 0, "why": "40 × 3/5." },
+        { "q": "In a code, CAT = 24 (3 + 1 + 20). What is DOG?", "options": ["26", "24", "30", "28"], "answer": 0, "why": "4 + 15 + 7." },
+        { "q": "Which word is spelt correctly?", "options": ["Recieve", "Receive", "Receeve", "Riceive"], "answer": 1, "why": "'i before e except after c'." }
+      ]
+    },
+    "revision": ["Day 121: explain how you'd add a new status colour to the theme."]
+  },
+  {
+    "day": 123,
+    "module": "capstone-1",
+    "title": "Applications list: filters, search and two views",
+    "goal": "Build the main screen: a fast, filterable applications list with table and board views.",
+    "learn": {
+      "concepts": [
+        "An ApplicationsStore with signals: list, meta, loading, error, query",
+        "Query params as the single source of truth for filters, sort and page",
+        "Debounced search; multi-select status filter; date range",
+        "Table view (desktop) and Kanban board view by status",
+        "Drag and drop between columns with the Angular CDK (calls the status endpoint)",
+        "Optimistic updates with rollback on error"
+      ],
+      "resources": [
+        { "title": "Angular CDK: Drag and drop", "url": "https://material.angular.dev/cdk/drag-drop/overview" },
+        { "title": "Angular: Read route state (query params)", "url": "https://angular.dev/guide/routing/read-route-state" }
+      ]
+    },
+    "build": {
+      "task": "In applytrack/web: /applications with a filter bar (search, status multi-select, applied date range, sort) fully synced to query params; a table view with pagination for desktop and a card list on mobile; a board view (toggle saved in localStorage) with one column per status where dragging a card changes its status via PATCH /status, optimistically, rolling back with a toast on error. Loading skeletons, an empty state with a 'Add your first application' button, and a 'No results — clear filters' state.",
+      "starterFiles": [],
+      "acceptance": [
+        "All filters, sort and page live in the URL; reload and back button work",
+        "Table/cards and board views both work; the view choice persists",
+        "Drag and drop changes status on the server; failure rolls back with a toast",
+        "Distinct loading, empty and no-results states",
+        "Keyboard users can change status without dragging (e.g. a status menu on each card)"
+      ]
+    },
+    "hints": [
+      "Read query params as signals with withComponentInputBinding(), or toSignal(route.queryParamMap). Update them with router.navigate([], { queryParams, queryParamsHandling: 'merge' }).",
+      "Optimistic move: const prev = app.status; store.setStatus(id, next); try { await api.changeStatus(id, next) } catch { store.setStatus(id, prev); toast.error('Could not move application') }",
+      "Drag and drop alone isn't accessible. Add a small 'Move to…' dropdown on each card as the keyboard alternative."
+    ],
+    "proof": "Commit with the list, board and filters, plus a short screen recording (GIF) in the PR or README.",
+    "explainBack": [
+      { "q": "Explain optimistic updates and the risk they bring.", "lookFor": ["update UI before server confirms", "feels instant", "must roll back on failure", "UI can briefly show wrong state"] },
+      { "q": "Why provide a non-drag way to change status?", "lookFor": ["keyboard and screen-reader users", "accessibility", "touch devices"] }
+    ],
+    "lastHintExplanation": "An optimistic update changes the UI immediately and assumes the server will agree, which makes the board feel instant. The cost is that you must undo the change cleanly if the request fails. Drag and drop needs a mouse or precise touch, so a 'Move to…' menu keeps the feature usable with a keyboard or screen reader.",
+    "predict": [],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Heaps: top k",
+      "note": "Count with a Map, then keep the k most frequent with a heap (or bucket sort by frequency for O(n)).",
+      "problems": [
+        { "title": "LeetCode 347: Top K Frequent Elements", "url": "https://leetcode.com/problems/top-k-frequent-elements/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Timed mixed test 9 (10 minutes)",
+      "questions": [
+        { "q": "A sum doubles in 8 years at simple interest. What is the rate?", "options": ["10%", "12.5%", "8%", "15%"], "answer": 1, "why": "100% over 8 years." },
+        { "q": "The average weight of 4 people is 60 kg. A fifth person joins and the average becomes 62 kg. What does the fifth person weigh?", "options": ["68 kg", "70 kg", "72 kg", "66 kg"], "answer": 1, "why": "310 − 240." },
+        { "q": "Two trains, 100 m and 150 m long, run in opposite directions at 40 and 50 km/h. How long do they take to cross each other?", "options": ["10 s", "12 s", "8 s", "15 s"], "answer": 0, "why": "250 m at 25 m/s." },
+        { "q": "Odd one out: 2, 3, 5, 9, 11", "options": ["3", "5", "9", "11"], "answer": 2, "why": "9 is not prime." },
+        { "q": "'The committee ___ reached a decision.' (acting as one group)", "options": ["have", "has", "are", "were"], "answer": 1, "why": "A collective noun acting as one unit takes a singular verb." }
+      ]
+    },
+    "revision": ["Day 122: explain why session restore runs before routing."]
+  },
+  {
+    "day": 124,
+    "module": "capstone-1",
+    "title": "Application form and detail page",
+    "goal": "Build the add/edit form and a rich detail page with timeline, interviews and contacts.",
+    "learn": {
+      "concepts": [
+        "One reusable form component for create and edit",
+        "Typed reactive forms with nested FormArrays (contacts)",
+        "Unsaved-changes guard (canDeactivate)",
+        "Detail page: info, status timeline from history, interviews, contacts, notes",
+        "Dates and times: displaying in the user's locale; sending ISO strings"
+      ],
+      "resources": [
+        { "title": "Angular: Typed forms", "url": "https://angular.dev/guide/forms/typed-forms" },
+        { "title": "Angular: CanDeactivate guard", "url": "https://angular.dev/api/router/CanDeactivateFn" },
+        { "title": "MDN: Intl.DateTimeFormat", "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat" }
+      ]
+    },
+    "build": {
+      "task": "In applytrack/web: an ApplicationForm component used by /applications/new and /applications/:id/edit (company, role, job URL with validation, location, salary range, source select, applied date, notes), with server-side errors shown and a canDeactivate guard for unsaved changes. A detail page /applications/:id with a header (company, role, StatusBadge, quick status change), a status timeline from history, an interviews section (add/edit/delete, upcoming highlighted), a contacts section, and notes. Delete the application with a confirmation dialog (use a custom dialog, not window.confirm).",
+      "starterFiles": [],
+      "acceptance": [
+        "Same form component handles create and edit",
+        "Unsaved-changes guard prompts before leaving a dirty form",
+        "Detail page shows timeline, interviews and contacts, all editable",
+        "Dates displayed in en-IN format; interviews shown in local time",
+        "Delete uses an accessible custom dialog (focus trapped, Esc closes)"
+      ]
+    },
+    "hints": [
+      "Edit mode: if the route has an id, load the application and form.patchValue(app); on save, call update instead of create.",
+      "canDeactivate: export const unsavedChangesGuard: CanDeactivateFn<{ isDirty(): boolean }> = (c) => !c.isDirty() || confirmDialog.open('Discard changes?');",
+      "The native <dialog> element with showModal() gives you focus trapping and Esc to close for free."
+    ],
+    "proof": "Commit with the form, detail page and dialog.",
+    "explainBack": [
+      { "q": "How does one form component handle both create and edit?", "lookFor": ["checks for id input/route param", "patchValue for edit", "calls create vs update"] },
+      { "q": "Why use the native <dialog> instead of window.confirm or a plain div?", "lookFor": ["styleable unlike confirm", "built-in focus trap and Esc", "accessible semantics", "doesn't block the page thread"] }
+    ],
+    "lastHintExplanation": "The form only needs to know whether it has an existing application: if so, it patches the values in and saves with update, otherwise with create. The native <dialog> with showModal() traps focus, closes on Esc and is announced as a dialog by screen readers. window.confirm can't be styled and blocks the whole page.",
+    "predict": [],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Heaps: k closest",
+      "note": "Keep a max-heap of size k by distance (or sort for simplicity, then improve).",
+      "problems": [
+        { "title": "LeetCode 973: K Closest Points to Origin", "url": "https://leetcode.com/problems/k-closest-points-to-origin/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Timed mixed test 10 (10 minutes)",
+      "questions": [
+        { "q": "A shopkeeper marks goods 40% above cost and gives a 20% discount. What is the profit percentage?", "options": ["12%", "20%", "16%", "10%"], "answer": 0, "why": "1.4 × 0.8 = 1.12." },
+        { "q": "A tap fills a tank in 4 hours. How much is filled in 1.5 hours?", "options": ["3/8", "1/3", "1/2", "5/8"], "answer": 0, "why": "1.5/4." },
+        { "q": "What is the HCF of 36 and 48?", "options": ["6", "12", "18", "24"], "answer": 1, "why": "36 = 12 × 3 and 48 = 12 × 4." },
+        { "q": "Facing north, you turn 90° clockwise, then 180°. Which way are you facing?", "options": ["East", "West", "South", "North"], "answer": 1, "why": "North → East → West." },
+        { "q": "Which word means the opposite of 'Generous'?", "options": ["Kind", "Selfish", "Rich", "Helpful"], "answer": 1, "why": "Generous means freely giving." }
+      ]
+    },
+    "revision": ["Day 123: explain optimistic updates and rollback."]
+  },
+  {
+    "day": 125,
+    "module": "capstone-1",
+    "title": "Dashboard: stats and charts",
+    "goal": "Turn your stats endpoint into a clear, accessible dashboard.",
+    "learn": {
+      "concepts": [
+        "Stat cards: total, active, interviews this week, offers, response rate",
+        "Charts with Chart.js: applications per week (bar) and status breakdown",
+        "Accessible charts: titles, colour plus labels, a data table alternative",
+        "Upcoming interviews list",
+        "Refreshing stats after changes elsewhere (shared store or refetch on navigation)"
+      ],
+      "resources": [
+        { "title": "Chart.js: Getting started", "url": "https://www.chartjs.org/docs/latest/getting-started/" },
+        { "title": "W3C WAI: Complex images (charts)", "url": "https://www.w3.org/WAI/tutorials/images/complex/" }
+      ]
+    },
+    "build": {
+      "task": "In applytrack/web: /dashboard with five stat cards; a bar chart of applications per week (last 8 weeks); a status breakdown (horizontal bar or doughnut) using the same status colours as the badges; an 'Upcoming interviews' list for the next 7 days linking to each application; and a 'Needs follow-up' list (Applied more than 14 days ago with no status change). Each chart has a title, a visually hidden data table for screen readers and a 'Show as table' toggle. Destroy charts on component destroy. Make the dashboard the default route after login.",
+      "starterFiles": [],
+      "acceptance": [
+        "Five stat cards with correct numbers (check against the database)",
+        "Both charts render with consistent status colours",
+        "Upcoming interviews and needs-follow-up lists work and link through",
+        "Charts have accessible table alternatives",
+        "No chart memory leaks when navigating away and back"
+      ]
+    },
+    "hints": [
+      "Create the chart in an effect or afterNextRender once the canvas exists, keep the instance, and call chart.destroy() in ngOnDestroy (or with DestroyRef.onDestroy).",
+      "'Needs follow-up' is easier on the server: add GET /api/applications?status=Applied&staleDays=14, or a dedicated stats field.",
+      "Use the same status colour map as StatusBadge, converted to hex for Chart.js."
+    ],
+    "proof": "Commit with the dashboard and a screenshot in the README.",
+    "explainBack": [
+      { "q": "How did you make the charts accessible?", "lookFor": ["titles", "data table alternative", "not colour alone", "labels/aria"] },
+      { "q": "Why destroy Chart.js instances when the component is destroyed?", "lookFor": ["frees memory and event listeners", "avoid 'canvas already in use' errors", "leaks on repeated navigation"] }
+    ],
+    "lastHintExplanation": "Charts are images to a screen reader, so an equivalent data table, clear titles and labels (not colour alone) make the data available to everyone. Chart.js attaches listeners and keeps references to its canvas; if you don't destroy it, every visit to the dashboard leaks another chart, and re-using the canvas throws errors.",
+    "predict": [],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Heaps: two heaps",
+      "note": "A max-heap for the lower half and a min-heap for the upper half; balance their sizes. Hard: understand it even if you don't finish.",
+      "problems": [
+        { "title": "LeetCode 295: Find Median from Data Stream", "url": "https://leetcode.com/problems/find-median-from-data-stream/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Timed mixed test 11 (10 minutes)",
+      "questions": [
+        { "q": "A's income is ₹40,000. He spends 70% and saves the rest. Expenses rise by 10% and income stays the same. What are his new savings?", "options": ["₹9,200", "₹12,000", "₹10,000", "₹8,800"], "answer": 0, "why": "Expenses go from 28,000 to 30,800, so savings are 9,200." },
+        { "q": "How many ways can the letters of 'CODE' be arranged?", "options": ["12", "24", "16", "4"], "answer": 1, "why": "4!." },
+        { "q": "A cyclist covers 15 km in 45 minutes. What is the speed in km/h?", "options": ["18", "20", "22", "25"], "answer": 1, "why": "15/0.75." },
+        { "q": "If 2x + 3 = 15, what is x²?", "options": ["25", "36", "49", "16"], "answer": 1, "why": "x = 6." },
+        { "q": "What does 'cost an arm and a leg' mean?", "options": ["Be painful", "Be very expensive", "Be dangerous", "Be cheap"], "answer": 1, "why": "It's an idiom for very expensive." }
+      ]
+    },
+    "revision": ["Day 124: explain why the native dialog element is a good choice."]
+  },
+  {
+    "day": 126,
+    "module": "capstone-1",
+    "title": "Bug bash and week review",
+    "goal": "Use ApplyTrack like a real user, find bugs and rough edges, and fix the important ones.",
+    "learn": {
+      "concepts": [
+        "Bug bash: structured exploratory testing",
+        "Writing good bug reports: steps, expected, actual, environment, severity",
+        "Triage: fix now, fix later, won't fix",
+        "Testing edge cases: long text, empty data, slow network, expired session, mobile",
+        "DevTools network throttling and offline mode"
+      ],
+      "resources": [
+        { "title": "Chrome DevTools: Throttle the network", "url": "https://developer.chrome.com/docs/devtools/network#throttle" },
+        { "title": "How to write a good bug report (Atlassian)", "url": "https://www.atlassian.com/blog/inside-atlassian/jira-bug-report-template" }
+      ]
+    },
+    "build": {
+      "task": "Run a 90-minute bug bash on ApplyTrack with the checklist: very long company names, 200 applications (bulk seed), empty account, slow 3G, offline, expired token mid-form, two tabs open, 375 px width, keyboard only, dark mode, and refreshing on every route. Log every issue as a GitHub issue with steps, expected, actual and severity. Fix all high-severity issues today, each in its own commit referencing the issue. Ask one friend or family member to try adding an application without help and note where they hesitate. Write week21-notes.md.",
+      "starterFiles": [],
+      "acceptance": [
+        "Every checklist item tested",
+        "At least 8 well-written bug issues with severity labels",
+        "All high-severity bugs fixed and closed from commits",
+        "Notes from one real user test",
+        "week21-notes.md lists what's fixed and what's left"
+      ]
+    },
+    "hints": [
+      "Bulk seed 200 applications with generate_series in a seed script so you can test pagination and performance.",
+      "Long text breaks layouts: use truncate or line-clamp with a title attribute, and min-w-0 on flex children.",
+      "Watching someone else use your app for 10 minutes finds more UX problems than an hour of testing it yourself."
+    ],
+    "proof": "Link to your issues list filtered by the 'bug' label.",
+    "explainBack": [
+      { "q": "Pick your best bug report and explain why it's good.", "lookFor": ["clear steps to reproduce", "expected vs actual", "environment", "severity"] },
+      { "q": "What did the real user test reveal that you hadn't noticed?", "lookFor": ["specific observation", "UX insight", "change made"] }
+    ],
+    "lastHintExplanation": "A good bug report lets someone else reproduce the problem without asking you anything: exact steps, what should have happened, what did happen, and where (browser, screen size). Users who didn't build the app don't know your shortcuts, so they reveal confusing labels and hidden actions within minutes.",
+    "predict": [],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Heaps: review",
+      "note": "Merge k sorted lists with a min-heap of the current heads. Then re-solve Top K Frequent Elements.",
+      "problems": [
+        { "title": "LeetCode 23: Merge k Sorted Lists", "url": "https://leetcode.com/problems/merge-k-sorted-lists/" },
+        { "title": "LeetCode 347: Top K Frequent Elements (re-solve)", "url": "https://leetcode.com/problems/top-k-frequent-elements/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Timed mixed test 12 (10 minutes)",
+      "questions": [
+        { "q": "What is 25% of 480 plus 20% of 250?", "options": ["170", "160", "180", "150"], "answer": 0, "why": "120 + 50." },
+        { "q": "A, B and C share ₹9,000 in the ratio 2:3:4. What is C's share?", "options": ["₹3,000", "₹4,000", "₹4,500", "₹3,600"], "answer": 1, "why": "9,000 × 4/9." },
+        { "q": "A man is 4 times as old as his son. In 20 years he'll be twice as old. How old is the son now?", "options": ["8", "10", "12", "15"], "answer": 1, "why": "4s + 20 = 2(s + 20), so s = 10." },
+        { "q": "Next in the series: 1, 4, 9, 16, 25, ?", "options": ["30", "36", "35", "49"], "answer": 1, "why": "6²." },
+        { "q": "'He insisted ___ paying the bill.'", "options": ["to", "on", "for", "at"], "answer": 1, "why": "insist on." }
+      ]
+    },
+    "revision": ["Days 121–125: sketch ApplyTrack's frontend architecture (routes, stores, services, interceptors) from memory."]
+  }
+]

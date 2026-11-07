@@ -1,0 +1,403 @@
+[
+  {
+    "day": 55,
+    "module": "typescript",
+    "title": "TypeScript: why, setup and basic types",
+    "goal": "Set up TypeScript, annotate basic types, and let the compiler catch mistakes before you run code.",
+    "learn": {
+      "concepts": [
+        "What TypeScript adds: types checked at compile time, removed at runtime",
+        "Installing: npm i -D typescript tsx; npx tsc --init; strict mode",
+        "Basic types: string, number, boolean, arrays (number[]), tuples, null/undefined",
+        "Type inference: you don't annotate everything",
+        "any vs unknown: why any switches checking off",
+        "Running TS: tsc to type-check/compile, tsx to run directly"
+      ],
+      "resources": [
+        { "title": "TypeScript Handbook: The Basics", "url": "https://www.typescriptlang.org/docs/handbook/2/basic-types.html" },
+        { "title": "TypeScript Handbook: Everyday Types", "url": "https://www.typescriptlang.org/docs/handbook/2/everyday-types.html" },
+        { "title": "TypeScript Playground", "url": "https://www.typescriptlang.org/play" }
+      ]
+    },
+    "build": {
+      "task": "In day55/, run npm init -y, npm i -D typescript tsx, and npx tsc --init (keep \"strict\": true). Convert your Day 28 utils (capitalize, isValidEmail, clamp, randomInt, countVowels) and grades functions to utils.ts and grades.ts with parameter and return types. Add a scripts entry \"check\": \"tsc --noEmit\". Then write mistakes.ts with 6 deliberate type errors (wrong argument type, missing argument, calling a method that doesn't exist, possibly-undefined value, etc.); paste each compiler error as a comment and explain it in your own words; then comment the mistakes out so npm run check passes.",
+      "starterFiles": [],
+      "acceptance": [
+        "tsconfig.json has strict: true",
+        "utils.ts and grades.ts have typed parameters and return types; no any",
+        "npm run check passes with zero errors",
+        "mistakes.ts documents 6 different compiler errors with explanations",
+        "npx tsx grades.ts runs and your checks pass"
+      ]
+    },
+    "hints": [
+      "Annotate parameters and return types for exported functions: function clamp(n: number, min: number, max: number): number { ... }. Let TS infer local variables.",
+      "If TS says 'Object is possibly undefined', it's telling you about a real case you haven't handled. Handle it; don't silence it.",
+      "VS Code shows TS errors as red squiggles. Hover to read the message, and read it slowly: the last line is usually the most useful."
+    ],
+    "proof": "Commit with day55/ (no node_modules).",
+    "explainBack": [
+      { "q": "Pick one compiler error from mistakes.ts. Explain what bug it would have caused at runtime.", "lookFor": ["names their error", "describes the real runtime failure (undefined, NaN, crash)", "caught before running"] },
+      { "q": "What's the difference between any and unknown?", "lookFor": ["any disables type checking", "unknown requires narrowing before use", "unknown is the safe choice for untrusted data"] }
+    ],
+    "lastHintExplanation": "TypeScript checks types while you write and compile, then strips them so the output is plain JavaScript. any turns checking off for that value, so mistakes slip through. unknown accepts any value but makes you check its type (narrow it) before using it, which makes it the safe type for untrusted data like JSON.",
+    "predict": [
+      { "q": "let x = 5; x = 'five'; What does TypeScript do?", "options": ["Allows it", "Error: string not assignable to number", "Converts 'five' to NaN", "Warns at runtime"], "answer": 1, "why": "x is inferred as number from its initial value." },
+      { "q": "TypeScript compiles to JavaScript. At runtime, does the browser check your types?", "options": ["Yes", "No, types are erased", "Only in strict mode", "Only for interfaces"], "answer": 1, "why": "Types exist only at compile time." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Two pointers",
+      "note": "New pattern: two indexes moving towards each other on sorted input. Solve in TypeScript from today.",
+      "problems": [
+        { "title": "LeetCode 167: Two Sum II - Input Array Is Sorted", "url": "https://leetcode.com/problems/two-sum-ii-input-array-is-sorted/" },
+        { "title": "LeetCode 557: Reverse Words in a String III", "url": "https://leetcode.com/problems/reverse-words-in-a-string-iii/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Permutations: counting basics",
+      "questions": [
+        { "q": "With 3 shirts and 4 trousers, how many outfits can you make?", "options": ["7", "12", "24", "64"], "answer": 1, "why": "Multiplication rule: 3 × 4." },
+        { "q": "What is 5!?", "options": ["25", "60", "120", "720"], "answer": 2, "why": "5 × 4 × 3 × 2 × 1." },
+        { "q": "How many ways can the letters of CAT be arranged?", "options": ["3", "6", "9", "27"], "answer": 1, "why": "3! = 6." },
+        { "q": "How many 4-digit PINs are possible using 0–9 with repetition?", "options": ["5040", "9999", "10000", "1000"], "answer": 2, "why": "10⁴." },
+        { "q": "In how many ways can a president and a vice-president be chosen from 6 people?", "options": ["15", "30", "36", "12"], "answer": 1, "why": "Order matters: 6 × 5." }
+      ]
+    },
+    "revision": ["Phase 2: re-read your phase2-review.md and spend 20 minutes on your weakest topic."]
+  },
+  {
+    "day": 56,
+    "module": "typescript",
+    "title": "Interfaces, type aliases, unions and literal types",
+    "goal": "Describe the shape of your data precisely so the compiler stops whole classes of bugs.",
+    "learn": {
+      "concepts": [
+        "Object types with interface and type",
+        "Optional (?) and readonly properties",
+        "Union types: string | number; literal types: 'pending' | 'done'",
+        "Discriminated unions: { kind: 'card' ... } | { kind: 'upi' ... }",
+        "Intersection types (A & B) and extending interfaces",
+        "Index signatures and Record<string, number>"
+      ],
+      "resources": [
+        { "title": "TypeScript Handbook: Object Types", "url": "https://www.typescriptlang.org/docs/handbook/2/objects.html" },
+        { "title": "TypeScript Handbook: Narrowing (discriminated unions)", "url": "https://www.typescriptlang.org/docs/handbook/2/narrowing.html#discriminated-unions" }
+      ]
+    },
+    "build": {
+      "task": "In day56/, model an online order system in types.ts: Customer, Address, Product (readonly id), CartItem, Order with status as a union of literal types ('placed' | 'packed' | 'shipped' | 'delivered' | 'cancelled'), and Payment as a discriminated union of upi { upiId }, card { last4, network }, and cod { }. In orders.ts write: orderTotal(order), describePayment(payment) using a switch on kind with an exhaustive never check, canCancel(order), and nextStatus(status). Create 3 sample orders and print summaries. Run npm run check.",
+      "starterFiles": [],
+      "acceptance": [
+        "Status and payment kinds use literal unions, not plain string",
+        "Payment is a discriminated union; describePayment narrows correctly",
+        "Exhaustive check: adding a new payment kind causes a compile error in describePayment",
+        "Product id is readonly (assignment is a compile error)",
+        "Optional fields used where data may be missing (e.g. address line 2)",
+        "npm run check passes; sample output printed with tsx"
+      ]
+    },
+    "hints": [
+      "type Payment = { kind: 'upi'; upiId: string } | { kind: 'card'; last4: string; network: 'visa' | 'mastercard' | 'rupay' } | { kind: 'cod' };",
+      "Exhaustive check: in the switch's default: const _exhaustive: never = payment; return _exhaustive;. If a case is missing, TypeScript errors there.",
+      "interface vs type: either works for objects. Use type for unions; use interface when you want to extend object shapes."
+    ],
+    "proof": "Commit with day56/ files.",
+    "explainBack": [
+      { "q": "Explain how TypeScript knows payment.upiId exists inside case 'upi'.", "lookFor": ["discriminant property kind", "narrowing by checking the literal value", "only the upi member has upiId"] },
+      { "q": "What does the never check protect you from?", "lookFor": ["forgetting to handle a new union member", "compile error instead of runtime bug"] }
+    ],
+    "lastHintExplanation": "In a discriminated union, every member has a shared literal property (kind). Checking kind === 'upi' narrows the type to the upi member, so upiId becomes available. In the default branch every handled kind has been removed, so the value's type should be never. If someone adds a new payment kind and forgets a case, assigning it to never fails at compile time.",
+    "predict": [
+      { "q": "type Status = 'open' | 'closed'; let s: Status = 'Open'; What happens?", "options": ["Works", "Compile error: 'Open' not assignable to Status", "Runtime error", "s becomes 'open'"], "answer": 1, "why": "Literal types are exact, including case." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Two pointers",
+      "note": "Skip at most one character: try both options when a mismatch happens.",
+      "problems": [
+        { "title": "LeetCode 680: Valid Palindrome II", "url": "https://leetcode.com/problems/valid-palindrome-ii/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Combinations: nCr",
+      "questions": [
+        { "q": "What is 5C2?", "options": ["10", "20", "5", "25"], "answer": 0, "why": "5 × 4 / 2 = 10." },
+        { "q": "In how many ways can 3 people be chosen from 7?", "options": ["21", "35", "210", "42"], "answer": 1, "why": "7C3 = 35." },
+        { "q": "What is 6P2?", "options": ["12", "15", "30", "36"], "answer": 2, "why": "6 × 5 = 30." },
+        { "q": "How many committees of 2 men and 1 woman can be formed from 5 men and 4 women?", "options": ["20", "40", "60", "80"], "answer": 1, "why": "5C2 × 4C1 = 10 × 4." },
+        { "q": "If 10 people each shake hands once with everyone else, how many handshakes are there?", "options": ["90", "45", "100", "50"], "answer": 1, "why": "10C2 = 45." }
+      ]
+    },
+    "revision": ["Day 55: explain any vs unknown in two sentences."]
+  },
+  {
+    "day": 57,
+    "module": "typescript",
+    "title": "Typed functions, narrowing and type guards",
+    "goal": "Type functions fully, handle data of uncertain shape safely, and validate JSON at runtime.",
+    "learn": {
+      "concepts": [
+        "Function types: (a: number) => string; optional and default parameters",
+        "Narrowing with typeof, instanceof, in, and truthiness",
+        "User-defined type guards: function isUser(x: unknown): x is User",
+        "Non-null assertion (!) and why to avoid it",
+        "Overloads (just know they exist)",
+        "Validating unknown JSON at runtime (TS types disappear!)"
+      ],
+      "resources": [
+        { "title": "TypeScript Handbook: Narrowing", "url": "https://www.typescriptlang.org/docs/handbook/2/narrowing.html" },
+        { "title": "TypeScript Handbook: More on Functions", "url": "https://www.typescriptlang.org/docs/handbook/2/functions.html" },
+        { "title": "Zod documentation", "url": "https://zod.dev/" }
+      ]
+    },
+    "build": {
+      "task": "In day57/: (1) write formatValue(v: string | number | Date | null) that narrows each case. (2) Write a type guard isExpense(x: unknown): x is Expense and use it to safely load expenses from a JSON string, reporting invalid rows. (3) Do the same validation with zod (npm i zod): define an ExpenseSchema, infer the type with z.infer, and use safeParse. Compare both approaches in a comment. (4) Write a typed fetchJson<T>(url, guard) that returns T or throws if the guard fails, and use it with JSONPlaceholder /users.",
+      "starterFiles": [],
+      "acceptance": [
+        "formatValue handles all 4 cases with no type errors and no any",
+        "isExpense checks every required field's type at runtime",
+        "zod schema with z.infer type; invalid rows reported with zod's error messages",
+        "fetchJson validates the response before returning it",
+        "No non-null assertions (!) in the code",
+        "npm run check passes"
+      ]
+    },
+    "hints": [
+      "Type guard skeleton: function isExpense(x: unknown): x is Expense { return typeof x === 'object' && x !== null && 'amount' in x && typeof (x as any).amount === 'number' && ... }. (Using as any inside a guard is acceptable; avoid it elsewhere.)",
+      "zod: const ExpenseSchema = z.object({ id: z.string(), amount: z.number().positive(), category: z.enum(['food', 'travel', 'bills']) }); type Expense = z.infer<typeof ExpenseSchema>;",
+      "res.json() returns Promise<any>. Assign it to unknown first so TypeScript forces you to validate."
+    ],
+    "proof": "Commit with day57/ files.",
+    "explainBack": [
+      { "q": "If TypeScript checks types, why do you still need runtime validation for JSON?", "lookFor": ["types are erased at runtime", "API/JSON data is outside the compiler's control", "a type annotation is just a promise, not a check"] },
+      { "q": "What does the 'x is Expense' return type do?", "lookFor": ["tells TS that when it returns true, x is an Expense", "narrows the type in the calling code"] }
+    ],
+    "lastHintExplanation": "TypeScript only checks code it compiles; data arriving at runtime (JSON, APIs, localStorage) has no types until you check it. Annotating it as Expense is just a claim. A type guard (x is Expense) or a zod schema checks the real values, and when it passes, TypeScript narrows the type in your code.",
+    "predict": [
+      { "q": "const data = JSON.parse('{\"age\":\"20\"}') as { age: number }; console.log(data.age + 1)", "options": ["21", "\"201\"", "Compile error", "NaN"], "answer": 1, "why": "as doesn't convert anything; age is still the string '20' at runtime, so + concatenates." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Two pointers",
+      "note": "Sort first, fix one number, then use two pointers for the rest. Skip duplicates carefully. Medium.",
+      "problems": [
+        { "title": "LeetCode 15: 3Sum", "url": "https://leetcode.com/problems/3sum/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Arrangements with repeats and circles",
+      "questions": [
+        { "q": "How many ways can the letters of LEVEL be arranged?", "options": ["120", "60", "30", "20"], "answer": 2, "why": "5!/(2! × 2!) = 30." },
+        { "q": "How many ways can the letters of BANANA be arranged?", "options": ["720", "120", "60", "360"], "answer": 2, "why": "6!/(3! × 2!) = 60." },
+        { "q": "In how many ways can 5 people sit around a round table?", "options": ["120", "24", "60", "12"], "answer": 1, "why": "(5 − 1)! = 24." },
+        { "q": "How many arrangements of APPLE keep the vowels together?", "options": ["12", "24", "48", "60"], "answer": 1, "why": "Treat AE as one unit: 4!/2! = 12 arrangements, × 2 orders of AE = 24." },
+        { "q": "How many 3-digit numbers can be made from 1–5 without repeating a digit?", "options": ["60", "125", "120", "10"], "answer": 0, "why": "5 × 4 × 3." }
+      ]
+    },
+    "revision": ["Day 56: write a discriminated union with an exhaustive never check from memory."]
+  },
+  {
+    "day": 58,
+    "module": "typescript",
+    "title": "Generics and utility types",
+    "goal": "Write reusable, type-safe functions and types with generics, and use the built-in utility types.",
+    "learn": {
+      "concepts": [
+        "Generic functions: function first<T>(arr: T[]): T | undefined",
+        "Generic constraints: <T extends { id: string }>",
+        "Generic types and interfaces: ApiResponse<T>",
+        "Utility types: Partial, Required, Pick, Omit, Record, Readonly, ReturnType",
+        "keyof and indexed access types: T[K]",
+        "as const for literal tuples and objects"
+      ],
+      "resources": [
+        { "title": "TypeScript Handbook: Generics", "url": "https://www.typescriptlang.org/docs/handbook/2/generics.html" },
+        { "title": "TypeScript Handbook: Utility Types", "url": "https://www.typescriptlang.org/docs/handbook/utility-types.html" },
+        { "title": "TypeScript Handbook: Keyof Type Operator", "url": "https://www.typescriptlang.org/docs/handbook/2/keyof-types.html" }
+      ]
+    },
+    "build": {
+      "task": "In day58/, write a typed generic toolkit with tests: groupBy<T, K extends string>(items, keyFn): Record<K, T[]>; uniqueBy<T>(items, keyFn); sortBy<T>(items, key: keyof T, dir); pluck<T, K extends keyof T>(items, key): T[K][]; and a generic class Repository<T extends { id: string }> with add, update(id, changes: Partial<Omit<T, 'id'>>), remove, findById, and all(). Use it for two different types (Expense and Note) to show it's reusable. Write 12+ checks.",
+      "starterFiles": [],
+      "acceptance": [
+        "All functions are generic and fully typed; no any",
+        "pluck's return type is inferred correctly (hover shows e.g. number[])",
+        "Repository.update accepts Partial changes and can't change id (compile error if tried)",
+        "Repository used with two different types",
+        "12+ passing checks; npm run check passes"
+      ]
+    },
+    "hints": [
+      "pluck: function pluck<T, K extends keyof T>(items: T[], key: K): T[K][] { return items.map(i => i[key]); }",
+      "update(id: string, changes: Partial<Omit<T, 'id'>>): T | undefined — Omit removes id, Partial makes the rest optional.",
+      "If you're tempted to write any, try a generic parameter or unknown first."
+    ],
+    "proof": "Commit with day58/ files.",
+    "explainBack": [
+      { "q": "Explain what K extends keyof T means in pluck, and what it prevents.", "lookFor": ["K must be one of T's property names", "prevents plucking a non-existent key", "return type T[K][] matches the property type"] },
+      { "q": "Explain Partial<Omit<T, 'id'>> in your own words.", "lookFor": ["remove id from T", "make remaining fields optional", "so update can change some fields but never id"] }
+    ],
+    "lastHintExplanation": "Generics let a function work for many types while keeping the exact type. In pluck, K extends keyof T restricts the key to real property names of T, and T[K] is that property's type, so pluck(expenses, 'amount') returns number[]. Omit<T, 'id'> removes id, and Partial makes the remaining fields optional.",
+    "predict": [
+      { "q": "function id<T>(x: T): T { return x } const r = id(['a', 'b']); What is the type of r?", "options": ["any", "string[]", "T", "unknown"], "answer": 1, "why": "T is inferred from the argument as string[]." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Two pointers",
+      "note": "Move the pointer at the shorter line. Explain why that's safe.",
+      "problems": [
+        { "title": "LeetCode 11: Container With Most Water", "url": "https://leetcode.com/problems/container-with-most-water/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Selections",
+      "questions": [
+        { "q": "How many diagonals does a hexagon have?", "options": ["6", "9", "12", "15"], "answer": 1, "why": "n(n − 3)/2 = 6 × 3/2 = 9." },
+        { "q": "You must answer 5 of 8 questions, and Q1 is compulsory. How many ways can you choose?", "options": ["35", "56", "70", "21"], "answer": 0, "why": "Choose the other 4 from 7: 7C4 = 35." },
+        { "q": "How many triangles can be formed from 10 points with no 3 in a line?", "options": ["120", "720", "100", "45"], "answer": 0, "why": "10C3 = 120." },
+        { "q": "In how many ways can you pick at least one fruit from 4 different fruits?", "options": ["15", "16", "4", "24"], "answer": 0, "why": "2⁴ − 1 = 15." },
+        { "q": "How many teams of 5 with exactly 2 girls can be picked from 6 boys and 4 girls?", "options": ["120", "60", "90", "210"], "answer": 0, "why": "4C2 × 6C3 = 6 × 20." }
+      ]
+    },
+    "revision": ["Day 57: explain why runtime validation is still needed with TypeScript."]
+  },
+  {
+    "day": 59,
+    "module": "typescript",
+    "title": "Convert the expense tracker to TypeScript",
+    "goal": "Migrate a real JavaScript project to strict TypeScript and fix every bug the compiler finds.",
+    "learn": {
+      "concepts": [
+        "Incremental migration: rename .js to .ts one file at a time",
+        "Typing DOM code: querySelector<HTMLInputElement>, null checks",
+        "Typing event handlers: (e: SubmitEvent) and e.target narrowing",
+        "Typing localStorage and JSON loading with validation",
+        "Vite supports TS out of the box (type-check separately with tsc --noEmit)"
+      ],
+      "resources": [
+        { "title": "TypeScript: Migrating from JavaScript", "url": "https://www.typescriptlang.org/docs/handbook/migrating-from-javascript.html" },
+        { "title": "TypeScript Handbook: DOM Manipulation", "url": "https://www.typescriptlang.org/docs/handbook/dom-manipulation.html" }
+      ]
+    },
+    "build": {
+      "task": "On a branch typescript in your expense-tracker repo: add TypeScript (npm i -D typescript, add a strict tsconfig.json), rename files to .ts one at a time, and fix every error properly. Define Expense, Category and Budget types in src/types.ts, validate loaded data with your zod schema from Day 57, type all DOM lookups, and add a \"typecheck\": \"tsc --noEmit\" script. Keep a docs/migration.md log of every real bug TypeScript found. Open a PR, review your diff, merge, and redeploy.",
+      "starterFiles": [
+        { "name": "docs/migration.md", "content": "# TypeScript migration log\n\n| File | Error | Was it a real bug? | Fix |\n|---|---|---|---|\n" }
+      ],
+      "acceptance": [
+        "All source files are .ts; strict mode on; npm run typecheck passes",
+        "No any, no @ts-ignore, no non-null assertions (!) without a comment justifying them",
+        "Loaded data validated with zod before use",
+        "migration.md lists at least 5 errors and says which were real bugs",
+        "Merged via a pull request; live site still works after redeploy"
+      ]
+    },
+    "hints": [
+      "Do storage.ts and expenses.ts first (pure logic is easiest), then ui.ts, then main.ts.",
+      "DOM: const form = document.querySelector<HTMLFormElement>('#expense-form'); if (!form) throw new Error('Missing #expense-form'); After that check, TypeScript knows form isn't null.",
+      "e.target is EventTarget | null. Narrow it: if (!(e.target instanceof HTMLElement)) return; then use e.target.closest(...)."
+    ],
+    "proof": "Link to the merged TypeScript migration PR.",
+    "explainBack": [
+      { "q": "Name a real bug TypeScript found in your tracker and explain how it could have shown up for a user.", "lookFor": ["specific bug from migration.md", "user-visible failure", "how the types caught it"] },
+      { "q": "Why does Vite still need tsc --noEmit for type-checking?", "lookFor": ["Vite strips types for speed without checking them", "tsc does the actual type check", "run in CI/before deploy"] }
+    ],
+    "lastHintExplanation": "Vite (via esbuild) removes TypeScript types without checking them, which is why it's fast; tsc --noEmit does the real type-check without writing files. Strict mode surfaces real bugs like a querySelector that might return null, or JSON that might not have the shape you assumed.",
+    "predict": [
+      { "q": "const el = document.querySelector('#amount'); el.value = '5'; In strict TS, what happens?", "options": ["Works", "Errors: el is possibly null, and Element has no value", "Only a warning", "Runtime error only"], "answer": 1, "why": "querySelector returns Element | null; value exists on HTMLInputElement, not Element." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Two pointers: three-way partition",
+      "note": "Dutch national flag: low, mid and high pointers.",
+      "problems": [
+        { "title": "LeetCode 75: Sort Colors", "url": "https://leetcode.com/problems/sort-colors/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Probability basics",
+      "questions": [
+        { "q": "What is the probability of heads on a fair coin toss?", "options": ["1/4", "1/2", "1/3", "1"], "answer": 1, "why": "1 of 2 equally likely outcomes." },
+        { "q": "What is the probability that two dice add up to 7?", "options": ["1/6", "1/12", "7/36", "5/36"], "answer": 0, "why": "6 of the 36 outcomes give 7." },
+        { "q": "What is the probability of drawing a king from a deck of 52 cards?", "options": ["1/13", "1/4", "1/52", "4/13"], "answer": 0, "why": "4/52 = 1/13." },
+        { "q": "What is the probability of at least one head in 2 tosses?", "options": ["1/2", "3/4", "1/4", "2/3"], "answer": 1, "why": "1 − P(no heads) = 1 − 1/4." },
+        { "q": "A bag has 3 red and 5 blue balls. What is the probability of drawing a red one?", "options": ["3/5", "3/8", "5/8", "1/3"], "answer": 1, "why": "3 out of 8." }
+      ]
+    },
+    "revision": ["Day 58: write pluck<T, K extends keyof T> from memory."]
+  },
+  {
+    "day": 60,
+    "module": "typescript",
+    "title": "Debug lab: lying types, and week review",
+    "goal": "Fix compile errors properly and find the runtime bug that an unsafe cast hid.",
+    "learn": {
+      "concepts": [
+        "Excess property checks catch typos in object literals",
+        "Array.find returns T | undefined",
+        "Optional properties must be handled before use",
+        "as casts don't convert or check anything",
+        "Fixing errors vs silencing them (any, !, @ts-ignore)"
+      ],
+      "resources": [
+        { "title": "TypeScript Handbook: Type Assertions", "url": "https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#type-assertions" },
+        { "title": "Total TypeScript: Beginner's TypeScript (free)", "url": "https://www.totaltypescript.com/tutorials/beginners-typescript" }
+      ]
+    },
+    "build": {
+      "task": "Copy the starter into day60/debug/inventory.ts (in a folder with strict TypeScript set up). Run npx tsc --noEmit and fix all 4 compile errors properly: no any, no !, no @ts-ignore. Then run it with npx tsx: the GST line should print 1416 but prints something strange. Find the fifth (runtime) bug and fix it by validating the parsed data (a guard or zod), not by casting. One commit per bug. Write day60/week10-notes.md (Days 55–59: one confident and one weak topic each).",
+      "starterFiles": [
+        { "name": "day60/debug/inventory.ts", "content": "interface Product {\n  id: number;\n  name: string;\n  price: number;\n  stock: number;\n  tags?: string[];\n}\n\nconst products: Product[] = [\n  { id: 1, name: 'Pen', price: 10, stock: 100, tags: ['stationery'] },\n  { id: 2, name: 'Notebook', price: '60', stock: 40 },\n  { id: 3, name: 'Bag', price: 900, stok: 5 },\n];\n\nfunction findProduct(id: number): Product {\n  return products.find((p) => p.id === id);\n}\n\nfunction tagList(p: Product): string {\n  return p.tags.join(', ');\n}\n\nfunction withGst(p: Product): Product {\n  return { ...p, price: p.price + (p.price * 18) / 100 };\n}\n\nconsole.log(findProduct(1).name, tagList(findProduct(1)));\n\nconst raw: any = JSON.parse('{\"id\": 4, \"name\": \"Lamp\", \"price\": \"1200\", \"stock\": 3}');\nconst lamp = raw as Product;\nconsole.log('Lamp with GST:', withGst(lamp).price); // expect 1416\n" }
+      ],
+      "acceptance": [
+        "npx tsc --noEmit passes with no any, !, or @ts-ignore added",
+        "findProduct's return type is honest (Product | undefined) and callers handle undefined",
+        "tagList works for products without tags",
+        "Parsed JSON is validated and price converted/rejected; GST line prints 1416",
+        "5 commits, one per bug; week10-notes.md written"
+      ]
+    },
+    "hints": [
+      "Read each tsc error's last line. Two of them are in the products array itself.",
+      "find can return undefined. Change the return type and handle the missing case where it's called, e.g. const pen = findProduct(1); if (!pen) throw ...",
+      "The GST result looks like '1200216': a string + number. as Product told TypeScript to trust you. Validate: parse price with Number(), check it's finite, or use a zod schema with z.coerce.number()."
+    ],
+    "proof": "Link to your final fix commit.",
+    "explainBack": [
+      { "q": "List the 5 bugs and how you fixed each without silencing the compiler.", "lookFor": ["price '60' string → number", "stok typo caught by excess property check", "find returns undefined → honest return type + handling", "optional tags → ?? [] or optional chaining", "as Product cast hid string price → runtime validation"] },
+      { "q": "Why didn't TypeScript catch the lamp's string price?", "lookFor": ["raw is any so no checking", "as is an assertion, not a conversion", "JSON is runtime data"] }
+    ],
+    "lastHintExplanation": "Four bugs are compile errors: '60' is a string, stok is a typo (the excess property check), find can return undefined, and tags is optional. The fifth hid behind any + as Product: the lamp's price is the string '1200', so '1200' + 216 concatenates to '1200216'. Casts make TypeScript trust you without checking; validate runtime data instead.",
+    "predict": [
+      { "q": "const p = { id: 1 } as { id: number; name: string }; console.log(p.name.length)", "options": ["0", "Compile error", "Runtime TypeError", "undefined"], "answer": 2, "why": "The cast compiles, but name is undefined at runtime, so .length throws." }
+    ],
+    "debugLab": {
+      "title": "Lying types",
+      "symptoms": [
+        "tsc reports 4 errors",
+        "After they're fixed, 'Lamp with GST' prints 1200216 instead of 1416"
+      ],
+      "files": ["day60/debug/inventory.ts"],
+      "bugCount": 5
+    },
+    "dsa": {
+      "pattern": "Two pointers: greedy pairing",
+      "note": "Sort, then pair the heaviest with the lightest if possible.",
+      "problems": [
+        { "title": "LeetCode 881: Boats to Save People", "url": "https://leetcode.com/problems/boats-to-save-people/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Timed mixed: counting and probability",
+      "questions": [
+        { "q": "4! × 2 = ?", "options": ["24", "48", "12", "96"], "answer": 1, "why": "24 × 2." },
+        { "q": "What is 8C2?", "options": ["16", "28", "56", "64"], "answer": 1, "why": "8 × 7 / 2." },
+        { "q": "How many ways can the letters of BOOK be arranged?", "options": ["24", "12", "6", "4"], "answer": 1, "why": "4!/2! = 12." },
+        { "q": "What is the probability of rolling an even number on a die?", "options": ["1/3", "1/2", "2/3", "1/6"], "answer": 1, "why": "3 of 6 outcomes." },
+        { "q": "In how many ways can 4 books be arranged on a shelf?", "options": ["16", "24", "12", "4"], "answer": 1, "why": "4! = 24." }
+      ]
+    },
+    "revision": ["Days 55–59: explain unions, narrowing, generics and runtime validation in a 2-minute voice note."]
+  }
+]

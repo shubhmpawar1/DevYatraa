@@ -1,0 +1,427 @@
+[
+  {
+    "day": 1,
+    "module": "git-basics",
+    "title": "Your setup and first Git commits",
+    "goal": "Set up your tools and push your first three commits to GitHub from the terminal.",
+    "learn": {
+      "concepts": [
+        "What a terminal is: cd, ls (dir on Windows), mkdir, pwd",
+        "What Git is: a history of snapshots of your project",
+        "Repository, working folder, staging area, commit",
+        "git init, git status, git add, git commit, git log",
+        "What GitHub is and how git push sends commits to it"
+      ],
+      "resources": [
+        { "title": "Pro Git book, chapter 1 and 2.1–2.3", "url": "https://git-scm.com/book/en/v2/Getting-Started-About-Version-Control" },
+        { "title": "GitHub Docs: Set up Git", "url": "https://docs.github.com/en/get-started/getting-started-with-git/set-up-git" },
+        { "title": "MDN: Command line crash course", "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Getting_started/Environment_setup/Command_line" }
+      ]
+    },
+    "build": {
+      "task": "Install VS Code and Git, create a GitHub account, and create a public repo called jobready-journey. Inside it make a folder day01 with a file about-me.md describing who you are and why you are learning. Make at least 3 separate commits from the terminal, then push.",
+      "starterFiles": [
+        { "name": "day01/about-me.md", "content": "# About me\n\n## Who I am\n\n(write 2–3 lines)\n\n## Why I am learning full stack\n\n(write 2–3 lines)\n\n## My goal by the end of this plan\n\n(one line)\n" }
+      ],
+      "acceptance": [
+        "Repo jobready-journey is public on GitHub",
+        "At least 3 commits, each with a message that says what changed (not \"update\" or \"final\")",
+        "All commits made with git commit in the terminal, not by uploading files on the website",
+        "day01/about-me.md has all three sections filled in your own words",
+        "Root README.md says what this repo is for"
+      ]
+    },
+    "hints": [
+      "Work in this order: mkdir jobready-journey → cd into it → git init → create files → git status to see what Git notices.",
+      "One commit = git add <file> then git commit -m \"message\". Make a commit after creating README.md, another after adding about-me.md, another after filling its sections.",
+      "Create an empty repo on GitHub (no README), then run: git remote add origin https://github.com/<you>/jobready-journey.git, git branch -M main, git push -u origin main."
+    ],
+    "proof": "Link to your third commit on GitHub (open the commit on github.com and copy the URL from the address bar).",
+    "explainBack": [
+      { "q": "Using one of your own commits as the example, explain the difference between git add and git commit.", "lookFor": ["add moves changes to the staging area", "commit saves a snapshot of staged changes with a message", "refers to a specific file or commit of theirs"] },
+      { "q": "Pick one of your commit messages. What does it tell someone reading your history later, and why did you word it that way?", "lookFor": ["message describes what changed", "useful for future reader or themselves", "quotes their real message"] },
+      { "q": "Before you ran git push, where did your commits exist? What did git push change?", "lookFor": ["commits were only in the local repository on their computer", "push uploads commits to the remote (GitHub)", "origin is the name of the remote"] }
+    ],
+    "lastHintExplanation": "git add chooses which changes go into the next snapshot (the staging area). git commit saves that snapshot with a message into your local history. Until you push, all of this lives only in the .git folder on your computer; git push copies your new commits to the remote called origin, which is your GitHub repo.",
+    "predict": [],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Logic basics (JavaScript warm-up)",
+      "note": "You don't know JavaScript yet. This week the DSA hour teaches just enough JS to solve small problems. Run code in the browser console (F12 → Console).",
+      "problems": [
+        { "title": "javascript.info: Variables (do the 3 tasks at the end)", "url": "https://javascript.info/variables" },
+        { "title": "javascript.info: Data types (do the task at the end)", "url": "https://javascript.info/types" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Number system",
+      "questions": [
+        { "q": "Which of these is a prime number?", "options": ["51", "57", "59", "63"], "answer": 2, "why": "51 = 3×17, 57 = 3×19, 63 = 7×9. 59 has no divisors other than 1 and itself." },
+        { "q": "What is the unit digit of 7⁴?", "options": ["1", "3", "7", "9"], "answer": 0, "why": "Unit digits of powers of 7 cycle 7, 9, 3, 1. The 4th power ends in 1 (7⁴ = 2401)." },
+        { "q": "What is the sum of the first 20 natural numbers?", "options": ["190", "200", "210", "220"], "answer": 2, "why": "n(n+1)/2 = 20×21/2 = 210." },
+        { "q": "Which number is divisible by 9?", "options": ["5,231", "4,356", "7,124", "2,345"], "answer": 1, "why": "A number is divisible by 9 if its digit sum is. 4+3+5+6 = 18." },
+        { "q": "What is the LCM of 12 and 18?", "options": ["6", "24", "36", "72"], "answer": 2, "why": "12 = 2²×3, 18 = 2×3². LCM = 2²×3² = 36." }
+      ]
+    },
+    "revision": ["Nothing yet: this is Day 1. Tonight, re-read your three commit messages and say out loud what each one did."]
+  },
+  {
+    "day": 2,
+    "module": "html-foundations",
+    "title": "HTML page structure and text",
+    "goal": "Write a valid HTML page from scratch with a correct head, heading order and text elements.",
+    "learn": {
+      "concepts": [
+        "What HTML is: content described by elements and attributes",
+        "<!DOCTYPE html>, <html lang>, <head>, <body>",
+        "<meta charset> and <meta name=\"viewport\">, <title>",
+        "Headings h1–h6 as an outline, not for font size",
+        "p, strong vs b, em vs i, blockquote, br vs new paragraph",
+        "Checking your page with the W3C validator"
+      ],
+      "resources": [
+        { "title": "MDN: Basic HTML syntax", "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/Basic_HTML_syntax" },
+        { "title": "MDN: What's in the head?", "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/Webpage_metadata" },
+        { "title": "W3C Markup Validator", "url": "https://validator.w3.org/#validate_by_input" }
+      ]
+    },
+    "build": {
+      "task": "In day02/index.html, write an \"About me\" page from an empty file (no templates, no Emmet shortcuts). It needs a full head, one h1, at least two h2 sections each with an h3 inside, paragraphs, at least one strong and one em used for meaning, and a blockquote with a quote you like.",
+      "starterFiles": [
+        { "name": "day02/index.html", "content": "<!-- Start from an empty file. Type every line yourself. -->\n" }
+      ],
+      "acceptance": [
+        "Starts with <!DOCTYPE html> and has <html lang=\"en\"> (or your language)",
+        "Head has meta charset, meta viewport and a title",
+        "Exactly one h1; h2 and h3 used in order (no skipping from h1 to h3)",
+        "strong and em each used where the meaning needs emphasis, not for looks",
+        "W3C validator shows 0 errors (paste a note in the commit message saying so)"
+      ]
+    },
+    "hints": [
+      "Write the skeleton first: doctype, html, head, body. Open it in the browser before adding content.",
+      "Think of headings as a book outline: h1 = book title, h2 = chapters, h3 = sections inside a chapter.",
+      "<meta charset=\"utf-8\"> and <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"> go inside <head>. Paste your full file into validator.w3.org and fix each error from the top."
+    ],
+    "proof": "Commit containing day02/index.html. Mention \"validator: 0 errors\" in the commit message.",
+    "explainBack": [
+      { "q": "In your page, what would break or change if you removed the meta charset line? And the viewport line?", "lookFor": ["charset tells browser the text encoding so characters like ₹ or Hindi display correctly", "viewport makes the page size correctly on mobile instead of zoomed-out desktop width"] },
+      { "q": "Why did you choose h2 for your sections and not h1 or h4? Point to your actual headings.", "lookFor": ["headings form a document outline/hierarchy", "one h1 for the page topic", "screen readers and search engines use heading order", "names their real headings"] },
+      { "q": "Where did you use strong and em in your page, and why those instead of b and i?", "lookFor": ["strong = strong importance, em = stress emphasis", "b and i are only visual", "meaning matters for screen readers", "cites their real sentence"] }
+    ],
+    "lastHintExplanation": "HTML describes meaning, CSS handles looks. meta charset sets the text encoding; the viewport meta lets mobile browsers use the device width. Headings form an outline that screen readers and search engines navigate, so their order matters more than their size. strong and em carry meaning (importance, stress); b and i are only visual.",
+    "predict": [
+      { "q": "What does the browser show?", "code": "<p>Hello        world</p>\n<p>Line one\nLine two</p>", "options": ["Spaces and the line break are kept exactly", "\"Hello world\" with one space, and \"Line one Line two\" on one line", "An error because of extra spaces", "Only the first paragraph"], "answer": 1, "why": "HTML collapses runs of whitespace (spaces and newlines) into a single space. Use separate <p> elements or CSS for layout." },
+      { "q": "You write <h1>Big</h1><h1>Also big</h1>. What happens?", "options": ["The second h1 is ignored", "Both show as large headings; it's valid HTML but a poor outline", "The browser shows an error", "The second becomes an h2 automatically"], "answer": 1, "why": "Browsers render both. One h1 per page is a best practice for a clear outline, not a hard rule." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Logic basics: conditions",
+      "note": "Learn if/else, then solve the tasks. Write each in a .js file and run it with node, or in the browser console.",
+      "problems": [
+        { "title": "javascript.info: Operators and comparisons (tasks)", "url": "https://javascript.info/comparison" },
+        { "title": "javascript.info: if and ? (do all 6 tasks)", "url": "https://javascript.info/ifelse" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Percentages",
+      "questions": [
+        { "q": "What is 25% of 480?", "options": ["96", "120", "125", "140"], "answer": 1, "why": "480 × 25/100 = 120." },
+        { "q": "A price rises from ₹400 to ₹500. What is the percentage increase?", "options": ["20%", "25%", "30%", "100%"], "answer": 1, "why": "Increase 100 on base 400 = 25%." },
+        { "q": "36 is what percent of 120?", "options": ["25%", "30%", "33%", "36%"], "answer": 1, "why": "36/120 × 100 = 30%." },
+        { "q": "A salary is increased by 10% and then decreased by 10%. Net change?", "options": ["No change", "1% decrease", "1% increase", "2% decrease"], "answer": 1, "why": "1.1 × 0.9 = 0.99, so a 1% decrease." },
+        { "q": "The pass mark is 40%. A student scores 160 and fails by 40 marks. What are the maximum marks?", "options": ["400", "450", "500", "600"], "answer": 2, "why": "Pass mark = 160 + 40 = 200 = 40% of max. Max = 500." }
+      ]
+    },
+    "revision": ["Day 1: run git log --oneline in your repo and explain each commit in one sentence."]
+  },
+  {
+    "day": 3,
+    "module": "html-foundations",
+    "title": "Links, images, lists and semantic layout",
+    "goal": "Build a two-page mini site linked together, using semantic layout elements instead of plain divs.",
+    "learn": {
+      "concepts": [
+        "<a href> with relative paths (projects.html, ../day02/index.html) and absolute URLs",
+        "Opening external links safely: target=\"_blank\" with rel=\"noopener\"",
+        "<img src alt width height>: why alt text matters",
+        "ul, ol, li and nesting lists",
+        "Semantic layout: header, nav, main, section, article, footer",
+        "Why semantic elements beat div for accessibility and SEO"
+      ],
+      "resources": [
+        { "title": "MDN: Creating links", "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/Creating_links" },
+        { "title": "MDN: Images in HTML", "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/HTML_images" },
+        { "title": "MDN: Structuring documents", "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/Structuring_documents" }
+      ]
+    },
+    "build": {
+      "task": "In day03/, build index.html (home) and projects.html. Both pages share the same header with a nav linking to each other. Home has your photo or any image with real alt text and an ordered list of your top 3 goals. Projects has one article per planned project (at least 2) with a nested unordered list of the tech it will use, and a link to your Day 2 page.",
+      "starterFiles": [
+        { "name": "day03/images/README.txt", "content": "Put your image here, for example me.jpg. Keep it under 300 KB.\n" }
+      ],
+      "acceptance": [
+        "Both pages use header, nav, main and footer; no layout made of plain divs",
+        "Nav links work in both directions using relative paths",
+        "Image has meaningful alt text (not \"image\" or \"photo\") and width/height set",
+        "An ol on home and a nested ul inside each project article",
+        "A working relative link from projects.html to ../day02/index.html",
+        "Any external link opens in a new tab with rel=\"noopener\""
+      ]
+    },
+    "hints": [
+      "Copy nothing from Day 2. Start with the shared header and nav on index.html, make it work, then build projects.html.",
+      "A relative path is relative to the file you are in. From day03/projects.html, your Day 2 page is one folder up: ../day02/index.html.",
+      "Good alt text describes what the image shows for someone who can't see it, e.g. alt=\"Me standing in front of my college library\". Nest a <ul> inside an <li> or an <article>, not directly inside another <ul>."
+    ],
+    "proof": "Commit with day03/index.html, day03/projects.html and your image.",
+    "explainBack": [
+      { "q": "Take one relative link from your own pages. Explain how the browser works out which file to open.", "lookFor": ["path resolved from the current file's folder", "../ goes up one folder", "cites their actual href"] },
+      { "q": "Read out the alt text you wrote. Who uses it and when?", "lookFor": ["screen reader users", "shown if the image fails to load", "search engines", "describes the content not the word image"] },
+      { "q": "You used header, nav, main and footer instead of divs. What does that change if the page looks exactly the same?", "lookFor": ["meaning for screen readers and landmarks navigation", "SEO / browser understands structure", "easier to read code", "looks don't change because they are block elements without default styling"] }
+    ],
+    "lastHintExplanation": "Relative paths are resolved from the folder of the current file, so ../ means 'go up one folder'. Alt text is read by screen readers and shown if the image fails to load. Semantic elements look like divs, but they tell browsers and assistive tech what each region is (landmarks), so users can jump straight to the nav or the main content.",
+    "predict": [
+      { "q": "Your file is at day03/index.html and contains <a href=\"projects.html\">. Which file opens?", "options": ["/projects.html at the repo root", "day03/projects.html", "day02/projects.html", "Nothing, you need the full URL"], "answer": 1, "why": "A relative path starts from the current file's folder, which is day03/." },
+      { "q": "<img src=\"me.jpg\" alt=\"Me at college\"> but me.jpg doesn't exist. What appears?", "options": ["A blank page", "A broken-image icon and/or the alt text \"Me at college\"", "A JavaScript error", "The browser downloads a default image"], "answer": 1, "why": "When the image can't load, the browser shows the alt text (often with a broken-image icon)." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Loops",
+      "note": "Learn for and while loops on javascript.info, then solve two easy problems on LeetCode in JavaScript.",
+      "problems": [
+        { "title": "javascript.info: Loops (tasks)", "url": "https://javascript.info/while-for" },
+        { "title": "LeetCode 412: Fizz Buzz", "url": "https://leetcode.com/problems/fizz-buzz/" },
+        { "title": "LeetCode 1480: Running Sum of 1d Array", "url": "https://leetcode.com/problems/running-sum-of-1d-array/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Ratio and proportion",
+      "questions": [
+        { "q": "Divide ₹120 in the ratio 3:5. What is the larger part?", "options": ["₹45", "₹72", "₹75", "₹80"], "answer": 2, "why": "120 × 5/8 = 75." },
+        { "q": "If a:b = 2:3 and b:c = 4:5, what is a:c?", "options": ["2:5", "8:15", "6:20", "4:15"], "answer": 1, "why": "a:b:c = 8:12:15, so a:c = 8:15." },
+        { "q": "The ages of A and B are in the ratio 4:5 and add up to 54. How old is B?", "options": ["24", "27", "30", "32"], "answer": 2, "why": "54 × 5/9 = 30." },
+        { "q": "What is the mean proportional of 4 and 16?", "options": ["6", "8", "10", "12"], "answer": 1, "why": "√(4×16) = √64 = 8." },
+        { "q": "40 L of milk and water is in the ratio 3:1. How much water must be added to make it 3:2?", "options": ["5 L", "10 L", "15 L", "20 L"], "answer": 1, "why": "Milk 30 L, water 10 L. For 3:2, water must be 20 L, so add 10 L." }
+      ]
+    },
+    "revision": ["Day 2: without looking, write the full <head> of an HTML page on paper, then check it against your Day 2 file."]
+  },
+  {
+    "day": 4,
+    "module": "html-foundations",
+    "title": "Forms and tables",
+    "goal": "Build an accessible form and a correctly structured table.",
+    "learn": {
+      "concepts": [
+        "<form action method>, what happens on submit",
+        "<label for> linked to <input id>; why every input needs a label",
+        "Input types: text, email, number, date, radio, checkbox; select, textarea",
+        "The name attribute: what gets sent to the server",
+        "Built-in validation: required, min, max, type=email",
+        "<table> with thead, tbody, th (scope), td, caption"
+      ],
+      "resources": [
+        { "title": "MDN: Your first form", "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Forms/Your_first_form" },
+        { "title": "MDN: Basic native form controls", "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Forms/Basic_native_form_controls" },
+        { "title": "MDN: HTML table basics", "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/HTML_table_basics" }
+      ]
+    },
+    "build": {
+      "task": "In day04/index.html build a \"Join the study group\" form and your weekly study timetable. The form has name, email, year of study (select), preferred time (radio: morning/evening), topics (checkboxes: HTML, CSS, JS), a short message (textarea) and a submit button, using action=\"https://httpbin.org/post\" method=\"post\" so you can see what gets sent. The timetable is a table with a caption, days as column headers and time slots as row headers.",
+      "starterFiles": [],
+      "acceptance": [
+        "Every control has a <label> linked with for/id (click the label: the input gets focus)",
+        "Every control has a name; radio buttons share one name",
+        "Email and name are required; empty submit is blocked by the browser",
+        "Submitting shows your data on httpbin.org under \"form\"",
+        "Table uses caption, thead, tbody, and th with scope=\"col\" / scope=\"row\""
+      ]
+    },
+    "hints": [
+      "Build one field at a time and submit after each to see it appear on httpbin.",
+      "Radio buttons are one group when they share the same name. Each gets its own id and label, and its own value.",
+      "A row header looks like <th scope=\"row\">9–10 AM</th> as the first cell of each body row; column headers live in <thead> with scope=\"col\"."
+    ],
+    "proof": "Commit with day04/index.html. Paste the httpbin \"form\" output into the commit message body.",
+    "explainBack": [
+      { "q": "In your httpbin result, which attribute of each input decided the key names you saw? Give one example from your form.", "lookFor": ["name attribute becomes the key", "value is what the user entered or the value attribute", "example from their form"] },
+      { "q": "Pick one label in your form. What does linking it with for/id do for users?", "lookFor": ["clicking label focuses or checks the input", "screen readers announce the label", "bigger click target"] },
+      { "q": "Why are your day names in th and not td? What does scope add?", "lookFor": ["th marks header cells", "scope tells whether header applies to column or row", "screen readers read headers with each cell"] }
+    ],
+    "lastHintExplanation": "On submit, the browser sends each control's name with its value; controls without a name are not sent, and unchecked checkboxes send nothing. A label linked by for/id makes the text clickable and is what screen readers announce. th with scope marks header cells so assistive tech can say 'Monday, 9–10 AM: DSA' for each data cell.",
+    "predict": [
+      { "q": "A required email field is empty and you click Submit. What happens?", "options": ["Form submits with an empty email", "The browser blocks submit and shows a message on the field", "The page reloads", "JavaScript error"], "answer": 1, "why": "Built-in validation stops submission and focuses the invalid field." },
+      { "q": "<input type=\"checkbox\" name=\"topics\" value=\"html\"> is left unchecked. What is sent for it?", "options": ["topics=html", "topics=off", "topics= (empty)", "Nothing at all"], "answer": 3, "why": "Unchecked checkboxes are not included in form data." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Arrays: basics",
+      "note": "Learn arrays on javascript.info, then solve these.",
+      "problems": [
+        { "title": "javascript.info: Arrays (tasks)", "url": "https://javascript.info/array" },
+        { "title": "LeetCode 1929: Concatenation of Array", "url": "https://leetcode.com/problems/concatenation-of-array/" },
+        { "title": "LeetCode 1672: Richest Customer Wealth", "url": "https://leetcode.com/problems/richest-customer-wealth/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Averages",
+      "questions": [
+        { "q": "What is the average of 10, 20, 30, 40 and 50?", "options": ["25", "30", "35", "150"], "answer": 1, "why": "Sum 150 / 5 = 30." },
+        { "q": "The average of 5 numbers is 20. One is removed and the average of the rest is 18. Which number was removed?", "options": ["22", "26", "28", "30"], "answer": 2, "why": "100 − 4×18 = 100 − 72 = 28." },
+        { "q": "What is the average of the first 10 natural numbers?", "options": ["5", "5.5", "6", "10"], "answer": 1, "why": "Sum 55 / 10 = 5.5." },
+        { "q": "A batsman averages 40 over 10 innings and scores 62 in the 11th. New average?", "options": ["41", "42", "43", "44"], "answer": 1, "why": "(400 + 62)/11 = 42." },
+        { "q": "30 students average 15 years. When the teacher is included the average becomes 16. The teacher's age?", "options": ["31", "40", "45", "46"], "answer": 3, "why": "31×16 − 30×15 = 496 − 450 = 46." }
+      ]
+    },
+    "revision": ["Day 3: from memory, list the 6 semantic layout elements and when to use each. Check against MDN."]
+  },
+  {
+    "day": 5,
+    "module": "css-foundations",
+    "title": "CSS basics: selectors, cascade and the box model",
+    "goal": "Style your Day 3 site with an external stylesheet and explain exactly why each rule wins.",
+    "learn": {
+      "concepts": [
+        "Linking a stylesheet: <link rel=\"stylesheet\" href>",
+        "Selectors: element, .class, #id, descendant, :hover",
+        "Cascade and specificity: which rule wins and why",
+        "Box model: content, padding, border, margin",
+        "box-sizing: border-box",
+        "Units: px, rem, %; colors and fonts",
+        "Using DevTools (F12 → Elements → Styles / Computed) to inspect rules"
+      ],
+      "resources": [
+        { "title": "MDN: CSS selectors", "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Styling_basics/Basic_selectors" },
+        { "title": "MDN: Cascade, specificity and inheritance", "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Styling_basics/Handling_conflicts" },
+        { "title": "MDN: The box model", "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Styling_basics/Box_model" }
+      ]
+    },
+    "build": {
+      "task": "Copy your Day 3 site into day05/ and add css/style.css. Style it: a base font and colors on body, a header with padding and a bottom border, nav links styled with a :hover state, a centered main column (max-width with auto margins), and project articles as boxes with padding, border and margin. Add box-sizing: border-box for all elements. Include one deliberate specificity conflict and a comment explaining which rule wins.",
+      "starterFiles": [
+        { "name": "day05/css/style.css", "content": "/* Day 5 styles. Write every rule yourself. */\n\n*,\n*::before,\n*::after {\n  /* your box-sizing rule here */\n}\n" }
+      ],
+      "acceptance": [
+        "No inline style attributes; all CSS in css/style.css",
+        "Uses element, class and id selectors at least once each, plus :hover",
+        "Main column is centered with max-width and margin auto",
+        "box-sizing: border-box applied to all elements",
+        "A comment in the CSS explains one specificity conflict and which rule wins"
+      ]
+    },
+    "hints": [
+      "Check the link works first: put body { background: yellow; } and refresh. If nothing changes, the href path is wrong.",
+      "To center a block: give it a max-width and margin: 0 auto. Use DevTools → Computed to see the box model numbers.",
+      "Specificity: id (1,0,0) beats class (0,1,0) beats element (0,0,1). Make a p with class=\"note\" and style both p and .note with different colors; .note wins."
+    ],
+    "proof": "Commit with day05/ including css/style.css.",
+    "explainBack": [
+      { "q": "Explain the specificity conflict you wrote in your CSS: which selectors compete, which wins, and why?", "lookFor": ["specificity calculation id > class > element", "later rule wins only when specificity is equal", "cites their selectors"] },
+      { "q": "On one of your project boxes, what is the difference between the padding and the margin you set? What would you see if you swapped them?", "lookFor": ["padding is inside the border, background shows through", "margin is outside the border, space between boxes", "references their values"] },
+      { "q": "What does box-sizing: border-box change about how your width or max-width is calculated?", "lookFor": ["width includes padding and border", "content-box adds padding and border on top of width", "prevents overflow surprises"] }
+    ],
+    "lastHintExplanation": "When two rules target the same element, the one with higher specificity wins (ids beat classes, classes beat elements); only on a tie does the later rule win. Padding is space inside the border (the background fills it); margin is space outside, between elements. With border-box, the width you set includes padding and border, so boxes don't grow unexpectedly.",
+    "predict": [
+      { "q": "Which color is the text?", "code": "p { color: red; }\n.note { color: blue; }\n\n<p class=\"note\">Hi</p>", "options": ["red", "blue", "black", "purple"], "answer": 1, "why": "A class selector (0,1,0) is more specific than an element selector (0,0,1)." },
+      { "q": "Which color is the text?", "code": "#intro { color: green; }\n.note { color: blue; }\n\n<p id=\"intro\" class=\"note\">Hi</p>", "options": ["green", "blue", "Whichever rule is last", "black"], "answer": 0, "why": "An id selector beats a class selector regardless of order." },
+      { "q": "A box has width: 200px; padding: 20px; border: 5px solid; and the default box-sizing. How wide is it on screen?", "options": ["200px", "225px", "240px", "250px"], "answer": 3, "why": "content-box: 200 + 2×20 + 2×5 = 250px. With border-box it would be 200px." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Strings: basics",
+      "note": "Learn strings on javascript.info, then solve these.",
+      "problems": [
+        { "title": "javascript.info: Strings (tasks)", "url": "https://javascript.info/string" },
+        { "title": "LeetCode 1108: Defanging an IP Address", "url": "https://leetcode.com/problems/defanging-an-ip-address/" },
+        { "title": "LeetCode 709: To Lower Case", "url": "https://leetcode.com/problems/to-lower-case/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Profit and loss",
+      "questions": [
+        { "q": "Cost price ₹200, selling price ₹250. Profit %?", "options": ["20%", "25%", "30%", "50%"], "answer": 1, "why": "Profit 50 on CP 200 = 25%." },
+        { "q": "Cost price ₹500 sold at a 10% loss. Selling price?", "options": ["₹440", "₹450", "₹460", "₹490"], "answer": 1, "why": "500 × 0.9 = 450." },
+        { "q": "An item sold for ₹660 gives a 10% profit. Cost price?", "options": ["₹594", "₹600", "₹606", "₹650"], "answer": 1, "why": "CP = 660 / 1.1 = 600." },
+        { "q": "Marked price ₹1000 with a 20% discount. Selling price?", "options": ["₹750", "₹800", "₹820", "₹980"], "answer": 1, "why": "1000 × 0.8 = 800." },
+        { "q": "10 pens are bought for ₹100 and each is sold for ₹12. Profit %?", "options": ["12%", "15%", "20%", "25%"], "answer": 2, "why": "CP per pen ₹10, profit ₹2 = 20%." }
+      ]
+    },
+    "revision": ["Day 4: rebuild one radio group and one checkbox from memory with labels, then submit to httpbin."]
+  },
+  {
+    "day": 6,
+    "module": "css-foundations",
+    "title": "Flexbox, a debug lab, and week review",
+    "goal": "Fix a broken layout using DevTools, then build a responsive card row with flexbox.",
+    "learn": {
+      "concepts": [
+        "display: flex on the parent; children become flex items",
+        "Main axis vs cross axis; flex-direction",
+        "justify-content, align-items, gap, flex-wrap",
+        "flex: 1 and flex-basis for sizing items",
+        "Debugging with DevTools: is the CSS loaded? Is the selector matching? Is the rule crossed out?"
+      ],
+      "resources": [
+        { "title": "MDN: Flexbox", "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/CSS_layout/Flexbox" },
+        { "title": "CSS-Tricks: A complete guide to Flexbox", "url": "https://css-tricks.com/snippets/css/a-guide-to-flexbox/" },
+        { "title": "Flexbox Froggy (game, levels 1–12)", "url": "https://flexboxfroggy.com/" }
+      ]
+    },
+    "build": {
+      "task": "Part 1: copy the debug lab files into day06/debug/ and fix all 4 bugs. Write what each bug was and how you found it in day06/debug/FIXES.md. Part 2: in day06/cards/, build a row of 4 profile cards (image, name, role, a button) with flexbox. Cards sit side by side on wide screens and wrap onto new lines on narrow screens, with equal gaps and equal heights.",
+      "starterFiles": [
+        { "name": "day06/debug/index.html", "content": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Broken nav</title>\n  <link href=\"style.css\">\n</head>\n<body>\n  <header class=\"site-header\">\n    <nav class=\"main-nav\">\n      <a href=\"#\">Home</a>\n      <a href=\"#\">Projects</a>\n      <a href=\"#\">Contact</a>\n    </nav>\n  </header>\n  <main>\n    <h1>Welcome</h1>\n    <p>This nav should be a horizontal row with space between the links.\n  </main>\n</body>\n</html>\n" },
+        { "name": "day06/debug/style.css", "content": ".site-header {\n  display: flex;\n  padding: 16px;\n  background: #1e293b;\n}\n\n.nav a {\n  color: white;\n  text-decoration: none;\n}\n\n.main-nav {\n  justify-content: space-between;\n  width: 100%;\n}\n" }
+      ],
+      "acceptance": [
+        "Debug lab: nav links show white, in a row, spread across the header",
+        "FIXES.md lists all 4 bugs with how you found each (DevTools, validator, reading)",
+        "Cards: display: flex with gap and flex-wrap on the container",
+        "Cards wrap below about 700px wide and stay equal height in each row",
+        "No fixed heights used to fake equal heights"
+      ]
+    },
+    "hints": [
+      "Bug hunting order: Is the stylesheet loading at all? (Network tab or a test rule.) Is each selector matching an element? (Elements panel.) Which rules are crossed out?",
+      "Two bugs are in the HTML and two in the CSS. Run the HTML through the validator. Compare the class names in the HTML with the selectors in the CSS.",
+      "The 4 bugs: the <link> is missing rel=\"stylesheet\"; the <p> is never closed; .nav a should be .main-nav a; display: flex is on .site-header, but the links live in .main-nav, so .main-nav needs display: flex for justify-content to work."
+    ],
+    "proof": "Commit with day06/debug (fixed, with FIXES.md) and day06/cards.",
+    "explainBack": [
+      { "q": "In your cards layout, what are the main axis and the cross axis, and which properties did you use on each?", "lookFor": ["main axis is row/horizontal by default", "justify-content works on the main axis", "align-items on the cross axis", "names their properties"] },
+      { "q": "Why do your cards wrap on a narrow screen instead of shrinking forever? Which line of your CSS does that?", "lookFor": ["flex-wrap: wrap", "flex-basis or min-width sets a minimum size", "cites their CSS"] },
+      { "q": "Pick one bug from the debug lab. How did you find it, and why did it break the page?", "lookFor": ["a concrete method, DevTools or validator", "correct cause of the bug", "e.g. without rel=stylesheet the CSS is not applied"] }
+    ],
+    "lastHintExplanation": "Flexbox lays out the direct children of the element with display: flex. justify-content positions items along the main axis (a row by default) and align-items along the cross axis. flex-wrap: wrap lets items move to a new line when they hit their minimum size. In the lab, the CSS never loaded (no rel), and the flex rules targeted the wrong element and the wrong class.",
+    "predict": [
+      { "q": "A div has display: flex and three child divs. How are the children laid out by default?", "options": ["Stacked vertically", "Side by side in a row", "On top of each other", "In a 3×1 grid with gaps"], "answer": 1, "why": "The default flex-direction is row." },
+      { "q": "With justify-content: space-between on a row of 3 items, where do they go?", "options": ["All centered", "First at the start, last at the end, middle evenly between", "Equal space around each, including the edges", "All at the start"], "answer": 1, "why": "space-between puts free space only between items, none at the edges." }
+    ],
+    "debugLab": {
+      "title": "The broken nav",
+      "symptoms": ["Page shows plain unstyled links in a column", "Even after styles load, links stay in the left corner and aren't white"],
+      "files": ["day06/debug/index.html", "day06/debug/style.css"],
+      "bugCount": 4
+    },
+    "dsa": {
+      "pattern": "Week 1 review: arrays and loops",
+      "note": "Re-solve one problem from this week without looking at your old code, then do these two.",
+      "problems": [
+        { "title": "LeetCode 1470: Shuffle the Array", "url": "https://leetcode.com/problems/shuffle-the-array/" },
+        { "title": "LeetCode 2011: Final Value of Variable After Performing Operations", "url": "https://leetcode.com/problems/final-value-of-variable-after-performing-operations/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Number series",
+      "questions": [
+        { "q": "2, 6, 12, 20, 30, ?", "options": ["40", "42", "44", "48"], "answer": 1, "why": "Differences 4, 6, 8, 10, 12. 30 + 12 = 42." },
+        { "q": "3, 9, 27, 81, ?", "options": ["162", "216", "243", "324"], "answer": 2, "why": "Multiply by 3 each time." },
+        { "q": "1, 4, 9, 16, 25, ?", "options": ["30", "35", "36", "49"], "answer": 2, "why": "Perfect squares: 6² = 36." },
+        { "q": "5, 11, 23, 47, ?", "options": ["94", "95", "96", "97"], "answer": 1, "why": "Each term = previous × 2 + 1." },
+        { "q": "2, 3, 5, 7, 11, ?", "options": ["12", "13", "14", "15"], "answer": 1, "why": "Prime numbers." }
+      ]
+    },
+    "revision": ["Days 1–5: open your repo on GitHub and read your commit history top to bottom. For each day, say in one sentence what you learned. Note anything you couldn't explain in your progress log."]
+  }
+]

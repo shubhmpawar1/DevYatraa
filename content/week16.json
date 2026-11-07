@@ -1,0 +1,407 @@
+[
+  {
+    "day": 91,
+    "module": "express-api",
+    "title": "Designing a REST API",
+    "goal": "Design a clean REST API on paper before writing code: resources, URLs, verbs, status codes and error shapes.",
+    "learn": {
+      "concepts": [
+        "Resources are nouns (/tasks), verbs come from HTTP methods",
+        "Collection vs item URLs: /tasks and /tasks/:id; nesting /projects/:id/tasks",
+        "Status codes: 200, 201 (+ Location), 204, 400, 401, 403, 404, 409, 422, 500",
+        "A consistent error format: { error: { code, message, details } }",
+        "Filtering, sorting and pagination with query params",
+        "Idempotency: GET, PUT and DELETE can be repeated safely; POST can't"
+      ],
+      "resources": [
+        { "title": "MDN: HTTP response status codes", "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status" },
+        { "title": "Microsoft: RESTful web API design", "url": "https://learn.microsoft.com/en-us/azure/architecture/best-practices/api-design" },
+        { "title": "Zalando RESTful API Guidelines", "url": "https://opensource.zalando.com/restful-api-guidelines/" }
+      ]
+    },
+    "build": {
+      "task": "In api-starter, write docs/api-design.md for a 'Task Manager API' with projects and tasks: every endpoint (method, URL, purpose), example request and response bodies, status codes for success and each failure, query parameters for filtering tasks (status, priority, due before), sorting (sort=dueDate or sort=-priority) and pagination (page, limit), and the response envelope for lists ({ data, meta: { page, limit, total } }). Define one error format used everywhere. List which endpoints are idempotent and why.",
+      "starterFiles": [
+        { "name": "docs/api-design.md", "content": "# Task Manager API design\n\n## Resources\n- Project: { id, name, createdAt }\n- Task: { id, projectId, title, status, priority, dueDate, createdAt, updatedAt }\n\n## Endpoints\n| Method | URL | Purpose | Success | Errors |\n|---|---|---|---|---|\n\n## List responses\n\n## Error format\n\n## Query parameters\n\n## Idempotency\n" }
+      ],
+      "acceptance": [
+        "All CRUD endpoints for projects and tasks, including nested /projects/:id/tasks",
+        "Every endpoint lists success and error status codes",
+        "Example JSON for at least one request and response per resource",
+        "One consistent error format, used in every example",
+        "Filtering, sorting and pagination documented with examples",
+        "Idempotency section explains GET/PUT/DELETE vs POST"
+      ]
+    },
+    "hints": [
+      "Use plural nouns, no verbs in URLs: POST /tasks, not /createTask. Actions that don't fit CRUD can be sub-resources, e.g. POST /tasks/:id/complete, used sparingly.",
+      "400 = malformed input; 404 = doesn't exist; 409 = conflicts with current state (e.g. duplicate name); 422 is sometimes used for validation errors. Pick one convention and stick to it.",
+      "201 responses should include the created resource and ideally a Location: /tasks/123 header."
+    ],
+    "proof": "Commit with docs/api-design.md.",
+    "explainBack": [
+      { "q": "Why is POST /tasks better than POST /createTask?", "lookFor": ["URL names the resource", "HTTP method already says the action", "consistent, predictable API"] },
+      { "q": "What does idempotent mean? Give an example from your design.", "lookFor": ["repeating the request has the same effect as once", "DELETE /tasks/5 twice leaves it deleted", "POST twice creates two"] },
+      { "q": "Why use one error format for every endpoint?", "lookFor": ["clients handle errors in one place", "predictable", "easier debugging"] }
+    ],
+    "lastHintExplanation": "In REST, URLs name resources and HTTP methods say what to do with them, so the API is predictable. An idempotent request has the same effect whether sent once or many times: DELETE /tasks/5 twice still leaves task 5 deleted, but POST /tasks twice creates two tasks. One error format lets frontends handle every failure the same way.",
+    "predict": [
+      { "q": "A client sends PUT /tasks/7 with the same body three times. How many changes happen?", "options": ["3 updates with different results", "Same final state as one request (idempotent)", "Error after the first", "A new task each time"], "answer": 1, "why": "PUT replaces the resource with the same data each time." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Binary search",
+      "note": "Use the API's feedback (-1, 1, 0) to move lo and hi.",
+      "problems": [
+        { "title": "LeetCode 374: Guess Number Higher or Lower", "url": "https://leetcode.com/problems/guess-number-higher-or-lower/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Verbal ability: prepositions and articles",
+      "questions": [
+        { "q": "'She is good ___ maths.'", "options": ["in", "at", "on", "with"], "answer": 1, "why": "good at." },
+        { "q": "'He has been absent ___ Monday.'", "options": ["for", "since", "from", "by"], "answer": 1, "why": "since + a starting point in time." },
+        { "q": "'___ honest man is respected.'", "options": ["A", "An", "The", "No article"], "answer": 1, "why": "'honest' starts with a vowel sound." },
+        { "q": "'The meeting is ___ Monday.'", "options": ["in", "on", "at", "by"], "answer": 1, "why": "on + a day." },
+        { "q": "'I prefer tea ___ coffee.'", "options": ["than", "to", "over", "from"], "answer": 1, "why": "prefer X to Y." }
+      ]
+    },
+    "revision": ["Day 90: explain 'Cannot set headers after they are sent' and how to avoid it."]
+  },
+  {
+    "day": 92,
+    "module": "express-api",
+    "title": "Structuring an Express app: routers, controllers, services",
+    "goal": "Organise an Express API into layers so it stays clean as it grows.",
+    "learn": {
+      "concepts": [
+        "express.Router() to group routes by resource",
+        "Layers: routes (HTTP wiring) → controllers (req/res) → services (business logic) → data",
+        "Why services shouldn't know about req/res",
+        "Mounting routers: app.use('/api/tasks', tasksRouter)",
+        "Route-level middleware (e.g. only on some routes)",
+        "Folder structure by feature: src/tasks/{tasks.routes,tasks.controller,tasks.service}.ts"
+      ],
+      "resources": [
+        { "title": "Express: express.Router", "url": "https://expressjs.com/en/guide/routing.html#express-router" },
+        { "title": "Express: Using middleware", "url": "https://expressjs.com/en/guide/using-middleware.html" }
+      ]
+    },
+    "build": {
+      "task": "In api-starter, implement the projects part of your Day 91 design with in-memory storage, structured by feature: src/projects/projects.routes.ts, projects.controller.ts, projects.service.ts and projects.repo.ts (in-memory Map behind an interface, so PostgreSQL can replace it later). Mount it at /api/projects. Add a requestId middleware that sets an X-Request-Id header and includes it in logs. Services throw typed errors (NotFoundError, ConflictError for duplicate names) that the error middleware maps to your Day 91 error format and status codes.",
+      "starterFiles": [],
+      "acceptance": [
+        "Feature folder with routes, controller, service and repo files",
+        "Service and repo have no req/res or Express imports",
+        "Repo implements an interface (ProjectsRepo) so it can be swapped later",
+        "Duplicate project name returns 409; missing returns 404, in your error format",
+        "Every response has X-Request-Id, and logs include it"
+      ]
+    },
+    "hints": [
+      "interface ProjectsRepo { list(): Promise<Project[]>; get(id: string): Promise<Project | undefined>; create(p: NewProject): Promise<Project>; ... } Make methods async now, so switching to a database later doesn't change callers.",
+      "Error classes: class AppError extends Error { constructor(public status: number, public code: string, message: string) { super(message) } } then class NotFoundError extends AppError { constructor(what: string) { super(404, 'NOT_FOUND', `${what} not found`) } }.",
+      "Request id: import { randomUUID } from 'node:crypto'; res.locals.requestId = randomUUID(); res.setHeader('X-Request-Id', res.locals.requestId); next();"
+    ],
+    "proof": "Commit with the projects feature folder.",
+    "explainBack": [
+      { "q": "Walk through POST /api/projects through each layer.", "lookFor": ["router matches and calls controller", "controller reads body, calls service", "service applies rules (duplicate check) and calls repo", "controller sends 201", "errors go to error middleware"] },
+      { "q": "Why should services not import Express?", "lookFor": ["business logic reusable (CLI, jobs, tests)", "easy to unit test", "HTTP is just one way in"] }
+    ],
+    "lastHintExplanation": "Each layer has one job: the router maps URLs to controllers; the controller translates HTTP into function calls and results into responses; the service holds business rules; the repo talks to storage. Because services don't know about Express, you can test them directly and call them from anywhere. Because the repo is an interface, PostgreSQL can replace the Map without touching the service.",
+    "predict": [
+      { "q": "router.get('/:id', ...) is mounted with app.use('/api/projects', router). Which URL reaches it?", "options": ["/:id", "/api/projects/:id", "/projects/:id", "/api/:id"], "answer": 1, "why": "Router paths are relative to their mount path." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Binary search: rotated array",
+      "note": "One half is always sorted. Compare mid with the right end to decide where the minimum is.",
+      "problems": [
+        { "title": "LeetCode 153: Find Minimum in Rotated Sorted Array", "url": "https://leetcode.com/problems/find-minimum-in-rotated-sorted-array/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Verbal ability: sentence ordering",
+      "questions": [
+        { "q": "Put in order — P: He opened the door. Q: Ravi heard a knock. R: His friend stood outside. S: He walked to the door.", "options": ["QSPR", "SPQR", "QPSR", "PQRS"], "answer": 0, "why": "Knock → walk to the door → open it → friend outside." },
+        { "q": "Put in order — P: Then add the rice. Q: First, boil the water. R: Finally, drain and serve. S: Cook for 15 minutes.", "options": ["QPSR", "PQSR", "QSPR", "SQPR"], "answer": 0, "why": "The signal words first, then and finally set the order." },
+        { "q": "Put in order — P: She practised daily. Q: Meena wanted to learn guitar. R: Within a year she performed on stage. S: She bought a second-hand one.", "options": ["QSPR", "QPSR", "SQPR", "QRSP"], "answer": 0, "why": "Want → buy → practise → perform." },
+        { "q": "Put in order — P: Then she sent it to her manager. Q: Asha wrote the report. R: She checked it for errors. S: Her manager approved it.", "options": ["QRPS", "QPRS", "RQPS", "QRSP"], "answer": 0, "why": "Write → check → send → approve." },
+        { "q": "Put in order — P: The seed sprouted. Q: A farmer planted a seed. R: It grew into a tall tree. S: He watered it every day.", "options": ["QSPR", "QPSR", "SQPR", "QSRP"], "answer": 0, "why": "Plant → water → sprout → grow." }
+      ]
+    },
+    "revision": ["Day 91: list 8 status codes and when to use each."]
+  },
+  {
+    "day": 93,
+    "module": "express-api",
+    "title": "Validation and async error handling",
+    "goal": "Validate every input with zod middleware and make sure async errors always reach your error handler.",
+    "learn": {
+      "concepts": [
+        "Never trust client input: validate body, params and query",
+        "A reusable validate({ body, params, query }) middleware with zod",
+        "Coercing query strings (page=2 → number) with z.coerce",
+        "Express 5 forwards rejected promises from async handlers to the error handler",
+        "Returning field-level validation errors in your error format",
+        "Unhandled rejections: why un-awaited promises crash Node"
+      ],
+      "resources": [
+        { "title": "Zod: Basic usage", "url": "https://zod.dev/basics" },
+        { "title": "Express 5: Migration guide (rejected promises handled)", "url": "https://expressjs.com/en/guide/migrating-5.html" },
+        { "title": "OWASP: Input validation cheat sheet", "url": "https://cheatsheetseries.owasp.org/cheatsheets/Input_Validation_Cheat_Sheet.html" }
+      ]
+    },
+    "build": {
+      "task": "In api-starter, write src/middleware/validate.ts: validate({ body?, params?, query? }) using zod schemas, returning 400 with { error: { code: 'VALIDATION_FAILED', message, details: [{ path, message }] } }. Apply it to every projects route (params id must be a UUID; name 1–60 chars, trimmed). Make all controllers async and confirm thrown errors reach the error handler. Add a /api/debug/crash route (only when NODE_ENV=development) that throws inside an async function, to prove the error handler catches it. Add process-level handlers that log unhandledRejection and uncaughtException.",
+      "starterFiles": [],
+      "acceptance": [
+        "validate() middleware is reusable and typed",
+        "Invalid body, params or query returns 400 with field-level details",
+        "Query values are coerced (e.g. ?limit=10 becomes a number)",
+        "Async errors always reach the error handler (crash route returns 500 JSON, server keeps running)",
+        "Debug route only exists in development",
+        "Process-level handlers log unexpected errors"
+      ]
+    },
+    "hints": [
+      "validate: const r = schema.body?.safeParse(req.body); if (r && !r.success) return next(new ValidationError(r.error.issues)); if (r) req.body = r.data; ... next();",
+      "In Express 5, req.query is a getter you can't reassign. Store parsed query values in res.locals.query instead.",
+      "z.string().trim().min(1).max(60) trims first, then checks length. z.string().uuid() validates ids."
+    ],
+    "proof": "Commit with validation middleware and updated routes.",
+    "explainBack": [
+      { "q": "Why validate on the server if the Angular form already validates?", "lookFor": ["clients can be bypassed (curl, modified JS)", "server is the trust boundary", "protects data integrity and security"] },
+      { "q": "What happens in Express 5 when an async handler throws, and what happened in Express 4?", "lookFor": ["Express 5 catches rejected promises and calls the error handler", "Express 4 needed try/catch or a wrapper", "otherwise unhandled rejection / hanging request"] }
+    ],
+    "lastHintExplanation": "Anyone can send requests straight to your API with curl, skipping the Angular form, so the server must validate everything. In Express 5, a promise rejected by an async handler is passed to your error middleware automatically. In Express 4 it wasn't, and the request would hang or crash the process unless you wrapped handlers.",
+    "predict": [
+      { "q": "z.coerce.number().parse('abc')", "options": ["0", "NaN", "Throws a ZodError", "'abc'"], "answer": 2, "why": "Coercion gives NaN, which fails number validation." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Binary search: rotated array",
+      "note": "Decide which half is sorted, then whether the target lies inside it. Medium.",
+      "problems": [
+        { "title": "LeetCode 33: Search in Rotated Sorted Array", "url": "https://leetcode.com/problems/search-in-rotated-sorted-array/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Verbal ability: idioms and one-word substitutes",
+      "questions": [
+        { "q": "What does 'break the ice' mean?", "options": ["Start a conversation in an awkward situation", "Break something cold", "End a friendship", "Feel cold"], "answer": 0, "why": "It means easing initial awkwardness." },
+        { "q": "What is a person who knows many languages called?", "options": ["Polyglot", "Bilingual", "Orator", "Translator"], "answer": 0, "why": "Bilingual means two languages; a polyglot knows many." },
+        { "q": "What does 'once in a blue moon' mean?", "options": ["Often", "Rarely", "Never", "At night"], "answer": 1, "why": "It means very rarely." },
+        { "q": "What is a place where bees are kept called?", "options": ["Aviary", "Apiary", "Aquarium", "Kennel"], "answer": 1, "why": "An aviary is for birds." },
+        { "q": "What does 'hit the nail on the head' mean?", "options": ["Hurt someone", "Say exactly the right thing", "Work hard", "Make a mistake"], "answer": 1, "why": "It means being exactly right." }
+      ]
+    },
+    "revision": ["Day 92: name the 4 layers and one rule for each."]
+  },
+  {
+    "day": 94,
+    "module": "express-api",
+    "title": "Tasks API: filtering, sorting and pagination",
+    "goal": "Implement the tasks resource fully, including list queries that real frontends need.",
+    "learn": {
+      "concepts": [
+        "Translating query params into filters safely (whitelists)",
+        "Sorting with a direction prefix (sort=-dueDate)",
+        "Offset pagination: page/limit → skip/take; total counts",
+        "Default and maximum limits to protect the server",
+        "PATCH for partial updates; marking tasks done",
+        "Nested routes: /api/projects/:projectId/tasks"
+      ],
+      "resources": [
+        { "title": "Microsoft: API design — filter and paginate data", "url": "https://learn.microsoft.com/en-us/azure/architecture/best-practices/api-design#filter-and-paginate-data" }
+      ]
+    },
+    "build": {
+      "task": "In api-starter, add the tasks feature (routes/controller/service/repo, in memory) following your design: create under a project (404 if the project doesn't exist), get, PATCH (title, status, priority, dueDate), delete, and list with filters status, priority and dueBefore, sort (whitelisted fields, - for descending), page and limit (default 20, max 100). List responses use { data, meta: { page, limit, total, totalPages } }. Seed 50 sample tasks on startup in development. Write 10 curl examples in docs/tasks-examples.md.",
+      "starterFiles": [],
+      "acceptance": [
+        "All task endpoints work, validated with your middleware",
+        "Filters combine (status + priority + dueBefore)",
+        "Unknown sort fields return 400; limit is capped at 100",
+        "meta values are correct (check the last page)",
+        "Creating a task for a missing project returns 404",
+        "docs/tasks-examples.md has 10 working curl examples"
+      ]
+    },
+    "hints": [
+      "Sort whitelist: const SORTABLE = ['dueDate', 'priority', 'createdAt', 'title'] as const; parse '-dueDate' into { field: 'dueDate', dir: 'desc' }.",
+      "Pagination: const start = (page - 1) * limit; data = filtered.slice(start, start + limit); totalPages = Math.ceil(total / limit).",
+      "query schema: z.object({ status: z.enum([...]).optional(), page: z.coerce.number().int().min(1).default(1), limit: z.coerce.number().int().min(1).max(100).default(20), ... })."
+    ],
+    "proof": "Commit with the tasks feature and docs.",
+    "explainBack": [
+      { "q": "Why whitelist sortable fields instead of sorting by whatever the client sends?", "lookFor": ["prevent errors/sorting by internal fields", "security when it becomes SQL (injection)", "predictable API"] },
+      { "q": "Why cap limit at 100?", "lookFor": ["protect server memory/CPU", "stop huge responses", "denial-of-service protection"] }
+    ],
+    "lastHintExplanation": "When this list becomes a SQL query, a field name from the client can't be a bound parameter like a value can, so an unchecked sort field risks SQL injection. Whitelisting known fields avoids that and keeps the API predictable. Capping limit stops one request from asking for a million rows and exhausting server memory.",
+    "predict": [
+      { "q": "total = 45, limit = 20, page = 3. How many items are in data?", "options": ["20", "5", "0", "45"], "answer": 1, "why": "Pages 1 and 2 hold 40 items, so page 3 has the remaining 5." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Binary search on the answer",
+      "note": "Search the eating speed k; check if it finishes within h hours. Medium.",
+      "problems": [
+        { "title": "LeetCode 875: Koko Eating Bananas", "url": "https://leetcode.com/problems/koko-eating-bananas/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Data interpretation: line graphs",
+      "questions": [
+        { "q": "Website visitors (thousands) Jan–Jun: 20, 24, 30, 27, 36, 45. Which month had the biggest increase over the month before?", "options": ["Mar", "May", "Jun", "Feb"], "answer": 2, "why": "Jun: +9." },
+        { "q": "Same data: what was the percentage growth from Jan to Jun?", "options": ["100%", "125%", "150%", "225%"], "answer": 1, "why": "25/20." },
+        { "q": "Same data: what is the average monthly number of visitors (thousands)?", "options": ["30.33", "30", "31.5", "29"], "answer": 0, "why": "182/6." },
+        { "q": "Same data: in how many months did visitors fall?", "options": ["0", "1", "2", "3"], "answer": 1, "why": "Only April." },
+        { "q": "Same data: if July grows 20% over June, how many visitors (thousands) will July have?", "options": ["50", "54", "56", "65"], "answer": 1, "why": "45 × 1.2." }
+      ]
+    },
+    "revision": ["Day 93: explain why server-side validation is required even with form validation."]
+  },
+  {
+    "day": 95,
+    "module": "express-api",
+    "title": "CORS and connecting Angular to Express",
+    "goal": "Connect your Angular app to your own API, understanding CORS instead of fighting it.",
+    "learn": {
+      "concepts": [
+        "Same-origin policy: scheme + host + port",
+        "CORS: the server says which origins may read responses",
+        "Preflight OPTIONS requests for non-simple requests (JSON bodies, custom headers)",
+        "The cors middleware with an allowlist from env",
+        "Alternative: the Angular dev-server proxy (proxy.conf.json)",
+        "API clients: Thunder Client, Postman or Bruno collections"
+      ],
+      "resources": [
+        { "title": "MDN: Cross-Origin Resource Sharing (CORS)", "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS" },
+        { "title": "Express: cors middleware", "url": "https://expressjs.com/en/resources/middleware/cors.html" },
+        { "title": "Angular: Proxying to a backend server", "url": "https://angular.dev/tools/cli/serve#proxying-to-a-backend-server" }
+      ]
+    },
+    "build": {
+      "task": "Create a simple Angular frontend (new repo task-manager-web or inside angular-playground) that uses your api-starter: projects list and create, project page listing tasks with filters, sort and pagination (driven by query params), and create/edit/delete tasks. First call the API directly from localhost:4200 and fix CORS on the server with an allowlist read from a CORS_ORIGINS env variable. Then also set up proxy.conf.json and explain in docs/cors.md which approach you'd use in dev and in production and why. Export a Thunder Client, Postman or Bruno collection of all endpoints into the API repo.",
+      "starterFiles": [],
+      "acceptance": [
+        "Angular app performs all project and task operations against your API",
+        "CORS allowlist comes from env; an unlisted origin is blocked (test it)",
+        "Preflight requests visible in the Network tab and explained in docs/cors.md",
+        "Proxy config works as an alternative",
+        "API collection file committed"
+      ]
+    },
+    "hints": [
+      "Server: app.use(cors({ origin: config.CORS_ORIGINS.split(','), credentials: true })). The origin must match exactly: http://localhost:4200 (no trailing slash).",
+      "In DevTools, look for an OPTIONS request before your POST or PATCH. That's the preflight; it must succeed for the real request to go through.",
+      "Proxy: proxy.conf.json { \"/api\": { \"target\": \"http://localhost:4000\", \"secure\": false } } and in angular.json serve options \"proxyConfig\": \"proxy.conf.json\". Then call /api/... from Angular."
+    ],
+    "proof": "Links to both repos (or folders) and docs/cors.md.",
+    "explainBack": [
+      { "q": "Explain what CORS protects against, and who enforces it.", "lookFor": ["browsers enforce it", "stops other websites reading responses using the user's browser", "server opts in via headers", "curl isn't affected"] },
+      { "q": "Why does the proxy make CORS disappear in development?", "lookFor": ["browser talks to same origin (4200)", "dev server forwards to the API", "no cross-origin request from the browser's view"] }
+    ],
+    "lastHintExplanation": "The browser enforces the same-origin policy: a page from localhost:4200 can't read responses from localhost:4000 unless that server sends Access-Control-Allow-Origin naming it. That protects users from other sites reading data with their cookies. curl ignores CORS. With a dev proxy, the browser only talks to 4200, and the dev server forwards requests to the API, so nothing is cross-origin.",
+    "predict": [
+      { "q": "Server allows origin 'http://localhost:4200'. The Angular app runs on http://127.0.0.1:4200. Is it allowed?", "options": ["Yes, same machine", "No: different origin string", "Only for GET", "Only with HTTPS"], "answer": 1, "why": "Origins are compared as strings; localhost and 127.0.0.1 differ." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Binary search: peaks",
+      "note": "Move towards the higher neighbour; a peak must exist on that side.",
+      "problems": [
+        { "title": "LeetCode 162: Find Peak Element", "url": "https://leetcode.com/problems/find-peak-element/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Data interpretation: caselets",
+      "questions": [
+        { "q": "A college has 600 students, 55% of them boys. 40% of the boys and 50% of the girls take CS. How many boys are there?", "options": ["300", "330", "270", "360"], "answer": 1, "why": "55% of 600." },
+        { "q": "Same college: how many girls?", "options": ["270", "300", "330", "240"], "answer": 0, "why": "600 − 330." },
+        { "q": "Same college: how many boys take CS?", "options": ["120", "132", "150", "165"], "answer": 1, "why": "40% of 330." },
+        { "q": "Same college: how many girls take CS?", "options": ["120", "135", "150", "108"], "answer": 1, "why": "50% of 270." },
+        { "q": "Same college: what percentage of all students take CS?", "options": ["44.5%", "45%", "42%", "47%"], "answer": 0, "why": "267/600." }
+      ]
+    },
+    "revision": ["Day 94: explain why sort fields are whitelisted."]
+  },
+  {
+    "day": 96,
+    "module": "express-api",
+    "title": "Debug lab: the broken tasks API, and week review",
+    "goal": "Fix CORS, middleware, async and query-string bugs in an Express API.",
+    "learn": {
+      "concepts": [
+        "CORS origin strings must match exactly",
+        "Middleware that responds must not also call next()",
+        "Un-awaited promises: responses sent too early and crashes from unhandled rejections",
+        "Query string values are strings ('true' !== true)",
+        "Reproducing bugs with curl before fixing them"
+      ],
+      "resources": [
+        { "title": "Node.js docs: unhandledRejection", "url": "https://nodejs.org/api/process.html#event-unhandledrejection" },
+        { "title": "Express: Error handling (async)", "url": "https://expressjs.com/en/guide/error-handling.html" }
+      ]
+    },
+    "build": {
+      "task": "Copy the starter into day96-debug/ in node-playground and npm install. Expected: an Angular app on http://localhost:4200 can call the API; POST /tasks with {} returns 400 and nothing else happens; POST /tasks with title 'boom' returns 500 JSON and the server keeps running; GET /tasks?done=false returns the open tasks. There are 4 bugs. Reproduce each with curl (or a browser fetch from a page on port 4200) before fixing it, and fix each in its own commit. Write week16-notes.md (Days 91–95).",
+      "starterFiles": [
+        { "name": "day96-debug/package.json", "content": "{\n  \"name\": \"day96-debug\",\n  \"type\": \"module\",\n  \"scripts\": { \"start\": \"node server.js\" },\n  \"dependencies\": { \"cors\": \"^2.8.5\", \"express\": \"^5.1.0\", \"zod\": \"^3.25.0\" }\n}\n" },
+        { "name": "day96-debug/server.js", "content": "import express from 'express';\nimport cors from 'cors';\nimport { z } from 'zod';\n\nconst app = express();\napp.use(express.json());\napp.use(cors({ origin: 'http://localhost:4200/' }));\n\nconst TaskInput = z.object({\n  title: z.string().min(1),\n  priority: z.enum(['low', 'medium', 'high']).default('medium'),\n});\n\nconst tasks = [{ id: 1, title: 'Write README', priority: 'low', done: false }];\nlet nextId = 2;\n\nfunction validate(schema) {\n  return (req, res, next) => {\n    const result = schema.safeParse(req.body);\n    if (!result.success) {\n      res.status(400).json({ errors: result.error.issues });\n    }\n    req.body = result.data;\n    next();\n  };\n}\n\nasync function fakeDbSave(task) {\n  await new Promise((r) => setTimeout(r, 50));\n  if (task.title === 'boom') throw new Error('DB write failed');\n  tasks.push(task);\n  return task;\n}\n\napp.post('/tasks', validate(TaskInput), (req, res) => {\n  const task = { id: nextId++, ...req.body, done: false };\n  fakeDbSave(task);\n  res.status(201).json(task);\n});\n\napp.get('/tasks', (req, res) => {\n  const { done } = req.query;\n  const list = done === undefined ? tasks : tasks.filter((t) => t.done === done);\n  res.json(list);\n});\n\napp.use((err, req, res, next) => {\n  console.error(err);\n  res.status(500).json({ error: 'Something went wrong' });\n});\n\napp.listen(3000, () => console.log('API on http://localhost:3000'));\n" }
+      ],
+      "acceptance": [
+        "Requests from http://localhost:4200 are allowed by CORS",
+        "POST {} returns 400 only; no task is created and no 'headers sent' error appears",
+        "POST 'boom' returns 500 JSON and the process keeps running",
+        "GET /tasks?done=false returns the open tasks",
+        "4 fix commits; week16-notes.md written"
+      ]
+    },
+    "hints": [
+      "The browser console says the CORS header value doesn't match the page's origin. Compare the two strings character by character.",
+      "After a 400, the server log shows a second error and a task with no title gets created. What happens after the response in validate()?",
+      "'boom' kills the whole server with an unhandledRejection. The handler doesn't wait for fakeDbSave. Make the handler async and await it (Express 5 will route the error to the error handler). And query values are strings: compare with done === 'true'."
+    ],
+    "proof": "Link to your last fix commit.",
+    "explainBack": [
+      { "q": "List the 4 bugs and fixes.", "lookFor": ["trailing slash in CORS origin", "validate missing return after 400", "fakeDbSave not awaited → early 201 and crash", "query 'false' string vs boolean"] },
+      { "q": "Why did one un-awaited promise crash the whole server?", "lookFor": ["rejection had no handler", "Node exits on unhandled rejections by default", "awaiting lets Express catch it"] }
+    ],
+    "lastHintExplanation": "1) The CORS origin 'http://localhost:4200/' has a trailing slash, but browsers send 'http://localhost:4200'. 2) validate() sends a 400 and then still calls next(), so the handler runs too; return after responding. 3) fakeDbSave isn't awaited, so 201 is sent before saving, and its rejection is unhandled, which crashes Node; make the handler async and await it. 4) req.query.done is the string 'false', never the boolean false.",
+    "predict": [
+      { "q": "GET /tasks?done=false. What is typeof req.query.done?", "options": ["'boolean'", "'string'", "'undefined'", "'object'"], "answer": 1, "why": "Query values arrive as strings." }
+    ],
+    "debugLab": {
+      "title": "The broken tasks API",
+      "symptoms": [
+        "The Angular app's requests are blocked by CORS",
+        "Invalid POSTs return 400 but also create a task and log a 'headers sent' error",
+        "Posting the title 'boom' crashes the whole server",
+        "?done=false returns an empty list"
+      ],
+      "files": ["day96-debug/package.json", "day96-debug/server.js"],
+      "bugCount": 4
+    },
+    "dsa": {
+      "pattern": "Binary search on the answer: review",
+      "note": "New problem with the same 'search the answer' template, then re-solve Find Minimum in Rotated Sorted Array.",
+      "problems": [
+        { "title": "LeetCode 1011: Capacity To Ship Packages Within D Days", "url": "https://leetcode.com/problems/capacity-to-ship-packages-within-d-days/" },
+        { "title": "LeetCode 153: Find Minimum in Rotated Sorted Array (re-solve)", "url": "https://leetcode.com/problems/find-minimum-in-rotated-sorted-array/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Verbal ability: mixed",
+      "questions": [
+        { "q": "Which word means the same as 'Diligent'?", "options": ["Lazy", "Hard-working", "Clever", "Rude"], "answer": 1, "why": "Diligent means showing care and effort." },
+        { "q": "Which word is spelt correctly?", "options": ["Acommodate", "Accommodate", "Accomodate", "Acomodate"], "answer": 1, "why": "Double c and double m." },
+        { "q": "Which word means the opposite of 'Optimistic'?", "options": ["Hopeful", "Pessimistic", "Cheerful", "Positive"], "answer": 1, "why": "Pessimistic means expecting the worst." },
+        { "q": "'I look forward ___ meeting you.'", "options": ["for", "to", "at", "on"], "answer": 1, "why": "look forward to + -ing." },
+        { "q": "What is a speech given without preparation called?", "options": ["Eulogy", "Extempore", "Monologue", "Soliloquy"], "answer": 1, "why": "Extempore means spoken without preparation." }
+      ]
+    },
+    "revision": ["Days 91–95: draw your API's request flow: CORS → logger → json → validate → controller → service → repo → error handler."]
+  }
+]

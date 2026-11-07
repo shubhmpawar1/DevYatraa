@@ -1,0 +1,870 @@
+[
+  {
+    "day": 151,
+    "module": "interview-prep",
+    "title": "DSA timed mock and pattern map",
+    "goal": "Solve interview-style problems under time pressure and build a one-page map of every pattern you know.",
+    "learn": {
+      "concepts": [
+        "Recognising the pattern from the problem's wording",
+        "Big-O for time and space; explaining it in one sentence",
+        "Brute force first, then optimise, saying both aloud",
+        "Edge cases: empty input, one element, duplicates, negatives, huge input",
+        "Recovering when stuck: smaller example, draw it, relax a constraint"
+      ],
+      "resources": [
+        {
+          "title": "Big-O Cheat Sheet",
+          "url": "https://www.bigocheatsheet.com/"
+        },
+        {
+          "title": "NeetCode roadmap (free problem lists by pattern)",
+          "url": "https://neetcode.io/roadmap"
+        },
+        {
+          "title": "Tech Interview Handbook: Algorithms study cheatsheet",
+          "url": "https://www.techinterviewhandbook.org/algorithms/study-cheatsheet/"
+        }
+      ]
+    },
+    "build": {
+      "task": "Do a 90-minute timed mock: 3 unseen problems (one easy, two medium; pick from LeetCode's Top Interview 150 list problems you haven't solved), 30 minutes each, speaking your approach aloud (record audio). For each: write the brute-force approach and its complexity before coding, then the optimised one. Afterwards write interview/pattern-map.md: one row per pattern you learned (hashing, two pointers, sliding window, stack, binary search, linked list, trees, BST, graphs, heaps, DP, backtracking) with 'signals in the problem statement', the template idea, complexity, and 2 problems you solved.",
+      "starterFiles": [],
+      "acceptance": [
+        "3 timed problems attempted with audio recorded",
+        "Brute force and optimised approaches written with complexity for each",
+        "At least 2 of 3 accepted within time (or a written analysis of what blocked you)",
+        "pattern-map.md covers all 12 patterns with signals, template, complexity and examples"
+      ]
+    },
+    "hints": [
+      "Signals: 'sorted array' → binary search or two pointers; 'contiguous subarray/substring' → sliding window; 'next greater' → monotonic stack; 'top k' → heap; 'number of ways / min cost' → DP; 'all combinations' → backtracking; 'shortest path in a grid' → BFS.",
+      "If you're stuck for 5 minutes, say the brute force aloud and code it. A working O(n²) beats an unfinished O(n).",
+      "Always state complexity at the end without being asked: 'This is O(n) time and O(n) space because of the map.'"
+    ],
+    "proof": "Commit with pattern-map.md and your three solutions.",
+    "explainBack": [
+      {
+        "q": "How do you decide which pattern a new problem needs?",
+        "lookFor": [
+          "look for signals in the wording",
+          "constraints hint at complexity",
+          "start from brute force and find the waste"
+        ]
+      },
+      {
+        "q": "Explain the time and space complexity of one of today's solutions.",
+        "lookFor": [
+          "correct Big-O",
+          "reason (loops, data structures)",
+          "space from extra structures/recursion"
+        ]
+      }
+    ],
+    "lastHintExplanation": "Interview problems are mostly familiar patterns in disguise. The wording ('sorted', 'contiguous', 'top k', 'number of ways') and the input size (n up to 10⁵ means O(n log n) or better) point to the right tool. Stating the brute force first shows clear thinking and gives you a fallback if the optimisation doesn't come.",
+    "predict": [],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Timed mock",
+      "note": "Today's build is the DSA mock. Add these two if time allows.",
+      "problems": [
+        {
+          "title": "LeetCode 56: Merge Intervals",
+          "url": "https://leetcode.com/problems/merge-intervals/"
+        },
+        {
+          "title": "LeetCode 739: Daily Temperatures (re-solve)",
+          "url": "https://leetcode.com/problems/daily-temperatures/"
+        }
+      ]
+    },
+    "aptitude": {
+      "topic": "Company-style full test 2 (15 minutes)",
+      "questions": [
+        {
+          "q": "A sum at compound interest doubles in 5 years. In how many years will it become 8 times as much?",
+          "options": [
+            "10",
+            "15",
+            "20",
+            "40"
+          ],
+          "answer": 1,
+          "why": "8 = 2³, so 3 × 5 years."
+        },
+        {
+          "q": "Two trains start at the same time from stations 300 km apart and travel towards each other at 70 and 80 km/h. When do they meet?",
+          "options": [
+            "1.5 hours",
+            "2 hours",
+            "2.5 hours",
+            "3 hours"
+          ],
+          "answer": 1,
+          "why": "300/150."
+        },
+        {
+          "q": "In a class, 60% are boys. 25% of boys and 50% of girls passed with distinction. What percentage of the class got a distinction?",
+          "options": [
+            "35%",
+            "37.5%",
+            "40%",
+            "30%"
+          ],
+          "answer": 0,
+          "why": "15% + 20%."
+        },
+        {
+          "q": "Which word means the opposite of 'Frugal'?",
+          "options": [
+            "Thrifty",
+            "Extravagant",
+            "Careful",
+            "Poor"
+          ],
+          "answer": 1,
+          "why": "Frugal means careful with money."
+        },
+        {
+          "q": "A is taller than B, C is shorter than B, and D is taller than A. Who is the shortest?",
+          "options": [
+            "A",
+            "B",
+            "C",
+            "D"
+          ],
+          "answer": 2,
+          "why": "The order is D > A > B > C."
+        }
+      ]
+    },
+    "revision": [
+      "Day 150: re-read your mock1-review.md and practise one rewritten answer aloud."
+    ]
+  },
+  {
+    "day": 152,
+    "module": "interview-prep",
+    "title": "System design basics: a URL shortener",
+    "goal": "Learn a simple framework for system design questions and apply it to a classic example.",
+    "learn": {
+      "concepts": [
+        "Framework: requirements (functional and non-functional), estimates, API, data model, high-level design, deep dive, trade-offs",
+        "Back-of-the-envelope estimates: requests per second, storage per year",
+        "Generating short codes: random base62 vs counter + base62, and collisions",
+        "Read-heavy systems: caching (Redis), CDNs, database indexes",
+        "Scaling basics: stateless servers behind a load balancer, read replicas",
+        "301 vs 302 redirects; rate limiting abuse; analytics"
+      ],
+      "resources": [
+        {
+          "title": "System Design Primer (GitHub)",
+          "url": "https://github.com/donnemartin/system-design-primer"
+        },
+        {
+          "title": "ByteByteGo: System design fundamentals (free articles)",
+          "url": "https://blog.bytebytego.com/"
+        },
+        {
+          "title": "MDN: Redirections in HTTP",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Redirections"
+        }
+      ]
+    },
+    "build": {
+      "task": "In jobready-journey, write interview/system-design-url-shortener.md following the framework: requirements; estimates (assume 1 million new links a month and 100 reads per link); the API (POST /links, GET /:code); the data model; a diagram (Mermaid) with load balancer, app servers, cache and database; the code-generation choice with collision handling; caching strategy; and 5 trade-offs. Then build a tiny version in Express + PostgreSQL (or extend api-starter): POST /links creates a code, GET /:code redirects with 302 and increments a click count, with tests. Write a short section applying the same framework to 'design ApplyTrack for 1 million users'.",
+      "starterFiles": [],
+      "acceptance": [
+        "Design doc follows the framework from requirements to trade-offs",
+        "Estimates shown with working (requests per second, storage)",
+        "Mermaid diagram renders",
+        "Working mini shortener with tests (create, redirect, 404, click count)",
+        "A section scaling ApplyTrack to 1 million users"
+      ]
+    },
+    "hints": [
+      "Estimates: 1M links a month ≈ 0.4 writes per second; 100M reads a month ≈ 40 reads per second on average (peaks maybe 10× that). Storage: 1M × 500 bytes ≈ 500 MB a month.",
+      "Base62 (0–9, a–z, A–Z) with 7 characters gives 62⁷ ≈ 3.5 trillion codes. With random codes, rely on a UNIQUE constraint and retry on collision.",
+      "302 (temporary) lets you count every click because browsers don't cache it; 301 is cached by browsers, which is faster but hides repeat clicks."
+    ],
+    "proof": "Commit with the design doc and the mini shortener.",
+    "explainBack": [
+      {
+        "q": "Walk through your URL shortener design in 5 minutes.",
+        "lookFor": [
+          "requirements",
+          "estimates",
+          "API",
+          "data model",
+          "cache for reads",
+          "code generation + collisions",
+          "trade-offs"
+        ]
+      },
+      {
+        "q": "Why use 302 instead of 301 for the redirect?",
+        "lookFor": [
+          "301 cached by browsers",
+          "302 hits the server every time",
+          "needed for click analytics",
+          "trade-off: more load"
+        ]
+      }
+    ],
+    "lastHintExplanation": "Junior system design rounds test structured thinking, not perfect answers. Clarify requirements, estimate scale, define the API and data, draw the main components, then discuss trade-offs. A URL shortener is read-heavy, so a cache in front of the database does most of the work, and 302 redirects keep analytics accurate at the cost of more traffic.",
+    "predict": [
+      {
+        "q": "How many distinct 6-character base62 codes are there (approximately)?",
+        "options": [
+          "56 billion",
+          "3.5 trillion",
+          "62 million",
+          "1 billion"
+        ],
+        "answer": 0,
+        "why": "62⁶ ≈ 5.68 × 10¹⁰."
+      }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Revision by pattern: heaps and intervals",
+      "note": "Timed: 25 minutes each.",
+      "problems": [
+        {
+          "title": "LeetCode 215: Kth Largest Element in an Array",
+          "url": "https://leetcode.com/problems/kth-largest-element-in-an-array/"
+        },
+        {
+          "title": "LeetCode 57: Insert Interval",
+          "url": "https://leetcode.com/problems/insert-interval/"
+        }
+      ]
+    },
+    "aptitude": {
+      "topic": "Company-style full test 3 (15 minutes)",
+      "questions": [
+        {
+          "q": "A server handles 1,200 requests per minute. How many is that per second?",
+          "options": [
+            "12",
+            "20",
+            "60",
+            "120"
+          ],
+          "answer": 1,
+          "why": "1,200/60."
+        },
+        {
+          "q": "A file of 2 GB is copied at 50 MB/s. About how long does it take? (1 GB = 1,000 MB)",
+          "options": [
+            "20 s",
+            "40 s",
+            "60 s",
+            "100 s"
+          ],
+          "answer": 1,
+          "why": "2,000/50."
+        },
+        {
+          "q": "A team of 8 finishes a project in 30 days. After 10 days, 2 members leave. How many more days does the rest take?",
+          "options": [
+            "20",
+            "24",
+            "26.67",
+            "30"
+          ],
+          "answer": 2,
+          "why": "Remaining work = 8 × 20 = 160 person-days; 160/6 ≈ 26.67."
+        },
+        {
+          "q": "Statements: Some servers are slow. All slow things are replaced. Conclusion: Some servers are replaced.",
+          "options": [
+            "Follows",
+            "Does not follow",
+            "Partially follows",
+            "Contradicts"
+          ],
+          "answer": 0,
+          "why": "The slow servers are replaced."
+        },
+        {
+          "q": "Which word means the same as 'Scalable'?",
+          "options": [
+            "Fixed",
+            "Able to grow to handle more",
+            "Weighable",
+            "Fragile"
+          ],
+          "answer": 1,
+          "why": "In tech, scalable means able to handle growth."
+        }
+      ]
+    },
+    "revision": [
+      "Day 151: name the signals for 5 patterns from your pattern map."
+    ]
+  },
+  {
+    "day": 153,
+    "module": "interview-prep",
+    "title": "HR and behavioural round",
+    "goal": "Handle the HR round confidently: motivation, salary, relocation, gaps and offers.",
+    "learn": {
+      "concepts": [
+        "Common HR questions: why this company, strengths and weaknesses, five-year goals, why should we hire you",
+        "Explaining a non-traditional path or a gap positively and honestly",
+        "Salary expectations: research ranges first, give a range, consider the total package",
+        "Questions about relocation, shifts, bonds and notice periods",
+        "Reading an offer letter: CTC vs in-hand pay, bond clauses, probation, joining date",
+        "Professional follow-up emails and handling rejection"
+      ],
+      "resources": [
+        {
+          "title": "Tech Interview Handbook: Negotiation",
+          "url": "https://www.techinterviewhandbook.org/negotiation/"
+        },
+        {
+          "title": "Glassdoor: salaries and interview reviews",
+          "url": "https://www.glassdoor.co.in/"
+        },
+        {
+          "title": "AmbitionBox: company reviews and salaries (India)",
+          "url": "https://www.ambitionbox.com/"
+        }
+      ]
+    },
+    "build": {
+      "task": "In jobready-journey, write interview/hr.md with honest answers for 15 HR questions (including 'why should we hire you?', 'what's your weakness?', 'where do you see yourself in 5 years?', 'why did you choose this field?', 'what are your salary expectations?', 'are you OK with relocation or night shifts?' and 'do you have other offers?'). Research the salary range for junior frontend/full-stack roles in your city on 2–3 sites and write your range with the reasoning. Write templates for a thank-you email after an interview, a polite follow-up after a week of silence, and a reply to a rejection that asks for feedback. List 5 red flags to check in any offer letter.",
+      "starterFiles": [],
+      "acceptance": [
+        "15 HR answers, honest and specific to you",
+        "A researched salary range with sources",
+        "3 email templates written",
+        "5 offer-letter red flags listed (e.g. long bonds, unclear CTC split)",
+        "Answers practised aloud at least once"
+      ]
+    },
+    "hints": [
+      "Weakness answers work best when they're real and show progress: 'I used to spend too long polishing before asking for feedback; now I share early drafts, as I did with my capstone pull requests.'",
+      "Salary: 'Based on my research for junior full-stack roles in this city, I'm looking for ₹X–Y LPA, but I'm flexible for the right learning opportunity.' Know the difference between CTC and in-hand pay.",
+      "A service bond (for example 2 years with a large penalty) is a serious commitment. Read it fully, ask questions, and decide deliberately."
+    ],
+    "proof": "Commit with interview/hr.md (keep any personal salary details private if you prefer).",
+    "explainBack": [
+      {
+        "q": "Answer 'Why should we hire you?' now.",
+        "lookFor": [
+          "specific skills matched to role",
+          "proof (projects, deployed apps)",
+          "attitude to learning",
+          "concise"
+        ]
+      },
+      {
+        "q": "What's the difference between CTC and in-hand salary?",
+        "lookFor": [
+          "CTC includes employer PF, gratuity, bonuses, benefits",
+          "in-hand is monthly take-home after deductions",
+          "compare offers on in-hand and growth"
+        ]
+      }
+    ],
+    "lastHintExplanation": "HR rounds check motivation, honesty and fit. Specific answers backed by evidence (your deployed projects, your 26-week routine) beat generic ones. CTC (cost to company) includes items such as the employer's PF contribution, gratuity, variable pay and benefits, so in-hand monthly pay can be noticeably lower. Always compare offers on in-hand pay, terms such as bonds, and learning potential.",
+    "predict": [],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Revision by pattern: DP and backtracking",
+      "note": "Timed: 25 minutes each.",
+      "problems": [
+        {
+          "title": "LeetCode 213: House Robber II",
+          "url": "https://leetcode.com/problems/house-robber-ii/"
+        },
+        {
+          "title": "LeetCode 22: Generate Parentheses",
+          "url": "https://leetcode.com/problems/generate-parentheses/"
+        }
+      ]
+    },
+    "aptitude": {
+      "topic": "Company-style full test 4 (15 minutes)",
+      "questions": [
+        {
+          "q": "An offer has a CTC of ₹6,00,000 a year, including ₹60,000 variable pay and ₹21,600 employer PF. What is the fixed pay excluding these two?",
+          "options": [
+            "₹5,18,400",
+            "₹5,40,000",
+            "₹5,78,400",
+            "₹5,00,000"
+          ],
+          "answer": 0,
+          "why": "6,00,000 − 60,000 − 21,600."
+        },
+        {
+          "q": "A salary of ₹50,000 a month gets a 12% hike. What is the new monthly salary?",
+          "options": [
+            "₹55,000",
+            "₹56,000",
+            "₹56,500",
+            "₹62,000"
+          ],
+          "answer": 1,
+          "why": "50,000 × 1.12."
+        },
+        {
+          "q": "If 5 interviews take 3 hours 20 minutes in total, how long is each on average?",
+          "options": [
+            "36 min",
+            "40 min",
+            "45 min",
+            "42 min"
+          ],
+          "answer": 1,
+          "why": "200/5."
+        },
+        {
+          "q": "'I look forward to ___ from you.'",
+          "options": [
+            "hear",
+            "hearing",
+            "heard",
+            "be hearing"
+          ],
+          "answer": 1,
+          "why": "look forward to + -ing."
+        },
+        {
+          "q": "Which is the most professional closing line for an email?",
+          "options": [
+            "Bye!",
+            "Thanks and regards,",
+            "Cya",
+            "Ok done"
+          ],
+          "answer": 1,
+          "why": "It's the standard formal closing."
+        }
+      ]
+    },
+    "revision": [
+      "Day 152: walk through the URL shortener design in 5 minutes."
+    ]
+  },
+  {
+    "day": 154,
+    "module": "interview-prep",
+    "title": "Job search strategy and tailored applications",
+    "goal": "Build a steady, trackable job search system and send your first batch of strong applications.",
+    "learn": {
+      "concepts": [
+        "Channels: job boards, company career pages, referrals, LinkedIn outreach, off-campus drives, communities",
+        "Referrals and warm outreach beat cold applications",
+        "Tailoring: resume keywords, a 3-line cover note, the most relevant project first",
+        "Tracking every application (dogfood ApplyTrack!)",
+        "A weekly routine: applications, outreach, practice, learning",
+        "Avoiding scams: never pay for a job, check the company domain"
+      ],
+      "resources": [
+        {
+          "title": "LinkedIn Help: Job search tips",
+          "url": "https://www.linkedin.com/help/linkedin/answer/a511279"
+        },
+        {
+          "title": "Wellfound (startup jobs)",
+          "url": "https://wellfound.com/jobs"
+        },
+        {
+          "title": "Government of India: National Career Service",
+          "url": "https://www.ncs.gov.in/"
+        }
+      ]
+    },
+    "build": {
+      "task": "Write interview/job-search-plan.md: target roles (e.g. Junior Frontend Developer, Angular Developer, Full-Stack Developer Trainee), 3 cities or remote, 25 target companies (startups, product firms and service companies), the channels you'll use, and a weekly routine (e.g. 10 tailored applications, 5 outreach messages, 3 DSA problems, 1 mock). Write a LinkedIn outreach template for asking for a referral (short, specific, polite). Then send your first 5 tailored applications today, tracking each in your own ApplyTrack with the job URL, source and notes.",
+      "starterFiles": [],
+      "acceptance": [
+        "job-search-plan.md with roles, locations, 25 companies, channels and a weekly routine",
+        "A referral outreach template",
+        "5 real, tailored applications sent today",
+        "All 5 tracked in ApplyTrack",
+        "A note on how you'll spot and avoid job scams"
+      ]
+    },
+    "hints": [
+      "Outreach template: 'Hi <name>, I'm a full-stack developer (Angular, Node, PostgreSQL) and I saw the <role> opening at <company>. I built <project + link>, which uses <relevant tech>. Would you be open to referring me, or sharing what the team looks for? Thank you!'",
+      "Tailor the top third of your resume (summary, skills order, first project) for each role. Keep a master resume and save each tailored copy with the company name.",
+      "Red flags: fees for training or 'registration', personal email domains for HR, offers without any interview, pressure to decide immediately."
+    ],
+    "proof": "Commit with job-search-plan.md, and a screenshot of your ApplyTrack board with the 5 applications.",
+    "explainBack": [
+      {
+        "q": "Why are referrals so much more effective than cold applications?",
+        "lookFor": [
+          "recruiters trust internal recommendations",
+          "resume gets seen by a human",
+          "fewer applicants via that route"
+        ]
+      },
+      {
+        "q": "What's your weekly job search routine, and how will you measure it?",
+        "lookFor": [
+          "specific numbers",
+          "balance of applying/practising",
+          "tracking in ApplyTrack",
+          "adjust based on response rate"
+        ]
+      }
+    ],
+    "lastHintExplanation": "Big job posts receive hundreds of applications, and a referral puts yours in front of a person. A steady weekly routine with numbers you can track (applications, outreach, response rate in your own ApplyTrack dashboard) turns job hunting from luck into a process you can improve.",
+    "predict": [],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Revision: your weakest pattern",
+      "note": "Pick the pattern you're weakest at from your pattern map and solve 2 new problems in it, under 25 minutes each.",
+      "problems": [
+        {
+          "title": "LeetCode 128: Longest Consecutive Sequence",
+          "url": "https://leetcode.com/problems/longest-consecutive-sequence/"
+        },
+        {
+          "title": "LeetCode 153: Find Minimum in Rotated Sorted Array (re-solve)",
+          "url": "https://leetcode.com/problems/find-minimum-in-rotated-sorted-array/"
+        }
+      ]
+    },
+    "aptitude": {
+      "topic": "Company-style full test 5 (15 minutes)",
+      "questions": [
+        {
+          "q": "You send 40 applications and get 6 interview calls. What is the response rate?",
+          "options": [
+            "12%",
+            "15%",
+            "18%",
+            "20%"
+          ],
+          "answer": 1,
+          "why": "6/40."
+        },
+        {
+          "q": "At that same rate, how many applications are needed for 15 calls?",
+          "options": [
+            "80",
+            "90",
+            "100",
+            "120"
+          ],
+          "answer": 2,
+          "why": "15/0.15."
+        },
+        {
+          "q": "A job portal shows 240 jobs; 35% are remote and a quarter of the remote ones are for freshers. How many remote fresher jobs are there?",
+          "options": [
+            "21",
+            "24",
+            "28",
+            "30"
+          ],
+          "answer": 0,
+          "why": "240 × 0.35 = 84, and a quarter of 84 is 21."
+        },
+        {
+          "q": "Which sentence is most suitable for a cover note?",
+          "options": [
+            "I need a job urgently.",
+            "I'm excited to apply for the Frontend Developer role and have built three deployed Angular apps.",
+            "Please hire me, I am hard worker.",
+            "I saw your job, interested."
+          ],
+          "answer": 1,
+          "why": "Specific, positive and professional."
+        },
+        {
+          "q": "Odd one out: Resume, Cover letter, Portfolio, Salary slip",
+          "options": [
+            "Resume",
+            "Cover letter",
+            "Portfolio",
+            "Salary slip"
+          ],
+          "answer": 3,
+          "why": "The others are what you send with an application."
+        }
+      ]
+    },
+    "revision": [
+      "Day 153: answer 'Why should we hire you?' aloud."
+    ]
+  },
+  {
+    "day": 155,
+    "module": "interview-prep",
+    "title": "Mock interview 2: full loop",
+    "goal": "Run a complete interview loop (technical, project and HR) and measure your improvement since mock 1.",
+    "learn": {
+      "concepts": [
+        "A full loop: online test → technical round → project/managerial round → HR",
+        "Consistency across rounds",
+        "Comparing against mock 1: what improved, what didn't",
+        "Keeping energy and focus across a long day"
+      ],
+      "resources": [
+        {
+          "title": "Tech Interview Handbook: Interview cheatsheet",
+          "url": "https://www.techinterviewhandbook.org/coding-interview-cheatsheet/"
+        }
+      ]
+    },
+    "build": {
+      "task": "Do a 2-hour mock loop, ideally with a different person from mock 1: (1) a 20-minute online-style test (10 aptitude questions + 2 output-prediction JS questions); (2) a 45-minute technical round (concepts + one live coding problem + one small UI task such as 'build a star rating component'); (3) a 30-minute project round on StandupBoard (security model, real-time design, what you'd change); (4) a 15-minute HR round. Record what you can. Write interview/mock2-review.md: the same scores as mock 1 side by side, 3 improvements, 3 remaining gaps and a plan for each.",
+      "starterFiles": [],
+      "acceptance": [
+        "All 4 parts of the loop completed",
+        "Scores compared with mock 1",
+        "3 improvements and 3 gaps with specific plans",
+        "Feedback from the mock interviewer recorded (if a person did it)"
+      ]
+    },
+    "hints": [
+      "Use your own content for the online test: pick aptitude questions from earlier days that you got wrong.",
+      "For the StandupBoard round, practise drawing the security layers: Firebase Auth → security rules for direct client access → verified ID tokens and checks in the Express API.",
+      "Treat it like the real thing: dress as you would, sit at a desk, and close other tabs."
+    ],
+    "proof": "Commit with mock2-review.md.",
+    "explainBack": [
+      {
+        "q": "Explain StandupBoard's security model in 2 minutes.",
+        "lookFor": [
+          "Firebase Auth identity",
+          "rules enforce membership/ownership/validation for client writes",
+          "Express verifies ID tokens and checks roles",
+          "Admin SDK bypasses rules so API must check"
+        ]
+      },
+      {
+        "q": "What improved most since mock 1, and what's still your biggest gap?",
+        "lookFor": [
+          "specific improvement with evidence",
+          "honest gap",
+          "plan"
+        ]
+      }
+    ],
+    "lastHintExplanation": "Real hiring loops test the same person from several angles, so consistency matters: the project you describe in HR should match what you explain technically. Comparing mock scores turns practice into measurable progress and tells you exactly where your final effort should go.",
+    "predict": [],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Timed mock",
+      "note": "Part of today's loop. If you have extra time, do this one under 25 minutes.",
+      "problems": [
+        {
+          "title": "LeetCode 54: Spiral Matrix",
+          "url": "https://leetcode.com/problems/spiral-matrix/"
+        }
+      ]
+    },
+    "aptitude": {
+      "topic": "Company-style full test 6 (15 minutes)",
+      "questions": [
+        {
+          "q": "A person invests ₹10,000 at 10% compound interest per year. What is the amount after 3 years?",
+          "options": [
+            "₹13,000",
+            "₹13,310",
+            "₹13,100",
+            "₹13,500"
+          ],
+          "answer": 1,
+          "why": "10,000 × 1.331."
+        },
+        {
+          "q": "A and B can do a job in 12 days, and A alone in 20 days. How long does B take alone?",
+          "options": [
+            "30 days",
+            "25 days",
+            "24 days",
+            "32 days"
+          ],
+          "answer": 0,
+          "why": "1/12 − 1/20 = 1/30."
+        },
+        {
+          "q": "In a code, COMPUTER is written as DPNQVUFS. How is MEDICINE written?",
+          "options": [
+            "NFEJDJOF",
+            "NFEJCJOF",
+            "MFEJDJOF",
+            "NEEJDJOF"
+          ],
+          "answer": 0,
+          "why": "Each letter moves +1: M→N, E→F, D→E, I→J, C→D, I→J, N→O, E→F."
+        },
+        {
+          "q": "Choose the correct sentence.",
+          "options": [
+            "Each of the employees have submitted the form.",
+            "Each of the employees has submitted the form.",
+            "Each employees has submitted the form.",
+            "Each of employee have submitted the form."
+          ],
+          "answer": 1,
+          "why": "'Each of' takes a singular verb."
+        },
+        {
+          "q": "What is the angle between the clock hands at 9:00?",
+          "options": [
+            "90°",
+            "270°",
+            "180°",
+            "60°"
+          ],
+          "answer": 0,
+          "why": "The smaller angle is 90°."
+        }
+      ]
+    },
+    "revision": [
+      "Day 154: review your job search routine and plan this week's applications."
+    ]
+  },
+  {
+    "day": 156,
+    "module": "interview-prep",
+    "title": "Final review: you're job-ready",
+    "goal": "Look back on 26 weeks, package everything you've built, and set up your routine for the weeks after.",
+    "learn": {
+      "concepts": [
+        "Reviewing progress with evidence: repos, deployed apps, tests, notes",
+        "Keeping skills sharp while job hunting",
+        "Next steps after the course: open source, deeper topics, a third project",
+        "Celebrating, honestly"
+      ],
+      "resources": [
+        {
+          "title": "GitHub: Finding ways to contribute to open source",
+          "url": "https://docs.github.com/en/get-started/exploring-projects-on-github/finding-ways-to-contribute-to-open-source-on-github"
+        },
+        {
+          "title": "Good First Issue (beginner-friendly open source)",
+          "url": "https://goodfirstissue.dev/"
+        },
+        {
+          "title": "roadmap.sh: Full Stack Developer",
+          "url": "https://roadmap.sh/full-stack"
+        }
+      ]
+    },
+    "build": {
+      "task": "Write JOURNEY.md at the root of jobready-journey: a summary of each phase (what you learned and the best thing you built), links to every deployed project and repo, stats (days completed, DSA problems solved, tests written, debug labs fixed), your 3 proudest moments, 3 things you'd tell someone starting Day 1, and your plan for the next 8 weeks (weekly job search routine, one open-source contribution, one deeper topic such as NgRx, Docker in depth or system design). Make sure every project README is up to date and every live link works. Then take a proper break: you've earned it.",
+      "starterFiles": [],
+      "acceptance": [
+        "JOURNEY.md summarises all 6 phases with links",
+        "Stats are filled in from your real data",
+        "All live links checked and working",
+        "An 8-week plan for after the course",
+        "Pinned GitHub repos and resume match JOURNEY.md"
+      ]
+    },
+    "hints": [
+      "Count your DSA problems from your LeetCode profile, tests by running each project's test command, and debug labs from your dayNN folders.",
+      "Your next-step topic should come from your mock interview gaps, not from what's trending.",
+      "Share JOURNEY.md in a LinkedIn post. A 26-week story with real deployed projects stands out to recruiters."
+    ],
+    "proof": "Link to JOURNEY.md.",
+    "explainBack": [
+      {
+        "q": "In 2 minutes, tell an interviewer what you learned over these 26 weeks and what you can build now.",
+        "lookFor": [
+          "full-stack scope",
+          "concrete projects",
+          "testing/security/deployment",
+          "learning habit"
+        ]
+      },
+      {
+        "q": "What's your plan for the next 8 weeks, and why those priorities?",
+        "lookFor": [
+          "job search routine",
+          "skill gap from mocks",
+          "realistic targets"
+        ]
+      }
+    ],
+    "lastHintExplanation": "You started with HTML and Git and finished with two deployed, tested, secured full-stack applications, plus DSA, aptitude and interview practice every week. The habit of shipping a little every day is what got you here, and it's what will carry you through the job search and your first role.",
+    "predict": [],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Keep the habit",
+      "note": "One problem a day from here on. Start with the Daily Question on LeetCode.",
+      "problems": [
+        {
+          "title": "LeetCode: Daily Question (problemset)",
+          "url": "https://leetcode.com/problemset/"
+        }
+      ]
+    },
+    "aptitude": {
+      "topic": "Final mixed review",
+      "questions": [
+        {
+          "q": "You completed 156 days in 26 weeks. How many days is that per week?",
+          "options": [
+            "5",
+            "6",
+            "7",
+            "4"
+          ],
+          "answer": 1,
+          "why": "156/26."
+        },
+        {
+          "q": "If you solved 2 DSA problems on 120 of the days and 1 on the other 36, how many did you solve in total?",
+          "options": [
+            "240",
+            "276",
+            "312",
+            "256"
+          ],
+          "answer": 1,
+          "why": "240 + 36."
+        },
+        {
+          "q": "What does 'the ball is in your court' mean?",
+          "options": [
+            "You lost",
+            "It's your turn to act",
+            "You're playing sport",
+            "You won"
+          ],
+          "answer": 1,
+          "why": "It's an idiom for a decision now resting with you."
+        },
+        {
+          "q": "Which word means the same as 'Persevere'?",
+          "options": [
+            "Give up",
+            "Keep going despite difficulty",
+            "Relax",
+            "Hurry"
+          ],
+          "answer": 1,
+          "why": "Persevere means to persist."
+        },
+        {
+          "q": "Next in the series: Week 1, Week 2, Week 4, Week 8, ?",
+          "options": [
+            "Week 10",
+            "Week 12",
+            "Week 16",
+            "Week 14"
+          ],
+          "answer": 2,
+          "why": "Each term doubles."
+        }
+      ]
+    },
+    "revision": [
+      "All phases: skim your weekly notes and pick 3 topics to revisit next week."
+    ]
+  }
+]

@@ -1,0 +1,37 @@
+[
+  { "section": "HR questions", "note": "Write your answer in your own words, then say it out loud in under 90 seconds.", "items": [
+    { "id": "hr-about", "text": "Tell me about yourself (education, what you built, why this role)" },
+    { "id": "hr-why-dev", "text": "Why software development? (career switchers: why now)" },
+    { "id": "hr-strength", "text": "Your strengths and one real weakness with what you do about it" },
+    { "id": "hr-hard-bug", "text": "A time you were stuck on a hard bug and how you got unstuck" },
+    { "id": "hr-gap", "text": "Explain any gap year or low marks honestly and briefly" },
+    { "id": "hr-salary", "text": "Salary expectations: know the fresher range for the role (check current listings)" },
+    { "id": "hr-questions", "text": "Two good questions to ask the interviewer" }
+  ]},
+  { "section": "Project walkthroughs", "note": "Do these for both capstones.", "items": [
+    { "id": "pw-pitch", "text": "2-minute pitch: problem, users, what it does" },
+    { "id": "pw-arch", "text": "Explain the architecture diagram from memory" },
+    { "id": "pw-decision", "text": "One technical decision and the alternative you rejected" },
+    { "id": "pw-bug", "text": "The hardest bug in the project and how you fixed it" },
+    { "id": "pw-improve", "text": "What you'd change with two more weeks" },
+    { "id": "pw-demo", "text": "Demo video recorded and linked in the README" }
+  ]},
+  { "section": "System design basics", "items": [
+    { "id": "sd-request", "text": "What happens when you type a URL and press Enter" },
+    { "id": "sd-rest", "text": "REST: resources, methods, status codes" },
+    { "id": "sd-auth", "text": "Sessions vs JWT, and where you store the token" },
+    { "id": "sd-index", "text": "Database indexes: what they speed up and what they cost" },
+    { "id": "sd-cache", "text": "Caching: where and when to cache" },
+    { "id": "sd-scale", "text": "Scaling a simple app: vertical vs horizontal, load balancer" },
+    { "id": "sd-rate", "text": "Rate limiting and why APIs need it" }
+  ]},
+  { "section": "Mock interview checklist", "items": [
+    { "id": "mk-resume", "text": "One-page resume with links to both capstones" },
+    { "id": "mk-github", "text": "GitHub profile: pinned repos with READMEs and screenshots" },
+    { "id": "mk-linkedin", "text": "LinkedIn headline and projects updated" },
+    { "id": "mk-dsa", "text": "150+ DSA problems solved across all patterns" },
+    { "id": "mk-apt", "text": "Timed aptitude test score of 70% or more" },
+    { "id": "mk-mock1", "text": "First mock interview done (friend, mentor or recorded)" },
+    { "id": "mk-mock2", "text": "Second mock interview done, with fixes from the first" }
+  ]}
+]

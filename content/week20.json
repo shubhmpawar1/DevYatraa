@@ -1,0 +1,381 @@
+[
+  {
+    "day": 115,
+    "module": "capstone-1",
+    "title": "Capstone 1 kickoff: user stories and wireframes",
+    "goal": "Plan a real product before coding: who it's for, what it must do, and what 'done' looks like.",
+    "learn": {
+      "concepts": [
+        "The capstone: ApplyTrack, a job application tracker (Angular + Tailwind + Express + PostgreSQL + JWT)",
+        "User stories: 'As a <user>, I want <goal>, so that <reason>' with acceptance criteria",
+        "MVP vs nice-to-have: cutting scope is a skill",
+        "Low-fidelity wireframes (paper, Excalidraw, Figma)",
+        "Tracking work in GitHub Issues and a Projects board",
+        "Milestones: Week 20 backend, Week 21 frontend, Week 22 tests and deploy, Week 23 polish and portfolio"
+      ],
+      "resources": [
+        { "title": "Atlassian: User stories with examples", "url": "https://www.atlassian.com/agile/project-management/user-stories" },
+        { "title": "Excalidraw (free wireframing)", "url": "https://excalidraw.com/" },
+        { "title": "GitHub Docs: About Projects", "url": "https://docs.github.com/en/issues/planning-and-tracking-with-projects/learning-about-projects/about-projects" }
+      ]
+    },
+    "build": {
+      "task": "Create a NEW repo applytrack. Write docs/product.md: the problem (job seekers lose track of applications), the target user, 10–12 user stories with acceptance criteria (account, add/edit/delete applications, statuses Wishlist → Applied → Interview → Offer / Rejected, interview dates, notes, contacts, filters and search, a dashboard with counts and a weekly chart, CSV export as a stretch), and an explicit 'Not in MVP' list. Draw wireframes for login, application list, application detail/form and dashboard (desktop and mobile) and commit them as images in docs/wireframes/. Create a GitHub issue per story, with labels and milestones, on a Projects board.",
+      "starterFiles": [
+        { "name": "docs/product.md", "content": "# ApplyTrack\n\n## Problem\n\n## Target user\n\n## User stories (MVP)\n1. As a job seeker, I want to ..., so that ...\n   - Acceptance: ...\n\n## Not in MVP\n\n## Milestones\n- Week 20: backend API with auth and tests\n- Week 21: Angular frontend\n- Week 22: testing, Docker, deployment\n- Week 23: polish, demo, portfolio\n" }
+      ],
+      "acceptance": [
+        "docs/product.md has a problem statement, target user and 10+ user stories with acceptance criteria",
+        "A clear 'Not in MVP' list",
+        "Wireframes for 4 screens, desktop and mobile, committed",
+        "Every story is a GitHub issue with a milestone; Projects board set up",
+        "README describes the project in 3 sentences"
+      ]
+    },
+    "hints": [
+      "Good acceptance criteria are testable: 'Given I'm logged in, when I change an application's status to Interview, then it moves to the Interview column and the dashboard count updates.'",
+      "Keep the MVP small enough to finish in 2 weeks. CSV export, email reminders and file uploads are good 'later' items.",
+      "Wireframes are boxes and labels, not designs. Spend 20 minutes per screen at most."
+    ],
+    "proof": "Link to the applytrack repo and its Projects board.",
+    "explainBack": [
+      { "q": "Pick one user story and explain how you'd know it's done.", "lookFor": ["acceptance criteria", "testable conditions", "user-visible outcome"] },
+      { "q": "What did you leave out of the MVP and why?", "lookFor": ["specific features", "time/complexity trade-off", "value vs effort"] }
+    ],
+    "lastHintExplanation": "Recruiters and interviewers love candidates who can explain why they built something and how they decided what to build. User stories keep you focused on what the user needs; acceptance criteria tell you when a story is finished; a 'Not in MVP' list protects your deadline.",
+    "predict": [],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Graphs: representation and BFS",
+      "note": "New pattern. Build an adjacency list from edges, then BFS/DFS from the source.",
+      "problems": [
+        { "title": "LeetCode 1971: Find if Path Exists in Graph", "url": "https://leetcode.com/problems/find-if-path-exists-in-graph/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Timed mixed test 1 (10 minutes)",
+      "questions": [
+        { "q": "A shirt marked ₹1,200 is sold at a 25% discount. What is the selling price?", "options": ["₹900", "₹950", "₹1,000", "₹875"], "answer": 0, "why": "1,200 × 0.75." },
+        { "q": "A can finish a job in 10 days and B in 15 days. How long do they take together?", "options": ["5 days", "6 days", "7.5 days", "12.5 days"], "answer": 1, "why": "1/10 + 1/15 = 1/6." },
+        { "q": "A train travels 180 km in 3 hours. What is its speed in m/s?", "options": ["15", "16.67", "18", "60"], "answer": 1, "why": "60 km/h × 5/18." },
+        { "q": "The average of 5 numbers is 20. One number is removed and the average becomes 18. What was removed?", "options": ["26", "28", "30", "22"], "answer": 1, "why": "100 − 72." },
+        { "q": "Simple interest on ₹5,000 at 8% per year for 3 years?", "options": ["₹1,200", "₹1,000", "₹1,500", "₹800"], "answer": 0, "why": "5,000 × 0.08 × 3." }
+      ]
+    },
+    "revision": ["Re-read your phase4-review.md and spend 20 minutes on your weakest topic."]
+  },
+  {
+    "day": 116,
+    "module": "capstone-1",
+    "title": "Data model: ER diagram and schema",
+    "goal": "Design ApplyTrack's database properly before writing any API code.",
+    "learn": {
+      "concepts": [
+        "Entities and relationships: users, applications, interviews, contacts, status history",
+        "ER diagrams with crow's foot notation (dbdiagram.io or Mermaid)",
+        "Normalisation basics: don't repeat data; one fact in one place",
+        "Enums as CHECK constraints or Postgres ENUM types",
+        "Indexes for your real queries (user_id + status, user_id + applied_on)",
+        "Audit-style history: application_status_history rows on every status change"
+      ],
+      "resources": [
+        { "title": "dbdiagram.io (free ER diagrams)", "url": "https://dbdiagram.io/" },
+        { "title": "Mermaid: Entity relationship diagrams", "url": "https://mermaid.js.org/syntax/entityRelationshipDiagram.html" },
+        { "title": "PostgreSQL docs: Enumerated types", "url": "https://www.postgresql.org/docs/current/datatype-enum.html" }
+      ]
+    },
+    "build": {
+      "task": "In applytrack: draw an ER diagram (Mermaid in docs/data-model.md so it renders on GitHub) for users, applications (company, role, job_url, location, salary_range, status, source, applied_on, notes), interviews (application_id, scheduled_at, kind, outcome), contacts (application_id, name, email, role) and application_status_history (application_id, from_status, to_status, changed_at). Write the migrations with constraints and indexes, and seed.sql with a demo user and 25 realistic applications across all statuses. Under the diagram, explain each relationship, delete behaviour and index.",
+      "starterFiles": [],
+      "acceptance": [
+        "Mermaid ER diagram renders on GitHub with all 5 tables",
+        "Migrations create all tables with FKs, CHECKs and NOT NULLs",
+        "Indexes match the planned list/filter/dashboard queries",
+        "Seed data covers every status and has realistic dates",
+        "docs/data-model.md explains relationships, ON DELETE choices and indexes"
+      ]
+    },
+    "hints": [
+      "Mermaid: erDiagram\\n  USERS ||--o{ APPLICATIONS : owns\\n  APPLICATIONS ||--o{ INTERVIEWS : has",
+      "Store status history from the start: the dashboard's 'applications per week' and 'time to first interview' come from it later.",
+      "applied_on is a date (a calendar day); scheduled_at is a timestamptz (a moment in time)."
+    ],
+    "proof": "Commit with docs/data-model.md, migrations and seed.",
+    "explainBack": [
+      { "q": "Why store status history in a separate table instead of only the current status?", "lookFor": ["keeps a record of changes", "enables timeline and stats", "current status alone loses information"] },
+      { "q": "Justify one index you added with the query it speeds up.", "lookFor": ["specific index", "matching WHERE/ORDER BY", "trade-off"] }
+    ],
+    "lastHintExplanation": "Only storing the current status throws away history: you can't show a timeline, count applications that reached interview, or measure how long responses take. A history table records each change as a row. Indexes should match real queries; for example, (user_id, status) supports 'my applications with status X', which the list page runs constantly.",
+    "predict": [
+      { "q": "A user is deleted. applications.user_id has ON DELETE CASCADE, and interviews.application_id also has CASCADE. What happens to that user's interviews?", "options": ["Kept", "Deleted too", "Error", "Set to NULL"], "answer": 1, "why": "Cascades chain: user → applications → interviews." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Graphs: grid DFS",
+      "note": "Each land cell starts a DFS that sinks its island; count how many times you start.",
+      "problems": [
+        { "title": "LeetCode 200: Number of Islands", "url": "https://leetcode.com/problems/number-of-islands/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Timed mixed test 2 (10 minutes)",
+      "questions": [
+        { "q": "Cost price ₹800, selling price ₹1,000. What is the profit percentage?", "options": ["20%", "25%", "15%", "30%"], "answer": 1, "why": "200/800." },
+        { "q": "Divide ₹1,800 in the ratio 4:5. What is the larger share?", "options": ["₹800", "₹1,000", "₹900", "₹1,100"], "answer": 1, "why": "1,800 × 5/9." },
+        { "q": "A number increased by 20% becomes 360. What is the number?", "options": ["288", "300", "320", "340"], "answer": 1, "why": "360/1.2." },
+        { "q": "Compound interest on ₹10,000 at 10% per year for 2 years?", "options": ["₹2,000", "₹2,100", "₹2,200", "₹1,900"], "answer": 1, "why": "12,100 − 10,000." },
+        { "q": "A car covers 240 km at 60 km/h and returns at 40 km/h. What is the average speed for the round trip?", "options": ["50 km/h", "48 km/h", "45 km/h", "52 km/h"], "answer": 1, "why": "2 × 60 × 40/(60 + 40) = 48." }
+      ]
+    },
+    "revision": ["Day 115: say your MVP in one sentence."]
+  },
+  {
+    "day": 117,
+    "module": "capstone-1",
+    "title": "Backend setup: project structure and CI-ready tooling",
+    "goal": "Set up the ApplyTrack API properly from the start: structure, config, lint, format and tests.",
+    "learn": {
+      "concepts": [
+        "Monorepo layout: api/ and web/ in one repo",
+        "Reusing your api-starter patterns (config, errors, validate, logger)",
+        "ESLint + Prettier for consistent code",
+        "Husky + lint-staged: checks before each commit",
+        "Conventional commits (feat:, fix:, test:, docs:)"
+      ],
+      "resources": [
+        { "title": "typescript-eslint: Getting started", "url": "https://typescript-eslint.io/getting-started/" },
+        { "title": "Prettier: Install", "url": "https://prettier.io/docs/install" },
+        { "title": "Conventional Commits", "url": "https://www.conventionalcommits.org/en/v1.0.0/" }
+      ]
+    },
+    "build": {
+      "task": "In applytrack/api: set up TypeScript (strict), Express 5, zod config validation (PORT, DATABASE_URL, JWT_SECRET, CORS_ORIGINS, LOG_LEVEL), pino logging, the error classes and error middleware, the validate middleware, requestId, helmet, CORS, health and ready routes, the migrate script and graceful shutdown, copying the patterns (not the files blindly) from api-starter. Add ESLint, Prettier and a pre-commit hook. Scripts: dev, build, start, migrate, seed, lint, format, test. Write api/README.md with setup steps.",
+      "starterFiles": [],
+      "acceptance": [
+        "npm run dev starts the API; /health and /ready work",
+        "Invalid config fails fast with clear errors",
+        "Lint and format run on commit",
+        "Migrations and seed run from npm scripts",
+        "Commits follow conventional commit style",
+        "api/README.md lets someone run it from scratch"
+      ]
+    },
+    "hints": [
+      "Copy deliberately: retype each file and improve it as you go. This is also a revision exercise.",
+      "npx husky init, then put npx lint-staged in .husky/pre-commit, with lint-staged running eslint --fix and prettier --write on staged .ts files.",
+      "Keep one config.ts that every module imports; never read process.env anywhere else."
+    ],
+    "proof": "Link to the commit with the API foundation.",
+    "explainBack": [
+      { "q": "Why set up lint, format and pre-commit hooks at the start of a project?", "lookFor": ["consistent code style", "catches bugs early", "cheaper than fixing later", "teammates/reviewers expect it"] },
+      { "q": "Explain your folder structure and where a new feature would go.", "lookFor": ["feature folders", "routes/controller/service/repo", "shared middleware and errors"] }
+    ],
+    "lastHintExplanation": "Tooling is cheapest on day one: adding a linter to 5,000 lines produces hundreds of warnings, but on an empty project it keeps everything clean from the start. Pre-commit hooks stop broken or unformatted code from ever reaching the repo, which reviewers notice.",
+    "predict": [],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Graphs: flood fill",
+      "note": "DFS from the start pixel, changing the colour of connected pixels with the same original colour.",
+      "problems": [
+        { "title": "LeetCode 733: Flood Fill", "url": "https://leetcode.com/problems/flood-fill/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Timed mixed test 3 (10 minutes)",
+      "questions": [
+        { "q": "Pipe A fills a tank in 6 hours; pipe B empties it in 12 hours. With both open, how long does it take to fill?", "options": ["8 hours", "10 hours", "12 hours", "18 hours"], "answer": 2, "why": "1/6 − 1/12 = 1/12." },
+        { "q": "What is 15% of 15% of 4,000?", "options": ["60", "90", "120", "150"], "answer": 1, "why": "4,000 × 0.0225." },
+        { "q": "A's salary is 25% more than B's. By what percentage is B's salary less than A's?", "options": ["25%", "20%", "15%", "30%"], "answer": 1, "why": "25/125." },
+        { "q": "The ages of A and B are in the ratio 3:4 and add up to 56. How old is A?", "options": ["21", "24", "28", "32"], "answer": 1, "why": "56 × 3/7." },
+        { "q": "A clock shows 3:00. What is the angle between the hands?", "options": ["60°", "90°", "120°", "45°"], "answer": 1, "why": "3 × 30°." }
+      ]
+    },
+    "revision": ["Day 116: draw your ER diagram from memory."]
+  },
+  {
+    "day": 118,
+    "module": "capstone-1",
+    "title": "Auth API for ApplyTrack",
+    "goal": "Implement secure registration, login and the current-user endpoint, tested from the start.",
+    "learn": {
+      "concepts": [
+        "Reusing the Phase 4 auth flow: bcrypt, JWT, requireAuth",
+        "Profile update (name) and password change (requires the current password)",
+        "Rate limiting auth routes",
+        "Writing tests alongside the code"
+      ],
+      "resources": [
+        { "title": "OWASP: Authentication Cheat Sheet", "url": "https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html" },
+        { "title": "OWASP: Forgot Password Cheat Sheet (for later)", "url": "https://cheatsheetseries.owasp.org/cheatsheets/Forgot_Password_Cheat_Sheet.html" }
+      ]
+    },
+    "build": {
+      "task": "In applytrack/api: POST /api/auth/register, POST /api/auth/login, GET /api/auth/me, PATCH /api/auth/me (name only) and POST /api/auth/change-password (requires currentPassword; new password must differ and meet the rules). Rate-limit the auth routes. Write supertest tests for every route, including the failure cases (weak password, duplicate email, wrong password, no token, expired token using a short JWT_EXPIRES_IN in tests, wrong current password). Close the matching GitHub issues from your commits ('Closes #3').",
+      "starterFiles": [],
+      "acceptance": [
+        "All 5 auth routes work with correct status codes",
+        "Password change requires the current password and rejects reuse",
+        "Every route has success and failure tests (15+ tests)",
+        "No hashes in responses or logs",
+        "GitHub issues closed from commit messages"
+      ]
+    },
+    "hints": [
+      "Expired token test: sign a token with expiresIn: -10 (already expired) using the test secret and expect 401.",
+      "Change password: load the hash, bcrypt.compare(currentPassword), and if the new password matches the old one (bcrypt.compare(newPassword, hash)), return 400.",
+      "Commit message: 'feat(auth): add change-password endpoint\\n\\nCloses #4'"
+    ],
+    "proof": "Link to the auth commits and the closed issues.",
+    "explainBack": [
+      { "q": "Why must change-password require the current password even though the user is logged in?", "lookFor": ["a stolen token or unattended device shouldn't allow takeover", "re-authentication for sensitive actions"] },
+      { "q": "How did you test token expiry without waiting an hour?", "lookFor": ["sign a token already expired", "or short expiry in test config", "deterministic test"] }
+    ],
+    "lastHintExplanation": "Sensitive actions need re-authentication: if someone steals a token or uses an unlocked laptop, they still can't lock the real owner out by changing the password. Signing a token with a negative expiry produces one that's already expired, so the test is instant and deterministic.",
+    "predict": [
+      { "q": "jwt.sign({ sub: 1 }, secret, { expiresIn: -10 }) is then verified. Result?", "options": ["Valid", "TokenExpiredError", "JsonWebTokenError: invalid signature", "null"], "answer": 1, "why": "Its exp is already in the past." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Graphs: BFS shortest path in a grid",
+      "note": "Multi-source BFS: start from all rotten oranges at once and count the levels.",
+      "problems": [
+        { "title": "LeetCode 994: Rotting Oranges", "url": "https://leetcode.com/problems/rotting-oranges/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Timed mixed test 4 (10 minutes)",
+      "questions": [
+        { "q": "A man walks 5 km north, then 12 km east. How far is he from the start?", "options": ["17 km", "13 km", "12 km", "7 km"], "answer": 1, "why": "√(25 + 144)." },
+        { "q": "Next in the series: 3, 6, 11, 18, 27, ?", "options": ["36", "38", "40", "35"], "answer": 1, "why": "The differences are 3, 5, 7, 9, 11." },
+        { "q": "A trader mixes 10 kg of rice at ₹40/kg with 15 kg at ₹50/kg. What is the price per kg of the mixture?", "options": ["₹45", "₹46", "₹44", "₹47"], "answer": 1, "why": "(400 + 750)/25." },
+        { "q": "If 8 workers build a wall in 12 days, how long do 6 workers take?", "options": ["14 days", "16 days", "9 days", "18 days"], "answer": 1, "why": "96 worker-days / 6." },
+        { "q": "Which word means the same as 'Candid'?", "options": ["Secretive", "Frank", "Polite", "Shy"], "answer": 1, "why": "Candid means honest and direct." }
+      ]
+    },
+    "revision": ["Day 117: explain why lint and hooks go in on day one."]
+  },
+  {
+    "day": 119,
+    "module": "capstone-1",
+    "title": "Applications API: CRUD, status changes and stats",
+    "goal": "Build the core of ApplyTrack: applications with filters, status history and dashboard stats.",
+    "learn": {
+      "concepts": [
+        "Changing status inside a transaction: update the application + insert history",
+        "Nested resources: /applications/:id/interviews and /contacts",
+        "Search and filters: status, company (ILIKE), applied between dates, sort, pagination",
+        "Stats endpoints with GROUP BY and date_trunc('week', ...)",
+        "Keeping controllers thin"
+      ],
+      "resources": [
+        { "title": "PostgreSQL docs: date_trunc", "url": "https://www.postgresql.org/docs/current/functions-datetime.html#FUNCTIONS-DATETIME-TRUNC" },
+        { "title": "node-postgres: Transactions", "url": "https://node-postgres.com/features/transactions" }
+      ]
+    },
+    "build": {
+      "task": "In applytrack/api: applications CRUD scoped by user; list with status (multiple allowed), q (company or role), appliedFrom/appliedTo, sort (whitelist) and pagination. PATCH /api/applications/:id/status changes status and writes a history row in one transaction, returning 409 if the status is unchanged. GET /api/applications/:id/history. Nested CRUD for interviews and contacts. GET /api/stats returns counts per status, applications per week for the last 8 weeks (filling empty weeks with 0), and response rate (share of applied that reached interview or later).",
+      "starterFiles": [],
+      "acceptance": [
+        "All application, interview and contact endpoints work, scoped by user",
+        "Status changes are transactional and recorded in history",
+        "List filters combine correctly; sort is whitelisted",
+        "Stats: per-status counts, 8-week series with zeros, response rate",
+        "Every query is parameterised"
+      ]
+    },
+    "hints": [
+      "Multiple statuses: ?status=Applied&status=Interview. Coerce to an array with z.union([z.string(), z.array(z.string())]).transform(v => [v].flat()), then use WHERE status = ANY($2).",
+      "Weeks with zero applications: generate the weeks with generate_series(date_trunc('week', now()) - interval '7 weeks', date_trunc('week', now()), interval '1 week') and LEFT JOIN the counts onto it.",
+      "Response rate: count applications whose history ever reached Interview, Offer or Rejected-after-interview, divided by those that reached Applied. Keep the definition simple and document it."
+    ],
+    "proof": "Commit with the applications, interviews, contacts and stats features.",
+    "explainBack": [
+      { "q": "Why must the status update and the history insert happen in one transaction?", "lookFor": ["both succeed or neither", "no history without status change or vice versa", "consistency if one fails"] },
+      { "q": "How did you make weeks with zero applications appear in the stats?", "lookFor": ["generate_series of weeks", "LEFT JOIN counts", "COALESCE to 0"] }
+    ],
+    "lastHintExplanation": "If the status update succeeded and the history insert failed, the timeline would silently disagree with reality. A transaction makes the pair all-or-nothing. GROUP BY only returns weeks that have rows, so you generate every week with generate_series and LEFT JOIN the counts onto it, using COALESCE(count, 0) for empty weeks.",
+    "predict": [
+      { "q": "SELECT date_trunc('week', DATE '2026-11-11') (a Wednesday). What does it return?", "options": ["2026-11-08 (Sunday)", "2026-11-09 (Monday)", "2026-11-11", "2026-11-15"], "answer": 1, "why": "Postgres weeks start on Monday (ISO)." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Graphs: cycle detection / topological sort",
+      "note": "Course prerequisites form a directed graph; you can finish if there's no cycle. Use Kahn's algorithm (in-degrees + queue).",
+      "problems": [
+        { "title": "LeetCode 207: Course Schedule", "url": "https://leetcode.com/problems/course-schedule/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Timed mixed test 5 (10 minutes)",
+      "questions": [
+        { "q": "A product's price rises by 10% and then falls by 10%. What is the net change?", "options": ["0%", "−1%", "+1%", "−2%"], "answer": 1, "why": "1.1 × 0.9 = 0.99." },
+        { "q": "A boat goes 12 km/h downstream and 8 km/h upstream. What is the speed of the stream?", "options": ["2 km/h", "4 km/h", "10 km/h", "3 km/h"], "answer": 0, "why": "(12 − 8)/2." },
+        { "q": "What is the smallest number divisible by 12, 15 and 20?", "options": ["60", "120", "180", "240"], "answer": 0, "why": "LCM = 60." },
+        { "q": "If APPLE = 50 (A=1, P=16, L=12, E=5), what is BALL?", "options": ["27", "26", "28", "30"], "answer": 0, "why": "2 + 1 + 12 + 12." },
+        { "q": "Of 5 candidates, 2 are chosen. How many pairs are possible?", "options": ["10", "20", "5", "25"], "answer": 0, "why": "5C2." }
+      ]
+    },
+    "revision": ["Day 118: explain why change-password re-checks the current password."]
+  },
+  {
+    "day": 120,
+    "module": "capstone-1",
+    "title": "API test suite and week review",
+    "goal": "Lock the ApplyTrack API down with a solid test suite before building the frontend on it.",
+    "learn": {
+      "concepts": [
+        "Unit tests for services, API tests with supertest, DB tests for repos",
+        "Test data builders (makeApplication({ status: 'Interview' }))",
+        "Testing transactions and stats against the real test database",
+        "A coverage target as a guide, not a goal"
+      ],
+      "resources": [
+        { "title": "Vitest: Coverage", "url": "https://vitest.dev/guide/coverage.html" },
+        { "title": "Kent C. Dodds: Write tests. Not too many. Mostly integration.", "url": "https://kentcdodds.com/blog/write-tests" }
+      ]
+    },
+    "build": {
+      "task": "In applytrack/api: write test-data builders and an auth helper; add API tests for every applications, interviews, contacts and stats endpoint (success, validation failure, 401, IDOR 404); DB tests for the status-change transaction (forced failure leaves no partial data) and the 8-week stats query with zero weeks. Reach 80%+ line coverage on services and repos. Add a test section to api/README.md. Write week20-notes.md: what's done, what slipped, and what's next week.",
+      "starterFiles": [],
+      "acceptance": [
+        "40+ tests across unit, API and DB levels, all passing",
+        "IDOR tests for applications, interviews and contacts",
+        "Transaction and stats queries tested against real Postgres",
+        "80%+ line coverage on services and repos",
+        "week20-notes.md is honest about progress"
+      ]
+    },
+    "hints": [
+      "Builder: function makeApplication(overrides: Partial<NewApplication> = {}): NewApplication { return { company: 'Acme', role: 'Frontend Developer', status: 'Applied', appliedOn: '2026-11-02', ...overrides }; }",
+      "For stats tests, use vi.setSystemTime (or pass 'today' into the query) so 'the last 8 weeks' is predictable.",
+      "If a test is hard to write, the code is often too coupled. Note it and refactor the code, not just the test."
+    ],
+    "proof": "Commit with the test suite and the coverage summary in the README.",
+    "explainBack": [
+      { "q": "Which test gives you the most confidence, and why?", "lookFor": ["specific test", "covers real risk (IDOR/transaction/stats)", "reasoning"] },
+      { "q": "How do builders make tests easier to read?", "lookFor": ["defaults for boring fields", "only specify what matters for the test", "less duplication"] }
+    ],
+    "lastHintExplanation": "Builders give every field a sensible default, so each test only states what matters to it, e.g. makeApplication({ status: 'Offer' }). The most valuable tests guard the costly failures: users seeing each other's data, half-written transactions and wrong dashboard numbers.",
+    "predict": [],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Graphs: review",
+      "note": "Clone a graph with a Map from old node to new node. Then re-solve Number of Islands with BFS.",
+      "problems": [
+        { "title": "LeetCode 133: Clone Graph", "url": "https://leetcode.com/problems/clone-graph/" },
+        { "title": "LeetCode 200: Number of Islands (re-solve with BFS)", "url": "https://leetcode.com/problems/number-of-islands/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Timed mixed test 6 (10 minutes)",
+      "questions": [
+        { "q": "The average of the first 10 natural numbers?", "options": ["5", "5.5", "6", "4.5"], "answer": 1, "why": "55/10." },
+        { "q": "An item bought for ₹500 is sold at a 12% loss. What is the selling price?", "options": ["₹440", "₹450", "₹460", "₹420"], "answer": 0, "why": "500 × 0.88." },
+        { "q": "A 150 m train passes a pole in 10 seconds. What is its speed in km/h?", "options": ["54", "45", "15", "60"], "answer": 0, "why": "15 m/s × 18/5." },
+        { "q": "The probability of drawing a king or a queen from a deck?", "options": ["1/13", "2/13", "4/13", "1/26"], "answer": 1, "why": "8/52." },
+        { "q": "Choose the correct sentence.", "options": ["He is one of the best player.", "He is one of the best players.", "He is one of best players.", "He is one of the better player."], "answer": 1, "why": "'One of the' + superlative + plural noun." }
+      ]
+    },
+    "revision": ["Days 115–119: explain your API's endpoints and schema to an imaginary interviewer in 3 minutes."]
+  }
+]

@@ -1,0 +1,431 @@
+[
+  {
+    "day": 7,
+    "module": "css-layout",
+    "title": "Flexbox in depth: navbars and card rows",
+    "goal": "Use Flexbox to build a real navbar and a row of cards that line up and wrap properly.",
+    "learn": {
+      "concepts": [
+        "Flex container vs flex items: display:flex goes on the parent",
+        "Main axis and cross axis; flex-direction row vs column",
+        "justify-content (main axis) and align-items (cross axis)",
+        "gap instead of margins between items",
+        "flex-wrap, and flex: 1 / flex-grow / flex-shrink / flex-basis",
+        "margin-left: auto to push an item to the far end"
+      ],
+      "resources": [
+        { "title": "MDN: Flexbox", "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/CSS_layout/Flexbox" },
+        { "title": "CSS-Tricks: A Complete Guide to Flexbox", "url": "https://css-tricks.com/snippets/css/a-guide-to-flexbox/" },
+        { "title": "Flexbox Froggy (game)", "url": "https://flexboxfroggy.com/" }
+      ]
+    },
+    "build": {
+      "task": "In day07/, build a page with (1) a navbar: logo text on the left, 4 links on the right, all vertically centred; (2) a row of 4 cards (title, short text, button) that sit side by side with equal widths on a wide screen and wrap onto new lines when the window is narrow; (3) a footer with three columns of links. Use Flexbox only, no Grid and no floats.",
+      "starterFiles": [
+        { "name": "day07/index.html", "content": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Day 7: Flexbox</title>\n  <link rel=\"stylesheet\" href=\"style.css\">\n</head>\n<body>\n  <!-- header with nav, main with 4 cards, footer with 3 columns -->\n</body>\n</html>\n" },
+        { "name": "day07/style.css", "content": "/* Flexbox only today. */\n" }
+      ],
+      "acceptance": [
+        "Logo left and links right in the navbar, vertically centred, using justify-content or margin-left:auto",
+        "Spacing between items uses gap, not margins on every item",
+        "Cards have equal widths on a wide window and wrap on a narrow one (flex-wrap plus flex-basis or flex: 1 1 200px)",
+        "All card buttons line up at the bottom even when card text lengths differ",
+        "Footer has three columns side by side",
+        "No Grid, no floats, no position:absolute for layout"
+      ]
+    },
+    "hints": [
+      "Build one thing at a time: navbar first, check it, then cards, then footer. Turn on DevTools' flex overlay (the 'flex' badge in the Elements panel) to see the axes.",
+      "For wrapping equal cards try .cards { display:flex; flex-wrap:wrap; gap:16px } and .card { flex: 1 1 220px }. The 220px is the width a card wants before it wraps.",
+      "To push buttons to the bottom, make each card a column flex container (flex-direction:column) and give the button margin-top:auto."
+    ],
+    "proof": "Commit with day07/index.html and day07/style.css. Include a screenshot of the wide and narrow layouts in day07/screens/ if you can.",
+    "explainBack": [
+      { "q": "In your navbar, which property puts the links on the right? Explain what it does in terms of the main axis.", "lookFor": ["names their actual property (justify-content: space-between or margin-left:auto)", "main axis is horizontal for row", "free space is distributed / pushed"] },
+      { "q": "Your cards use a flex value. Read it out and explain each of its three parts.", "lookFor": ["flex-grow: can grow into extra space", "flex-shrink: can shrink", "flex-basis: starting size before growing/shrinking", "wrapping happens when basis no longer fits"] },
+      { "q": "How did you line up the buttons at the bottom of cards with different text lengths?", "lookFor": ["card is a column flex container", "margin-top:auto takes the leftover space", "cards in a row stretch to same height by default (align-items: stretch)"] }
+    ],
+    "lastHintExplanation": "display:flex lays children along the main axis (horizontal for row). justify-content distributes space on the main axis, align-items aligns on the cross axis. flex: 1 1 220px means grow:1, shrink:1, basis:220px, so cards start at 220px, share extra space, and wrap when fewer fit. Inside a column-flex card, margin-top:auto eats the leftover space and pushes the button down.",
+    "predict": [
+      { "q": "A div has display:flex and three child divs. With no other CSS, how are the children laid out?", "options": ["Stacked vertically", "Side by side in a row", "On top of each other", "In a 3-column grid with equal widths"], "answer": 1, "why": "The default flex-direction is row, so items sit side by side at their content width." },
+      { "q": "A flex row has 3 items and justify-content: space-between. Where does the middle item sit?", "options": ["Next to the first item", "Exactly in the centre of the free space between first and last", "Next to the last item", "It wraps to a new line"], "answer": 1, "why": "space-between puts the first item at the start, the last at the end, and splits remaining space evenly between items." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Simple arrays",
+      "note": "Loop over arrays and build new ones. Write each solution in a .js file first, run it with node, then submit on LeetCode.",
+      "problems": [
+        { "title": "LeetCode 1929: Concatenation of Array", "url": "https://leetcode.com/problems/concatenation-of-array/" },
+        { "title": "LeetCode 1470: Shuffle the Array", "url": "https://leetcode.com/problems/shuffle-the-array/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "HCF and LCM",
+      "questions": [
+        { "q": "What is the HCF of 36 and 84?", "options": ["6", "12", "18", "24"], "answer": 1, "why": "36 = 2²·3², 84 = 2²·3·7. Common part is 2²·3 = 12." },
+        { "q": "What is the LCM of 12, 18 and 30?", "options": ["90", "120", "180", "360"], "answer": 2, "why": "Highest powers: 2²·3²·5 = 180." },
+        { "q": "Two numbers have product 2160 and HCF 12. What is their LCM?", "options": ["120", "150", "180", "240"], "answer": 2, "why": "HCF × LCM = product, so LCM = 2160/12 = 180." },
+        { "q": "What is the smallest number that leaves remainder 3 when divided by 6, 8 and 12?", "options": ["27", "51", "99", "123"], "answer": 0, "why": "LCM(6,8,12) = 24, so 24 + 3 = 27." },
+        { "q": "Three bells ring every 6, 10 and 15 minutes. They ring together at 9:00. When do they next ring together?", "options": ["9:15", "9:30", "9:45", "10:00"], "answer": 1, "why": "LCM(6,10,15) = 30 minutes." }
+      ]
+    },
+    "revision": ["Day 6: from memory, write the CSS for a horizontal nav using flex. Compare with your Day 6 file."]
+  },
+  {
+    "day": 8,
+    "module": "css-layout",
+    "title": "CSS Grid: two-dimensional page layouts",
+    "goal": "Lay out a full page (header, sidebar, content, footer) and a photo gallery with CSS Grid.",
+    "learn": {
+      "concepts": [
+        "display:grid, grid-template-columns and grid-template-rows",
+        "The fr unit and repeat()",
+        "gap for rows and columns",
+        "Placing items with grid-column / grid-row (span)",
+        "grid-template-areas for readable page layouts",
+        "repeat(auto-fit, minmax(200px, 1fr)) for responsive galleries",
+        "When to use Grid (2D) vs Flexbox (1D)"
+      ],
+      "resources": [
+        { "title": "MDN: Grids", "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/CSS_layout/Grids" },
+        { "title": "CSS-Tricks: A Complete Guide to CSS Grid", "url": "https://css-tricks.com/snippets/css/complete-guide-grid/" },
+        { "title": "Grid Garden (game)", "url": "https://cssgridgarden.com/" }
+      ]
+    },
+    "build": {
+      "task": "In day08/, build a dashboard-style page using grid-template-areas: header across the top, sidebar on the left, main content, footer across the bottom. Inside main, add a gallery of at least 8 items (images or coloured boxes with captions) using repeat(auto-fit, minmax(...)) so the number of columns changes with the window width. Make one gallery item span 2 columns.",
+      "starterFiles": [
+        { "name": "day08/index.html", "content": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Day 8: Grid</title>\n  <link rel=\"stylesheet\" href=\"style.css\">\n</head>\n<body class=\"page\">\n  <header class=\"page-header\"></header>\n  <aside class=\"page-sidebar\"></aside>\n  <main class=\"page-main\"></main>\n  <footer class=\"page-footer\"></footer>\n</body>\n</html>\n" }
+      ],
+      "acceptance": [
+        "The page layout uses grid-template-areas with named areas",
+        "The page fills at least the full window height (min-height: 100vh) with the footer at the bottom",
+        "The gallery uses repeat(auto-fit or auto-fill, minmax(...)) and changes column count when resizing",
+        "At least one gallery item spans 2 columns with grid-column: span 2",
+        "gap is used for spacing, not margins"
+      ]
+    },
+    "hints": [
+      "Write the areas like a picture: grid-template-areas: \"header header\" \"sidebar main\" \"footer footer\"; then give each element grid-area: header etc.",
+      "For the rows try grid-template-rows: auto 1fr auto with min-height:100vh on the body: the middle row takes all the leftover height.",
+      "Gallery: .gallery { display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:12px }. Open DevTools' grid overlay to see the lines."
+    ],
+    "proof": "Commit with day08/index.html and day08/style.css.",
+    "explainBack": [
+      { "q": "Read your grid-template-areas aloud and explain how the browser turns it into a layout.", "lookFor": ["each string is a row", "each word is a column cell", "repeated names make an area span", "elements placed with grid-area"] },
+      { "q": "Explain what repeat(auto-fit, minmax(180px, 1fr)) does when you make the window narrower.", "lookFor": ["fits as many columns of at least 180px as possible", "1fr shares leftover space", "columns drop as width shrinks, items move to new rows", "no media query needed"] },
+      { "q": "Why did you pick Grid for the page and not Flexbox?", "lookFor": ["grid controls rows and columns together (2D)", "flexbox is one direction (1D)", "areas make the layout readable"] }
+    ],
+    "lastHintExplanation": "grid-template-areas draws the layout as text: each quoted string is a row, each word a cell, and repeating a name makes that area span. auto-fit with minmax(180px, 1fr) creates as many columns as fit at 180px minimum, then stretches them with 1fr, so the gallery adapts without media queries. Grid is for two-dimensional layouts; Flexbox is for one row or column.",
+    "predict": [
+      { "q": "A 600px-wide grid has grid-template-columns: 1fr 2fr and no gap. How wide are the columns?", "options": ["300px and 300px", "200px and 400px", "100px and 500px", "1px and 2px"], "answer": 1, "why": "3 fractions share 600px: 1fr = 200px, 2fr = 400px." },
+      { "q": "A grid has grid-template-columns: repeat(3, 1fr) and 7 children. How many rows are created?", "options": ["2", "3", "7", "1, and 4 items overflow"], "answer": 1, "why": "Items fill 3 per row: 3 + 3 + 1, so 3 rows; rows are created automatically." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Simple arrays",
+      "note": "Nested loops over 2D arrays. Print the array with console.table first so you can see its shape.",
+      "problems": [
+        { "title": "LeetCode 1672: Richest Customer Wealth", "url": "https://leetcode.com/problems/richest-customer-wealth/" },
+        { "title": "LeetCode 1431: Kids With the Greatest Number of Candies", "url": "https://leetcode.com/problems/kids-with-the-greatest-number-of-candies/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Percentages: successive changes",
+      "questions": [
+        { "q": "A price rises by 20% and then falls by 20%. What is the net change?", "options": ["No change", "4% decrease", "4% increase", "2% decrease"], "answer": 1, "why": "1.2 × 0.8 = 0.96, so a 4% decrease." },
+        { "q": "30% of a number is 72. What is the number?", "options": ["216", "240", "260", "280"], "answer": 1, "why": "72 / 0.3 = 240." },
+        { "q": "A salary of ₹25,000 is increased by 12%. What is the new salary?", "options": ["₹27,000", "₹28,000", "₹28,500", "₹30,000"], "answer": 1, "why": "25,000 × 1.12 = 28,000." },
+        { "q": "A town of 10,000 people grows 10% every year. What is the population after 2 years?", "options": ["12,000", "12,100", "12,200", "11,900"], "answer": 1, "why": "10,000 × 1.1 × 1.1 = 12,100." },
+        { "q": "A earns 25% more than B. By what percent is B's income less than A's?", "options": ["20%", "25%", "15%", "30%"], "answer": 0, "why": "If B = 100, A = 125. Difference 25 on base 125 = 20%." }
+      ]
+    },
+    "revision": ["Day 7: in 3 sentences, explain flex: 1 1 220px to an imaginary friend. Then check your Day 7 cards still wrap."]
+  },
+  {
+    "day": 9,
+    "module": "css-layout",
+    "title": "Responsive design: mobile-first media queries",
+    "goal": "Make one page look right on a phone, a tablet and a laptop using mobile-first media queries.",
+    "learn": {
+      "concepts": [
+        "Why the viewport meta tag is required on phones",
+        "Mobile-first: base styles for small screens, then min-width media queries",
+        "Media query syntax: @media (min-width: 768px) { ... }",
+        "Common breakpoints and why you choose them by content, not devices",
+        "DevTools device toolbar for testing widths",
+        "Hiding/showing and re-arranging content at breakpoints"
+      ],
+      "resources": [
+        { "title": "MDN: Responsive design", "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/CSS_layout/Responsive_Design" },
+        { "title": "MDN: Using media queries", "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_media_queries/Using_media_queries" },
+        { "title": "web.dev: Learn Responsive Design", "url": "https://web.dev/learn/design" }
+      ]
+    },
+    "build": {
+      "task": "In day09/, build a product page (any product you like): header with nav, hero section (heading, text, image), a features section with 6 features, and a pricing section with 3 plans. Write mobile-first CSS: single column on phones; features in 2 columns from 600px; features in 3 columns and hero text beside the image from 900px. On phones the nav links stack under the logo.",
+      "starterFiles": [],
+      "acceptance": [
+        "Viewport meta tag is present",
+        "Base CSS (outside any media query) is the phone layout",
+        "Only min-width media queries are used, at least two breakpoints",
+        "Features: 1 column on phones, 2 from 600px, 3 from 900px",
+        "Hero image and text side by side from 900px, stacked below that",
+        "No horizontal scrollbar at 360px width (check in DevTools device toolbar)"
+      ]
+    },
+    "hints": [
+      "Start with the DevTools device toolbar at 360px wide and build the phone version completely before writing any media query.",
+      "Then add @media (min-width: 600px) { .features { grid-template-columns: repeat(2, 1fr) } } and check at 600px, then add the 900px block.",
+      "If a horizontal scrollbar appears, look for fixed widths (width: 500px) and images without max-width:100%. In DevTools, hover elements to find the one wider than the screen."
+    ],
+    "proof": "Commit with day09/ files, and screenshots at 360px, 768px and 1200px in day09/screens/.",
+    "explainBack": [
+      { "q": "What does mobile-first mean in your CSS file? Point to the lines that prove it.", "lookFor": ["base styles are for phones", "media queries use min-width and add changes for bigger screens", "refers to their actual breakpoints"] },
+      { "q": "What happens on a real phone if you delete the viewport meta tag?", "lookFor": ["phone pretends to be ~980px wide", "page shown zoomed out and tiny", "media queries for small widths don't apply"] },
+      { "q": "How did you choose your breakpoints?", "lookFor": ["where the content starts to look cramped or stretched", "not tied to a specific device", "tested by resizing"] }
+    ],
+    "lastHintExplanation": "Without the viewport meta tag, phones render the page at a fake desktop width and zoom out. Mobile-first means the CSS outside media queries is the phone layout, and each @media (min-width: X) block adds changes once the screen is at least X wide. Breakpoints should be where your content starts to break, not specific device sizes.",
+    "predict": [
+      { "q": "CSS: p { color: black } @media (min-width: 768px) { p { color: blue } }. The window is 500px wide. What colour is the text?", "options": ["Blue", "Black", "Default browser colour", "Both, alternating"], "answer": 1, "why": "500px is less than 768px, so the media query doesn't apply." },
+      { "q": "CSS order: @media (min-width: 600px) { h1 { color: red } } then @media (min-width: 900px) { h1 { color: blue } }. At 1000px, what colour is h1?", "options": ["Red", "Blue", "Black", "Purple"], "answer": 1, "why": "Both queries match; same specificity, so the later rule wins." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Strings and loops",
+      "note": "Build new strings with loops. Try each one once with a loop and once with a built-in method like replaceAll.",
+      "problems": [
+        { "title": "LeetCode 1108: Defanging an IP Address", "url": "https://leetcode.com/problems/defanging-an-ip-address/" },
+        { "title": "LeetCode 709: To Lower Case", "url": "https://leetcode.com/problems/to-lower-case/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Ratio: partnership",
+      "questions": [
+        { "q": "A invests ₹30,000 and B invests ₹45,000 for the same time. The profit is ₹15,000. What is A's share?", "options": ["₹5,000", "₹6,000", "₹7,500", "₹9,000"], "answer": 1, "why": "Ratio 2:3, so A gets 15,000 × 2/5 = 6,000." },
+        { "q": "A invests ₹20,000 for 12 months and B invests ₹30,000 for 6 months. What is the ratio of their profits?", "options": ["2:3", "4:3", "1:1", "3:2"], "answer": 1, "why": "20,000×12 : 30,000×6 = 240 : 180 = 4:3." },
+        { "q": "Two numbers are in the ratio 5:7 and their difference is 18. What is the larger number?", "options": ["45", "56", "63", "70"], "answer": 2, "why": "2 parts = 18, so 1 part = 9 and the larger is 7 × 9 = 63." },
+        { "q": "If 3x = 4y, what is x:y?", "options": ["3:4", "4:3", "7:3", "12:1"], "answer": 1, "why": "x/y = 4/3." },
+        { "q": "A bag has ₹1, 50p and 25p coins in the ratio 1:2:4 by number. The total is ₹30. How many 50p coins are there?", "options": ["10", "20", "30", "40"], "answer": 1, "why": "One set (1 + 2 + 4 coins) is worth ₹1 + ₹1 + ₹1 = ₹3, so there are 10 sets and 20 coins of 50p." }
+      ]
+    },
+    "revision": ["Day 8: sketch your Day 8 grid-template-areas on paper from memory, then compare."]
+  },
+  {
+    "day": 10,
+    "module": "css-layout",
+    "title": "CSS units, responsive images and fluid type",
+    "goal": "Choose the right CSS unit for each job and make images and text scale smoothly on any screen.",
+    "learn": {
+      "concepts": [
+        "Absolute vs relative units: px, %, em, rem, vw, vh",
+        "Why rem is the default choice for font sizes and spacing",
+        "max-width: 100% and height: auto for images",
+        "object-fit: cover for cropped thumbnails",
+        "<picture> and srcset for different image sizes",
+        "clamp() for fluid font sizes",
+        "min(), max() and max-width containers for readable line length"
+      ],
+      "resources": [
+        { "title": "MDN: CSS values and units", "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Styling_basics/Values_and_units" },
+        { "title": "MDN: Responsive images", "url": "https://developer.mozilla.org/en-US/docs/Web/HTML/Guides/Responsive_images" },
+        { "title": "MDN: clamp()", "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/clamp" }
+      ]
+    },
+    "build": {
+      "task": "In day10/, build a blog article page: a full-width cover image, a title, author line and 5+ paragraphs, plus a grid of 6 square thumbnails. Use rem for all font sizes and spacing, clamp() for the h1 size, a max-width container (about 65ch) for the text, object-fit: cover for the square thumbnails, and srcset on the cover image with at least two sizes.",
+      "starterFiles": [],
+      "acceptance": [
+        "No px font sizes; font sizes and spacing use rem",
+        "h1 uses clamp() and grows smoothly as the window widens",
+        "Article text column is limited (e.g. max-width: 65ch) and centred",
+        "All images have max-width:100% and never overflow",
+        "Thumbnails are perfect squares using aspect-ratio: 1 and object-fit: cover without stretching",
+        "Cover image uses srcset (and sizes) with at least two image files"
+      ]
+    },
+    "hints": [
+      "Put img { max-width: 100%; height: auto; display: block } at the top of your CSS. Most image overflow problems go away.",
+      "Fluid heading: h1 { font-size: clamp(1.75rem, 4vw + 1rem, 3.5rem) } means: never below 1.75rem, never above 3.5rem, and scales with the window in between.",
+      "For squares: .thumb { aspect-ratio: 1; width: 100%; object-fit: cover }. To make two image sizes, resize one photo in any image editor (e.g. 800px and 1600px wide)."
+    ],
+    "proof": "Commit with day10/ files including your images.",
+    "explainBack": [
+      { "q": "Explain rem and em using your own CSS. Why did you use rem for font sizes?", "lookFor": ["rem relative to root (html) font size", "em relative to the element's/parent's font size", "rem doesn't compound when nested", "respects the user's browser font setting"] },
+      { "q": "Read your clamp() for the h1 and explain each of the three values.", "lookFor": ["minimum", "preferred value that scales with vw", "maximum", "result stays between min and max"] },
+      { "q": "What does object-fit: cover do to a portrait photo in your square thumbnail?", "lookFor": ["fills the box", "keeps aspect ratio, no stretching", "crops the overflow"] }
+    ],
+    "lastHintExplanation": "rem is relative to the root font size (usually 16px), so 1.5rem is always 24px no matter where it's nested, and it scales if the user changes their browser font size. em is relative to the current element's font size and compounds when nested. clamp(min, preferred, max) picks the preferred value but keeps it between min and max. object-fit: cover fills the box while keeping proportions, cropping what doesn't fit.",
+    "predict": [
+      { "q": "The html font size is 16px. A div's parent has font-size: 20px. The div has font-size: 2rem. What is its font size?", "options": ["32px", "40px", "20px", "36px"], "answer": 0, "why": "rem uses the root font size: 2 × 16 = 32px. The parent doesn't matter." },
+      { "q": "A parent has font-size: 20px. Its child has font-size: 1.5em. What is the child's font size?", "options": ["24px", "30px", "20px", "1.5px"], "answer": 1, "why": "em for font-size is relative to the parent: 1.5 × 20 = 30px." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Counting with loops",
+      "note": "Nested loops: compare every pair. Count how many comparisons your solution makes for an array of length 5.",
+      "problems": [
+        { "title": "LeetCode 1512: Number of Good Pairs", "url": "https://leetcode.com/problems/number-of-good-pairs/" },
+        { "title": "LeetCode 2011: Final Value of Variable After Performing Operations", "url": "https://leetcode.com/problems/final-value-of-variable-after-performing-operations/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Averages",
+      "questions": [
+        { "q": "What is the average of the first 10 natural numbers?", "options": ["5", "5.5", "6", "10"], "answer": 1, "why": "Sum = 55, and 55 / 10 = 5.5." },
+        { "q": "The average of 5 numbers is 20. When one is removed, the average of the rest is 18. What number was removed?", "options": ["22", "24", "28", "30"], "answer": 2, "why": "Total 100, remaining total 72, so the removed number is 28." },
+        { "q": "A batsman averages 40 runs over 10 innings. How many runs must he score in the 11th innings to average 42?", "options": ["52", "60", "62", "64"], "answer": 2, "why": "He needs 42 × 11 = 462 in total. 462 − 400 = 62." },
+        { "q": "The average age of 30 students is 15. With the teacher included, the average is 16. How old is the teacher?", "options": ["31", "45", "46", "48"], "answer": 2, "why": "31 × 16 − 30 × 15 = 496 − 450 = 46." },
+        { "q": "The average of 3 consecutive even numbers is 24. What is the largest?", "options": ["24", "26", "28", "22"], "answer": 1, "why": "The numbers are 22, 24 and 26." }
+      ]
+    },
+    "revision": ["Day 9: open your Day 9 page at 360px and 1200px. Without looking at the CSS, say which media query changes what."]
+  },
+  {
+    "day": 11,
+    "module": "css-layout",
+    "title": "Project: responsive landing page from a brief",
+    "goal": "Turn a written brief into a complete, responsive landing page on your own, using Flexbox, Grid and media queries.",
+    "learn": {
+      "concepts": [
+        "Planning before coding: sketch the mobile and desktop layouts on paper",
+        "Breaking a page into sections and components",
+        "Choosing Flexbox vs Grid for each section",
+        "A small set of design tokens: 2 colours, 1–2 fonts, a spacing scale",
+        "Checking your page: resize test, keyboard tab test, image alt text"
+      ],
+      "resources": [
+        { "title": "MDN: Typesetting a community school homepage (assessment)", "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Text_styling/Typesetting_a_homepage" },
+        { "title": "Google Fonts", "url": "https://fonts.google.com/" },
+        { "title": "Coolors: colour palette generator", "url": "https://coolors.co/" }
+      ]
+    },
+    "build": {
+      "task": "Brief: a local coaching centre called 'BrightPath Classes' needs a one-page site. Sections: sticky header with nav; hero with headline, subtext and a 'Book a free demo' button; 'Courses' (6 course cards with subject, grade and fee); 'Why us' (3 points with icons or emoji); 'Testimonials' (3 quotes); a contact form (name, phone, course select, message); footer. Build it in day11/ mobile-first. Before coding, add day11/plan.md with your sketch notes: which sections use Flexbox and which use Grid, and your breakpoints.",
+      "starterFiles": [
+        { "name": "day11/plan.md", "content": "# BrightPath landing page plan\n\n## Sections and layout tool (Flexbox or Grid)\n\n- Header:\n- Hero:\n- Courses:\n- Why us:\n- Testimonials:\n- Contact:\n- Footer:\n\n## Breakpoints\n\n## Colours and fonts\n" }
+      ],
+      "acceptance": [
+        "plan.md is filled in and committed before the HTML/CSS (check commit order)",
+        "All 7 sections exist with semantic elements",
+        "Header stays at the top while scrolling (position: sticky)",
+        "Course cards: 1 column on phones, 2 on tablets, 3 on desktop",
+        "Form fields all have labels; the select lists real course options",
+        "No horizontal scroll at 360px; looks intentional at 1440px",
+        "Colours and spacing defined once as CSS custom properties (--brand, --space-2 ...)"
+      ]
+    },
+    "hints": [
+      "Commit plan.md first. Then build section by section and commit after each one. Small commits make the history easy to read and errors easy to undo.",
+      "position: sticky; top: 0 on the header only works if no ancestor has overflow: hidden. Give the header a background colour so content doesn't show through.",
+      "Define :root { --brand: #2563eb; --space-1: 0.5rem; --space-2: 1rem; --space-3: 2rem } and use var(--brand) everywhere. Changing the brand colour then takes one edit."
+    ],
+    "proof": "Link to your repo folder day11/ on GitHub. At least 5 commits for this day.",
+    "explainBack": [
+      { "q": "Walk through your plan.md. For one section you chose Grid and one you chose Flexbox: why?", "lookFor": ["grid for 2D card grids", "flex for a single row/column like nav or hero", "decision tied to their actual sections"] },
+      { "q": "How does position: sticky on your header differ from position: fixed?", "lookFor": ["sticky stays in normal flow until it reaches the top offset", "fixed is removed from flow and always relative to the viewport", "fixed often needs padding on the body to avoid covering content"] },
+      { "q": "What are CSS custom properties and how did they help in this project?", "lookFor": ["variables defined with --name", "used with var()", "change once, updates everywhere", "consistent colours and spacing"] }
+    ],
+    "lastHintExplanation": "Grid suits sections where items line up in rows and columns (course cards); Flexbox suits a single line (nav, a hero with two halves). position: sticky keeps the element in normal flow until scrolling reaches its top offset, then it sticks; fixed removes it from flow entirely. Custom properties (--brand) are variables, so one change updates every use.",
+    "predict": [
+      { "q": ":root { --gap: 1rem } .grid { gap: var(--gap, 2rem) }. What gap does .grid get?", "options": ["1rem", "2rem", "3rem", "No gap"], "answer": 0, "why": "--gap is defined, so var() uses it. The fallback 2rem is used only when the variable is not defined." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Week 2 practice",
+      "note": "No new problems today; the project is big. Re-solve Concatenation of Array and Richest Customer Wealth from a blank file without looking at your old code.",
+      "problems": [
+        { "title": "LeetCode 1929: Concatenation of Array (re-solve)", "url": "https://leetcode.com/problems/concatenation-of-array/" },
+        { "title": "LeetCode 1672: Richest Customer Wealth (re-solve)", "url": "https://leetcode.com/problems/richest-customer-wealth/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Profit, loss and discount",
+      "questions": [
+        { "q": "The marked price is ₹800 and the discount is 15%. What is the selling price?", "options": ["₹650", "₹680", "₹700", "₹720"], "answer": 1, "why": "800 × 0.85 = 680." },
+        { "q": "The cost price is ₹500 and the selling price is ₹600. What is the profit %?", "options": ["16.67%", "20%", "25%", "10%"], "answer": 1, "why": "100/500 = 20%." },
+        { "q": "An item bought for ₹250 is sold for ₹200. What is the loss %?", "options": ["20%", "25%", "50%", "15%"], "answer": 0, "why": "Loss 50 on 250 = 20%." },
+        { "q": "A shopkeeper marks goods 25% above cost and gives a 10% discount. What is the profit %?", "options": ["10%", "12.5%", "15%", "15.5%"], "answer": 1, "why": "1.25 × 0.9 = 1.125, so 12.5% profit." },
+        { "q": "The selling price of 12 articles equals the cost price of 15 articles. What is the profit %?", "options": ["20%", "25%", "30%", "3%"], "answer": 1, "why": "If each costs ₹1, 12 articles cost ₹12 and sell for ₹15: profit 3/12 = 25%." }
+      ]
+    },
+    "revision": ["Day 10: write a clamp() for a heading from memory and explain each value out loud."]
+  },
+  {
+    "day": 12,
+    "module": "css-layout",
+    "title": "Debug lab: the broken responsive page, and week review",
+    "goal": "Find and fix layout bugs using DevTools, then review everything from Week 2.",
+    "learn": {
+      "concepts": [
+        "DevTools Elements panel: computed styles, box model view, flex and grid badges",
+        "Crossed-out styles: a rule was overridden or is invalid",
+        "Yellow warning triangles: an invalid property or value",
+        "Finding overflow: which element is wider than the screen?",
+        "Fixing one bug at a time and re-testing"
+      ],
+      "resources": [
+        { "title": "Chrome DevTools: View and change CSS", "url": "https://developer.chrome.com/docs/devtools/css" },
+        { "title": "Chrome DevTools: Inspect CSS grid", "url": "https://developer.chrome.com/docs/devtools/css/grid" },
+        { "title": "MDN: Debugging CSS", "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Styling_basics/Debugging_CSS" }
+      ]
+    },
+    "build": {
+      "task": "Copy the starter files into day12/debug/. The page should show a header, then 3 cards in a row on desktop and stacked on phones, with images that fit. It has 4 bugs. Fix them one at a time, committing after each fix with a message that names the bug (e.g. 'fix: missing colon in media query'). Then write day12/week2-notes.md: for each of Days 7–11, one thing you're confident about and one thing you'd want to revise.",
+      "starterFiles": [
+        { "name": "day12/debug/index.html", "content": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Broken responsive page</title>\n  <link rel=\"stylesheet\" href=\"style.css\">\n</head>\n<body>\n  <header class=\"top\"><h1>Trip ideas</h1></header>\n  <main class=\"cards\">\n    <article class=\"card\"><img src=\"https://picsum.photos/1200/800?1\" alt=\"Mountain lake at sunrise\"><h2>Mountains</h2><p>Cool air and quiet trails.</p></article>\n    <article class=\"card\"><img src=\"https://picsum.photos/1200/800?2\" alt=\"Beach with palm trees\"><h2>Beaches</h2><p>Sun, sand and seafood.</p></article>\n    <article class=\"card\"><img src=\"https://picsum.photos/1200/800?3\" alt=\"Old city street at night\"><h2>Cities</h2><p>Food, history and markets.</p></article>\n  </main>\n</body>\n</html>\n" },
+        { "name": "day12/debug/style.css", "content": "* { box-sizing: border-box; }\nbody { margin: 0; font-family: system-ui, sans-serif; }\n.top { padding: 1rem; background: #0f766e; color: white; }\n\n.cards {\n  display: grid;\n  grid-template-columns: 1fr;\n  gap: 1rem;\n  padding: 1rem;\n}\n\n.card { border: 1px solid #ddd; border-radius: 8px; padding: 1rem; }\n\n@media (min-width 800px) {\n  .cards { grid-template-colums: repeat(3, 1fr); }\n}\n" }
+      ],
+      "acceptance": [
+        "All 4 bugs fixed, each in its own commit with a clear message",
+        "On a 360px-wide DevTools phone view: cards stacked, no horizontal scroll, images fit the card",
+        "At 1000px: 3 cards in a row",
+        "week2-notes.md has an entry for each of Days 7–11"
+      ]
+    },
+    "hints": [
+      "Open the page in the DevTools device toolbar at 360px. The text looks tiny and zoomed out: what tag tells phones to use the real screen width?",
+      "Images are 1200px wide and push past the card. One CSS rule for img fixes this.",
+      "Select .cards at 1000px wide. In the Styles panel, look for rules that are missing, crossed out or marked with a warning. There are two separate typos in the media query."
+    ],
+    "proof": "Link to your last debug fix commit on GitHub, plus week2-notes.md in the same commit or later.",
+    "explainBack": [
+      { "q": "List the 4 bugs you found. For each, say how DevTools showed it to you.", "lookFor": ["missing viewport meta", "images overflowing: no max-width:100%", "media query missing colon so the whole block is ignored", "grid-template-colums typo shown as invalid property", "describes the DevTools clue"] },
+      { "q": "Why did a missing colon in the media query break the whole block, not just one line?", "lookFor": ["invalid media query condition means the query never matches", "CSS ignores what it can't parse", "no error message, it just silently fails"] }
+    ],
+    "lastHintExplanation": "The bugs: (1) no viewport meta, so phones render at ~980px and zoom out; (2) images have no max-width:100%, so 1200px images overflow; (3) @media (min-width 800px) is missing the colon, so the condition is invalid and never matches; (4) grid-template-colums is misspelled, so DevTools flags it as an unknown property. CSS fails silently: invalid code is skipped, not reported as an error.",
+    "predict": [
+      { "q": "A CSS file has .box { colr: red; background: blue; }. What does the browser do?", "options": ["Shows an error and stops loading CSS", "Ignores colr: red and still applies background: blue", "Ignores the whole .box rule", "Treats colr as color"], "answer": 1, "why": "CSS skips the one declaration it doesn't understand and keeps the rest." },
+      { "q": "@media (min-width 800px) { body { background: red } } with the colon missing. At 1200px, what background does body have?", "options": ["Red", "Default (no red)", "Red only on phones", "The page fails to load"], "answer": 1, "why": "The media query condition is invalid, so the block never applies." }
+    ],
+    "debugLab": {
+      "title": "The broken responsive page",
+      "symptoms": [
+        "On a phone the whole page looks zoomed out with tiny text",
+        "Images stick out past the right edge of the cards and cause sideways scrolling",
+        "On a wide laptop screen the cards are still stacked in one column"
+      ],
+      "files": ["day12/debug/index.html", "day12/debug/style.css"],
+      "bugCount": 4
+    },
+    "dsa": {
+      "pattern": "Week 2 review: arrays and strings",
+      "note": "Re-solve one problem from this week without looking at your old code, then do this new one.",
+      "problems": [
+        { "title": "LeetCode 1365: How Many Numbers Are Smaller Than the Current Number", "url": "https://leetcode.com/problems/how-many-numbers-are-smaller-than-the-current-number/" },
+        { "title": "LeetCode 771: Jewels and Stones", "url": "https://leetcode.com/problems/jewels-and-stones/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Number series",
+      "questions": [
+        { "q": "3, 9, 27, 81, ?", "options": ["162", "243", "324", "729"], "answer": 1, "why": "Each term is multiplied by 3." },
+        { "q": "2, 6, 12, 20, 30, ?", "options": ["40", "42", "44", "48"], "answer": 1, "why": "n(n+1): 6×7 = 42." },
+        { "q": "1, 4, 9, 16, 25, ?", "options": ["30", "36", "49", "35"], "answer": 1, "why": "Squares: 6² = 36." },
+        { "q": "5, 11, 23, 47, ?", "options": ["94", "95", "96", "97"], "answer": 1, "why": "Each term is ×2 + 1: 47 × 2 + 1 = 95." },
+        { "q": "Find the wrong number: 2, 5, 10, 17, 26, 38", "options": ["5", "17", "26", "38"], "answer": 3, "why": "The pattern is n² + 1, so the last term should be 37." }
+      ]
+    },
+    "revision": ["Days 7–11: open each day's page, resize from 360px to 1400px, and say out loud what changes at each breakpoint and why."]
+  }
+]

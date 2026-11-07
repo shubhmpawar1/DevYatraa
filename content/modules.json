@@ -1,0 +1,473 @@
+[
+  {
+    "id": "git-basics",
+    "title": "Git basics",
+    "phase": 1,
+    "skippable": false,
+    "test": null
+  },
+  {
+    "id": "html-foundations",
+    "title": "HTML foundations",
+    "phase": 1,
+    "skippable": true,
+    "test": {
+      "passPercent": 80,
+      "questions": [
+        {
+          "day": 2,
+          "topic": "Page metadata",
+          "q": "Which line makes a page display at the device's width on phones?",
+          "options": [
+            "<meta charset=\"utf-8\">",
+            "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">",
+            "<html lang=\"en\">",
+            "<title>"
+          ],
+          "answer": 1
+        },
+        {
+          "day": 2,
+          "topic": "Heading outline",
+          "q": "A page has an h1, then jumps straight to h4 for its sections. What is the main problem?",
+          "options": [
+            "h4 is deprecated",
+            "The heading outline skips levels, confusing screen readers and structure",
+            "Browsers refuse to render it",
+            "Nothing"
+          ],
+          "answer": 1
+        },
+        {
+          "day": 2,
+          "topic": "Whitespace",
+          "code": "<p>A\n\n\nB</p>",
+          "q": "What is displayed?",
+          "options": [
+            "A and B on separate lines with blank lines",
+            "A B on one line",
+            "AB",
+            "Only A"
+          ],
+          "answer": 1
+        },
+        {
+          "day": 2,
+          "topic": "Semantic text",
+          "q": "Which element marks text as strongly important (not just bold)?",
+          "options": [
+            "<b>",
+            "<strong>",
+            "<i>",
+            "<mark>"
+          ],
+          "answer": 1
+        },
+        {
+          "day": 3,
+          "topic": "Relative paths",
+          "q": "From site/blog/post.html, which href opens site/index.html?",
+          "options": [
+            "index.html",
+            "/blog/index.html",
+            "../index.html",
+            "./blog/index.html"
+          ],
+          "answer": 2
+        },
+        {
+          "day": 3,
+          "topic": "Alt text",
+          "q": "Which alt text is best for a photo of a student presenting a project?",
+          "options": [
+            "alt=\"image\"",
+            "alt=\"photo.jpg\"",
+            "alt=\"Student presenting a to-do app on a projector\"",
+            "No alt needed"
+          ],
+          "answer": 2
+        },
+        {
+          "day": 3,
+          "topic": "Semantic layout",
+          "q": "Where should a site's main navigation links go?",
+          "options": [
+            "<div class=\"nav\">",
+            "<nav>",
+            "<section>",
+            "<aside>"
+          ],
+          "answer": 1
+        },
+        {
+          "day": 4,
+          "topic": "Form data",
+          "q": "An input has id=\"mail\" but no name attribute. What is sent on submit?",
+          "options": [
+            "mail=<value>",
+            "id=<value>",
+            "Nothing for this input",
+            "An error"
+          ],
+          "answer": 2
+        },
+        {
+          "day": 4,
+          "topic": "Labels",
+          "q": "How do you link <label> to <input id=\"age\">?",
+          "options": [
+            "<label name=\"age\">",
+            "<label for=\"age\">",
+            "<label id=\"age\">",
+            "<label href=\"#age\">"
+          ],
+          "answer": 1
+        },
+        {
+          "day": 4,
+          "topic": "Tables",
+          "q": "Which marks a header cell for a whole row?",
+          "options": [
+            "<td scope=\"row\">",
+            "<th scope=\"row\">",
+            "<tr header>",
+            "<th scope=\"col\">"
+          ],
+          "answer": 1
+        }
+      ],
+      "buildTask": {
+        "task": "In a new folder html-test/, build one page with header/nav/main/footer, an image with good alt text, a nested list, and a contact form with three labelled fields (one required). No CSS needed. Commit it and paste the commit link.",
+        "acceptance": [
+          "Semantic layout",
+          "Working labels",
+          "Required field blocks empty submit",
+          "Validator shows 0 errors"
+        ]
+      }
+    }
+  },
+  {
+    "id": "css-foundations",
+    "title": "CSS foundations",
+    "phase": 1,
+    "skippable": true,
+    "test": {
+      "passPercent": 80,
+      "questions": [
+        {
+          "day": 5,
+          "topic": "Specificity",
+          "code": "div p { color: red; }\n.text { color: blue; }\n<div><p class=\"text\">Hi</p></div>",
+          "q": "What color is the text?",
+          "options": [
+            "red",
+            "blue",
+            "black",
+            "Depends on order"
+          ],
+          "answer": 1
+        },
+        {
+          "day": 5,
+          "topic": "Specificity",
+          "code": ".a { color: red; }\n.a { color: green; }",
+          "q": "Both rules match. Which wins?",
+          "options": [
+            "red",
+            "green",
+            "Neither",
+            "Mixed"
+          ],
+          "answer": 1
+        },
+        {
+          "day": 5,
+          "topic": "Box model",
+          "q": "width: 300px; padding: 10px; border: 2px; box-sizing: border-box. Total rendered width?",
+          "options": [
+            "300px",
+            "312px",
+            "324px",
+            "320px"
+          ],
+          "answer": 0
+        },
+        {
+          "day": 5,
+          "topic": "Box model",
+          "q": "Which space is filled by the element's background color?",
+          "options": [
+            "Margin",
+            "Padding",
+            "Both",
+            "Neither"
+          ],
+          "answer": 1
+        },
+        {
+          "day": 5,
+          "topic": "Centering",
+          "q": "How do you horizontally center a block element with max-width: 800px?",
+          "options": [
+            "text-align: center",
+            "margin: 0 auto",
+            "align-items: center",
+            "float: center"
+          ],
+          "answer": 1
+        },
+        {
+          "day": 5,
+          "topic": "Linking CSS",
+          "q": "A stylesheet isn't applied. Which link tag is correct?",
+          "options": [
+            "<link href=\"style.css\">",
+            "<link rel=\"stylesheet\" href=\"style.css\">",
+            "<style src=\"style.css\">",
+            "<css href=\"style.css\">"
+          ],
+          "answer": 1
+        },
+        {
+          "day": 6,
+          "topic": "Flexbox axes",
+          "q": "With flex-direction: column, justify-content aligns items along…",
+          "options": [
+            "the horizontal axis",
+            "the vertical axis",
+            "both axes",
+            "neither axis"
+          ],
+          "answer": 1
+        },
+        {
+          "day": 6,
+          "topic": "Flexbox wrapping",
+          "q": "Items overflow the container on small screens. Which property lets them move to a new line?",
+          "options": [
+            "flex-flow: nowrap",
+            "flex-wrap: wrap",
+            "overflow: wrap",
+            "white-space: wrap"
+          ],
+          "answer": 1
+        },
+        {
+          "day": 6,
+          "topic": "Flexbox parent",
+          "q": "Links inside <nav> should be in a row. Where does display: flex go?",
+          "options": [
+            "On each <a>",
+            "On the <nav>",
+            "On <body>",
+            "On <html>"
+          ],
+          "answer": 1
+        },
+        {
+          "day": 6,
+          "topic": "Flexbox spacing",
+          "q": "Which property adds equal space between flex items without margins?",
+          "options": [
+            "gap",
+            "padding",
+            "spacing",
+            "justify-items"
+          ],
+          "answer": 0
+        }
+      ],
+      "buildTask": {
+        "task": "In a new folder css-test/, build a pricing section with 3 cards using flexbox: equal heights, wrapping on narrow screens, a centered max-width container, border-box sizing. Commit and paste the link.",
+        "acceptance": [
+          "Flex container with gap and wrap",
+          "Centered container",
+          "No inline styles"
+        ]
+      }
+    }
+  },
+  {
+    "id": "css-layout",
+    "title": "CSS layout: flexbox, grid and responsive design",
+    "phase": 1,
+    "skippable": false,
+    "test": null
+  },
+  {
+    "id": "git-workflow",
+    "title": "Git workflow: branches, pull requests and conflicts",
+    "phase": 1,
+    "skippable": false,
+    "test": null
+  },
+  {
+    "id": "web-basics",
+    "title": "How the web works",
+    "phase": 1,
+    "skippable": false,
+    "test": null
+  },
+  {
+    "id": "css-advanced",
+    "title": "Advanced CSS",
+    "phase": 1,
+    "skippable": false,
+    "test": null
+  },
+  {
+    "id": "phase1-project",
+    "title": "Phase 1 project: portfolio site",
+    "phase": 1,
+    "skippable": false,
+    "test": null
+  },
+  {
+    "id": "js-fundamentals",
+    "title": "JavaScript fundamentals",
+    "phase": 2,
+    "skippable": false,
+    "test": null
+  },
+  {
+    "id": "js-functions",
+    "title": "JavaScript functions",
+    "phase": 2,
+    "skippable": false,
+    "test": null
+  },
+  {
+    "id": "js-data",
+    "title": "Arrays, objects and data",
+    "phase": 2,
+    "skippable": false,
+    "test": null
+  },
+  {
+    "id": "js-dom",
+    "title": "The DOM and events",
+    "phase": 2,
+    "skippable": false,
+    "test": null
+  },
+  {
+    "id": "js-async",
+    "title": "Asynchronous JavaScript",
+    "phase": 2,
+    "skippable": false,
+    "test": null
+  },
+  {
+    "id": "js-modules",
+    "title": "Modules and tooling",
+    "phase": 2,
+    "skippable": false,
+    "test": null
+  },
+  {
+    "id": "phase2-project",
+    "title": "Phase 2 project: expense tracker",
+    "phase": 2,
+    "skippable": false,
+    "test": null
+  },
+  {
+    "id": "typescript",
+    "title": "TypeScript",
+    "phase": 3,
+    "skippable": false,
+    "test": null
+  },
+  {
+    "id": "tailwind",
+    "title": "Tailwind CSS",
+    "phase": 3,
+    "skippable": false,
+    "test": null
+  },
+  {
+    "id": "angular-basics",
+    "title": "Angular basics",
+    "phase": 3,
+    "skippable": false,
+    "test": null
+  },
+  {
+    "id": "angular-components",
+    "title": "Angular components, signals and services",
+    "phase": 3,
+    "skippable": false,
+    "test": null
+  },
+  {
+    "id": "angular-routing-forms",
+    "title": "Angular routing and forms",
+    "phase": 3,
+    "skippable": false,
+    "test": null
+  },
+  {
+    "id": "angular-http",
+    "title": "Angular HTTP and Phase 3 review",
+    "phase": 3,
+    "skippable": false,
+    "test": null
+  },
+  {
+    "id": "node-basics",
+    "title": "Node.js and Express basics",
+    "phase": 4,
+    "skippable": false,
+    "test": null
+  },
+  {
+    "id": "express-api",
+    "title": "REST APIs with Express",
+    "phase": 4,
+    "skippable": false,
+    "test": null
+  },
+  {
+    "id": "postgres",
+    "title": "PostgreSQL and SQL",
+    "phase": 4,
+    "skippable": false,
+    "test": null
+  },
+  {
+    "id": "auth-security",
+    "title": "Authentication and security",
+    "phase": 4,
+    "skippable": false,
+    "test": null
+  },
+  {
+    "id": "backend-testing",
+    "title": "Backend testing and Phase 4 review",
+    "phase": 4,
+    "skippable": false,
+    "test": null
+  },
+  {
+    "id": "capstone-1",
+    "title": "Capstone 1: ApplyTrack",
+    "phase": 5,
+    "skippable": false,
+    "test": null
+  },
+  {
+    "id": "capstone-2",
+    "title": "Capstone 2: StandupBoard",
+    "phase": 6,
+    "skippable": false,
+    "test": null
+  },
+  {
+    "id": "interview-prep",
+    "title": "Interview preparation",
+    "phase": 6,
+    "skippable": false,
+    "test": null
+  }
+]

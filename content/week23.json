@@ -1,0 +1,376 @@
+[
+  {
+    "day": 133,
+    "module": "capstone-1",
+    "title": "Performance and accessibility pass",
+    "goal": "Measure ApplyTrack with Lighthouse and axe, then fix what matters until both scores are strong.",
+    "learn": {
+      "concepts": [
+        "Core Web Vitals: LCP, INP, CLS",
+        "Lighthouse in DevTools: performance, accessibility, best practices, SEO",
+        "Bundle analysis: ng build --stats-json and a bundle analyser",
+        "Lazy-load heavy libraries (Chart.js only on the dashboard)",
+        "axe DevTools for accessibility issues; manual keyboard and screen reader checks",
+        "Caching static assets (hashed filenames + long cache headers in Nginx)"
+      ],
+      "resources": [
+        { "title": "web.dev: Core Web Vitals", "url": "https://web.dev/articles/vitals" },
+        { "title": "Chrome DevTools: Lighthouse", "url": "https://developer.chrome.com/docs/lighthouse/overview" },
+        { "title": "axe DevTools browser extension", "url": "https://www.deque.com/axe/devtools/" },
+        { "title": "Angular: Deferrable views (@defer)", "url": "https://angular.dev/guide/templates/defer" }
+      ]
+    },
+    "build": {
+      "task": "On the live ApplyTrack: run Lighthouse (mobile) on login, applications and dashboard, and axe on every page; record the starting scores in docs/quality.md. Fix: lazy-load Chart.js with @defer or a dynamic import, analyse the bundle and remove anything unnecessary, add long-lived cache headers for hashed assets in Nginx (and no-cache for index.html), reserve space for charts and images to avoid layout shift, and fix every axe issue (contrast, labels, landmarks, heading order). Test with keyboard only and with a screen reader (NVDA, VoiceOver or TalkBack) on one full journey. Record the after scores.",
+      "starterFiles": [],
+      "acceptance": [
+        "Before and after Lighthouse scores recorded for 3 pages",
+        "Performance 90+ and Accessibility 95+ on mobile for all 3",
+        "Chart.js no longer in the initial bundle",
+        "Zero axe violations",
+        "Cache headers: hashed assets cached long, index.html not cached",
+        "One screen-reader journey completed and written up"
+      ]
+    },
+    "hints": [
+      "Nginx: location ~* \\.(js|css|woff2|png|svg)$ { expires 1y; add_header Cache-Control \"public, immutable\"; } and location = /index.html { add_header Cache-Control \"no-cache\"; }",
+      "@defer (on viewport) { <app-weekly-chart /> } @placeholder { <div class=\"h-64\"></div> } keeps Chart.js out of the main bundle and reserves its space.",
+      "Run Lighthouse in an incognito window: extensions skew the results."
+    ],
+    "proof": "Commit with fixes and docs/quality.md showing before and after.",
+    "explainBack": [
+      { "q": "Why should hashed JS files be cached for a year but index.html not cached?", "lookFor": ["hash changes when content changes so new files get new URLs", "index.html points to the latest hashes", "caching index.html would keep users on old versions"] },
+      { "q": "Which fix improved your scores the most, and why?", "lookFor": ["specific fix", "metric it improved", "explanation"] }
+    ],
+    "lastHintExplanation": "Build tools put a content hash in each file name, so a changed file gets a new URL, which makes it safe to cache old ones forever. index.html is the entry point that references the current hashes, so it must always be fetched fresh, or users would keep loading last week's app.",
+    "predict": [],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "DP: 1D table",
+      "note": "Each row of Pascal's triangle is built from the previous row: row[i] = prev[i−1] + prev[i].",
+      "problems": [
+        { "title": "LeetCode 118: Pascal's Triangle", "url": "https://leetcode.com/problems/pascals-triangle/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Timed mixed test 19 (10 minutes)",
+      "questions": [
+        { "q": "A fan is sold for ₹2,400 at a 20% profit. What was its cost price?", "options": ["₹1,920", "₹2,000", "₹2,100", "₹1,800"], "answer": 1, "why": "2,400/1.2." },
+        { "q": "A and B can do a job in 6 days, B and C in 10 days, and A and C in 7.5 days. How long do all three take together?", "options": ["5 days", "4 days", "6 days", "4.5 days"], "answer": 0, "why": "The pair rates add up to 1/6 + 1/10 + 2/15 = 2/5, which is twice the combined rate, so the combined rate is 1/5." },
+        { "q": "A man covers half a distance at 30 km/h and the other half at 60 km/h. What is his average speed?", "options": ["45 km/h", "40 km/h", "50 km/h", "42 km/h"], "answer": 1, "why": "2 × 30 × 60/90." },
+        { "q": "Odd one out: Square, Rectangle, Rhombus, Triangle", "options": ["Square", "Rectangle", "Rhombus", "Triangle"], "answer": 3, "why": "The others have four sides." },
+        { "q": "Which word means the same as 'Ample'?", "options": ["Scarce", "Plenty", "Small", "Narrow"], "answer": 1, "why": "Ample means more than enough." }
+      ]
+    },
+    "revision": ["Day 132: list the 4 Docker bugs from memory."]
+  },
+  {
+    "day": 134,
+    "module": "capstone-1",
+    "title": "Polish: onboarding, empty states and one stretch feature",
+    "goal": "Turn a working app into one that feels finished.",
+    "learn": {
+      "concepts": [
+        "First-run experience: what a brand-new user sees",
+        "Helpful empty states with a clear next action",
+        "Microcopy: button labels, error messages, confirmations",
+        "Toasts with undo for destructive actions",
+        "Stretch features: CSV export, keyboard shortcuts, reminders"
+      ],
+      "resources": [
+        { "title": "Nielsen Norman Group: Empty states", "url": "https://www.nngroup.com/articles/empty-state-interface-design/" },
+        { "title": "Nielsen Norman Group: Error message guidelines", "url": "https://www.nngroup.com/articles/error-message-guidelines/" },
+        { "title": "MDN: Blob and download links", "url": "https://developer.mozilla.org/en-US/docs/Web/API/Blob" }
+      ]
+    },
+    "build": {
+      "task": "Polish ApplyTrack: a first-run welcome on the empty dashboard with 'Add your first application' and 'Load sample data' buttons (a server endpoint that seeds 10 sample applications for the current user); rewrite every error message to say what happened and what to do; add Undo to delete (soft delete or a delayed request); and build ONE stretch feature: CSV export of the filtered list (server endpoint with correct Content-Type and Content-Disposition, escaping commas and quotes), or keyboard shortcuts (n = new, / = search, ? = help dialog). Ship it with tests and a README update.",
+      "starterFiles": [],
+      "acceptance": [
+        "New users see a helpful welcome, not a blank dashboard",
+        "'Load sample data' works and is scoped to the current user",
+        "Every error message says what happened and what to do next",
+        "Deleting can be undone for a few seconds",
+        "One stretch feature shipped with tests and documented"
+      ]
+    },
+    "hints": [
+      "CSV escaping: wrap a field in double quotes if it contains a comma, quote or newline, and double any quotes inside: '\"' + value.replaceAll('\"', '\"\"') + '\"'.",
+      "Download headers: res.setHeader('Content-Type', 'text/csv; charset=utf-8'); res.setHeader('Content-Disposition', 'attachment; filename=\"applications.csv\"'). Prefix the file with a BOM ('\\uFEFF') so Excel reads ₹ and other non-ASCII characters correctly.",
+      "Undo pattern: remove from the UI immediately, show a toast with Undo for 5 seconds, and only call DELETE when the toast expires (or use a deleted_at column)."
+    ],
+    "proof": "Commit with polish changes and the stretch feature.",
+    "explainBack": [
+      { "q": "Show a before-and-after error message and explain why the new one is better.", "lookFor": ["says what happened", "says what to do", "plain language", "no blame or jargon"] },
+      { "q": "How did you handle commas and quotes in CSV fields?", "lookFor": ["quote fields", "double inner quotes", "test with tricky data"] }
+    ],
+    "lastHintExplanation": "'Error 400' tells a user nothing; 'That job URL doesn't look right — it should start with https://' tells them what happened and how to fix it. In CSV, a company name like 'Acme, Inc.' would split into two columns unless the field is quoted, and quotes inside a quoted field must be doubled.",
+    "predict": [],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "DP: longest increasing subsequence",
+      "note": "dp[i] = 1 + max(dp[j]) for j < i with nums[j] < nums[i]. O(n²) is fine; read about the O(n log n) method afterwards.",
+      "problems": [
+        { "title": "LeetCode 300: Longest Increasing Subsequence", "url": "https://leetcode.com/problems/longest-increasing-subsequence/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Timed mixed test 20 (10 minutes)",
+      "questions": [
+        { "q": "What is the compound interest on ₹8,000 at 5% per year for 2 years?", "options": ["₹800", "₹820", "₹840", "₹810"], "answer": 1, "why": "8,000 × 1.1025 − 8,000." },
+        { "q": "A train 200 m long crosses a 300 m platform in 25 seconds. What is its speed in km/h?", "options": ["72", "60", "54", "80"], "answer": 0, "why": "500/25 = 20 m/s." },
+        { "q": "If x : y = 2 : 3 and y : z = 4 : 5, what is x : z?", "options": ["8:15", "2:5", "3:5", "6:5"], "answer": 0, "why": "x/z = (2/3)(4/5)." },
+        { "q": "Coded as 1, 2, 3 = 6 and 2, 3, 4 = 24, what is 3, 4, 5?", "options": ["12", "60", "45", "20"], "answer": 1, "why": "The rule is the product of the numbers." },
+        { "q": "'She has a ___ for music.' (natural ability)", "options": ["flair", "flare", "flier", "flayer"], "answer": 0, "why": "Flair means natural talent; a flare is a light or a burst of flame." }
+      ]
+    },
+    "revision": ["Day 133: explain the caching rules for hashed assets vs index.html."]
+  },
+  {
+    "day": 135,
+    "module": "capstone-1",
+    "title": "Demo video and project story",
+    "goal": "Present ApplyTrack clearly in a 2-minute video and a story you can tell in interviews.",
+    "learn": {
+      "concepts": [
+        "The project story: problem, your solution, key technical decisions, a challenge you solved, results",
+        "STAR format for the 'hardest bug' story",
+        "Demo videos: script, one take per section, show, don't tell",
+        "Free tools: OBS Studio, Loom free tier, or the built-in screen recorder",
+        "Uploading to YouTube (unlisted) and linking from the README"
+      ],
+      "resources": [
+        { "title": "OBS Studio (free screen recording)", "url": "https://obsproject.com/" },
+        { "title": "The STAR method explained (Indeed)", "url": "https://www.indeed.com/career-advice/interviewing/how-to-use-the-star-interview-response-technique" }
+      ]
+    },
+    "build": {
+      "task": "Write docs/project-story.md: a 30-second pitch, a 2-minute walkthrough script, 3 technical decisions with trade-offs (from your ADRs), and 2 STAR stories ('hardest bug' and 'something I'd do differently'). Record a 2-minute demo: the problem (10 s), a user journey from adding an application to the dashboard (60 s), one technical highlight such as the status-history transaction or the test suite (30 s), and the stack and links (20 s). Upload it unlisted to YouTube and embed the link in the README. Practise the 30-second pitch aloud 5 times and record yourself once.",
+      "starterFiles": [
+        { "name": "docs/project-story.md", "content": "# ApplyTrack: project story\n\n## 30-second pitch\n\n## 2-minute walkthrough\n\n## Technical decisions\n1. Decision — why — trade-off\n\n## STAR: hardest bug\n- Situation:\n- Task:\n- Action:\n- Result:\n\n## STAR: what I'd do differently\n" }
+      ],
+      "acceptance": [
+        "project-story.md has the pitch, walkthrough, 3 decisions and 2 STAR stories",
+        "Demo video is 2–2.5 minutes, with clear audio, linked in the README",
+        "The video shows a full user journey and one technical highlight",
+        "You can deliver the 30-second pitch without notes"
+      ]
+    },
+    "hints": [
+      "Script before recording. Record each section separately and join them; nobody needs a one-take video.",
+      "Zoom the browser to 125% and hide bookmarks so text is readable in the video.",
+      "A strong STAR result is specific: 'Dashboard counts were wrong for empty weeks; I added generate_series with a LEFT JOIN and a DB test, so the bug can't come back.'"
+    ],
+    "proof": "Link to the demo video.",
+    "explainBack": [
+      { "q": "Give your 30-second pitch for ApplyTrack.", "lookFor": ["problem", "solution", "stack", "one impressive detail"] },
+      { "q": "Tell your 'hardest bug' story in STAR format.", "lookFor": ["situation", "task", "specific actions", "measurable result", "lesson"] }
+    ],
+    "lastHintExplanation": "Interviewers remember stories, not feature lists. A good project story names the problem, your decisions and their trade-offs, and one real difficulty you solved and how you'd stop it recurring. STAR keeps answers structured and short, and the Result is where you show impact.",
+    "predict": [],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "DP: word break",
+      "note": "dp[i] is true if some dp[j] is true and s.slice(j, i) is a word. Put the words in a Set.",
+      "problems": [
+        { "title": "LeetCode 139: Word Break", "url": "https://leetcode.com/problems/word-break/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Timed mixed test 21 (10 minutes)",
+      "questions": [
+        { "q": "Of 800 voters, 60% voted and the winner got 55% of the votes cast. How many votes did the winner get?", "options": ["264", "280", "300", "240"], "answer": 0, "why": "480 × 0.55." },
+        { "q": "A rectangle's length is twice its breadth and its perimeter is 60 cm. What is its area?", "options": ["150 cm²", "200 cm²", "180 cm²", "225 cm²"], "answer": 1, "why": "6b = 60, so b = 10 and l = 20." },
+        { "q": "A clock shows 6:30. What is the angle between the hands?", "options": ["0°", "15°", "30°", "45°"], "answer": 1, "why": "|30 × 6 − 5.5 × 30| = 15°." },
+        { "q": "Next in the series: Z, X, U, Q, ?", "options": ["L", "M", "K", "N"], "answer": 0, "why": "The steps back are −2, −3, −4, −5: Q − 5 = L." },
+        { "q": "Which word means the same as 'Elated'?", "options": ["Sad", "Overjoyed", "Tired", "Angry"], "answer": 1, "why": "Elated means very happy." }
+      ]
+    },
+    "revision": ["Day 134: explain how CSV escaping works."]
+  },
+  {
+    "day": 136,
+    "module": "capstone-1",
+    "title": "Resume: projects that get interviews",
+    "goal": "Write a one-page fresher resume with strong, specific project bullets.",
+    "learn": {
+      "concepts": [
+        "One page, ATS-friendly (simple layout, no tables or text in images)",
+        "Order for freshers: summary, skills, projects, education, certifications",
+        "Bullet formula: action verb + what you built + how (tech) + result or scale",
+        "Showing proof: live links, GitHub, the demo video",
+        "Tailoring keywords to the job description without lying"
+      ],
+      "resources": [
+        { "title": "Google: XYZ resume formula (Laszlo Bock)", "url": "https://www.inc.com/bill-murphy-jr/google-recruiters-say-these-5-resume-tips-including-x-y-z-formula-will-improve-your-odds-of-getting-hired-at-google.html" },
+        { "title": "Overleaf: free resume templates", "url": "https://www.overleaf.com/latex/templates/tagged/cv" },
+        { "title": "Jobscan: ATS-friendly resume tips", "url": "https://www.jobscan.co/blog/ats-resume/" }
+      ]
+    },
+    "build": {
+      "task": "Write your resume (Google Docs, Overleaf or Word, exported to PDF). Include: name, contact, LinkedIn, GitHub and portfolio links; a 2-line summary; skills grouped as Frontend, Backend, Database, Tools; projects: ApplyTrack (3–4 bullets), notes-fullstack, book-finder and the portfolio (1–2 bullets each, with live links); education. Every bullet follows action + what + how + result. Then tailor a copy for one real junior frontend or full-stack job description, matching keywords honestly. Save resume.pdf and resume-tailored.pdf in a private place, and write docs/resume-bullets.md in jobready-journey with your best 10 bullets.",
+      "starterFiles": [],
+      "acceptance": [
+        "One page, plain ATS-friendly layout, exported to PDF",
+        "Projects come before education, with live and GitHub links",
+        "Every bullet starts with an action verb and names the tech",
+        "At least 3 bullets include a concrete result or number",
+        "A tailored version for one real job posting"
+      ]
+    },
+    "hints": [
+      "Weak: 'Made a job tracker app.' Strong: 'Built ApplyTrack, a full-stack job tracker (Angular, Express, PostgreSQL) with JWT auth, a drag-and-drop status board and a weekly analytics dashboard; 70+ automated tests, deployed with Docker on Coolify.'",
+      "Numbers that are honest for a fresher: test counts, Lighthouse scores, endpoints, pages, days to build, users who tried it.",
+      "Paste your resume into a plain-text editor. If the order and text still make sense, an ATS can read it too."
+    ],
+    "proof": "Link to docs/resume-bullets.md (keep the resume itself private).",
+    "explainBack": [
+      { "q": "Read your best ApplyTrack bullet and explain each part.", "lookFor": ["action verb", "what was built", "technologies", "result/scale"] },
+      { "q": "How did you tailor the resume to the job description without being dishonest?", "lookFor": ["matched their keywords for skills actually used", "reordered skills/projects", "no invented experience"] }
+    ],
+    "lastHintExplanation": "Recruiters skim a resume in seconds, so each bullet must show what you built, with what, and why it matters. Specific, honest numbers (tests, scores, users) make claims believable. Tailoring means using the employer's words for skills you really have and putting the most relevant project first, never adding things you can't defend in an interview.",
+    "predict": [],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "DP: 2D strings",
+      "note": "If the characters match, dp[i][j] = dp[i−1][j−1] + 1; otherwise take the max of skipping one character from either string.",
+      "problems": [
+        { "title": "LeetCode 1143: Longest Common Subsequence", "url": "https://leetcode.com/problems/longest-common-subsequence/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Timed mixed test 22 (10 minutes)",
+      "questions": [
+        { "q": "A number is divided in the ratio 3:5 and the difference between the parts is 40. What is the number?", "options": ["120", "160", "200", "80"], "answer": 1, "why": "2 parts = 40, so 8 parts = 160." },
+        { "q": "A can type 40 pages in 5 hours and B 30 pages in 6 hours. How long do they take together to type 65 pages?", "options": ["5 hours", "6 hours", "4.5 hours", "7 hours"], "answer": 0, "why": "8 + 5 = 13 pages per hour; 65/13." },
+        { "q": "A cube has a volume of 216 cm³. What is its total surface area?", "options": ["216 cm²", "36 cm²", "144 cm²", "180 cm²"], "answer": 0, "why": "Side 6, so 6 × 36." },
+        { "q": "Statements: All developers are engineers. Some engineers are designers. Conclusion: Some developers are designers.", "options": ["Definitely true", "Definitely false", "Does not follow", "Both are true"], "answer": 2, "why": "The engineers who are designers may not be developers." },
+        { "q": "'The manager, along with his team, ___ attending the event.'", "options": ["are", "is", "were", "have"], "answer": 1, "why": "'Along with' doesn't change the subject; the manager is singular." }
+      ]
+    },
+    "revision": ["Day 135: deliver your 30-second pitch aloud."]
+  },
+  {
+    "day": 137,
+    "module": "capstone-1",
+    "title": "LinkedIn and GitHub profile polish",
+    "goal": "Make your online profiles show a developer who builds, ships and documents real work.",
+    "learn": {
+      "concepts": [
+        "LinkedIn: headline, about section, featured projects, skills, open-to-work settings",
+        "GitHub profile README, pinned repositories and descriptions with topics",
+        "Consistent links between resume, portfolio, GitHub and LinkedIn",
+        "Building in public: a short post about what you built and learned",
+        "Professional photo and a custom LinkedIn URL"
+      ],
+      "resources": [
+        { "title": "GitHub Docs: Managing your profile README", "url": "https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-github-profile/customizing-your-profile/managing-your-profile-readme" },
+        { "title": "GitHub Docs: Pinning items to your profile", "url": "https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-github-profile/customizing-your-profile/pinning-items-to-your-profile" },
+        { "title": "LinkedIn Help: Featured section", "url": "https://www.linkedin.com/help/linkedin/answer/a549047" }
+      ]
+    },
+    "build": {
+      "task": "GitHub: create a profile README (who you are, current focus, stack, featured projects with links), pin your 6 best repos (ApplyTrack first), give each a description, topics, a live link and a clean README, and archive or make private anything half-finished or embarrassing. LinkedIn: headline (e.g. 'Full-Stack Developer | Angular · Node.js · PostgreSQL | Building ApplyTrack'), an About section of 3 short paragraphs, ApplyTrack and two other projects in Featured, the top 10 skills, and a custom URL. Update your portfolio site with ApplyTrack. Write and publish one post about building ApplyTrack (what it does, one thing you learned, link). Record everything you changed in docs/profiles.md.",
+      "starterFiles": [],
+      "acceptance": [
+        "GitHub profile README live; 6 repos pinned with descriptions, topics and live links",
+        "LinkedIn headline, About, Featured, skills and custom URL done",
+        "Portfolio site shows ApplyTrack with the demo video",
+        "One LinkedIn post published about the project",
+        "All links consistent across resume, portfolio, GitHub and LinkedIn"
+      ]
+    },
+    "hints": [
+      "Create a repo with exactly your GitHub username; its README.md becomes your profile page.",
+      "Pin projects that show range: a full-stack app (ApplyTrack), a frontend app (book-finder), an API (bookmarks-api), and your portfolio.",
+      "A good post is short: the problem, one screenshot or GIF, one hard thing you learned, the link. Don't apologise for being a beginner."
+    ],
+    "proof": "Links to your GitHub profile, LinkedIn profile and your post.",
+    "explainBack": [
+      { "q": "If a recruiter opens your GitHub for 30 seconds, what do they see first, and what impression should it give?", "lookFor": ["profile README", "pinned real projects", "live links", "consistent activity/quality"] },
+      { "q": "Why archive or hide half-finished repos?", "lookFor": ["first impressions", "focus attention on best work", "quality over quantity"] }
+    ],
+    "lastHintExplanation": "Recruiters spend seconds per profile. A clear profile README, six pinned projects with live links and good READMEs, and matching links everywhere tell a consistent story: this person builds and finishes things. Half-finished repos dilute that impression, so hide or archive them.",
+    "predict": [],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "DP: grid minimum path",
+      "note": "dp[r][c] = grid[r][c] + min(top, left). You can update the grid in place.",
+      "problems": [
+        { "title": "LeetCode 64: Minimum Path Sum", "url": "https://leetcode.com/problems/minimum-path-sum/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Timed mixed test 23 (10 minutes)",
+      "questions": [
+        { "q": "A salary of ₹30,000 is raised by 10% and then cut by 10%. What is the final salary?", "options": ["₹30,000", "₹29,700", "₹30,300", "₹29,000"], "answer": 1, "why": "30,000 × 0.99." },
+        { "q": "What is the probability that a number chosen from 1 to 20 is a multiple of 3 or 5?", "options": ["9/20", "8/20", "10/20", "7/20"], "answer": 0, "why": "6 multiples of 3 + 4 of 5 − 1 (15) = 9." },
+        { "q": "A boat goes 30 km downstream in 2 hours and back in 3 hours. What is its speed in still water?", "options": ["12.5 km/h", "10 km/h", "15 km/h", "12 km/h"], "answer": 0, "why": "(15 + 10)/2." },
+        { "q": "A is B's sister. C is B's mother. D is C's father. How is A related to D?", "options": ["Granddaughter", "Daughter", "Niece", "Sister"], "answer": 0, "why": "A is C's daughter, and D is C's father." },
+        { "q": "What does 'burn the midnight oil' mean?", "options": ["Waste money", "Work late into the night", "Start a fire", "Sleep early"], "answer": 1, "why": "It's an idiom for working late." }
+      ]
+    },
+    "revision": ["Day 136: rewrite one weak bullet using action + what + how + result."]
+  },
+  {
+    "day": 138,
+    "module": "capstone-1",
+    "title": "Capstone 1 walkthrough review",
+    "goal": "Defend ApplyTrack in a mock technical interview and close Phase 5.",
+    "learn": {
+      "concepts": [
+        "Project deep-dive interviews: architecture, decisions, trade-offs, scaling, what you'd change",
+        "Live code walkthrough: open a file and explain it confidently",
+        "Answering 'I don't know' honestly, plus how you'd find out",
+        "Phase 5 retrospective"
+      ],
+      "resources": [
+        { "title": "Tech Interview Handbook: Behavioral and project questions", "url": "https://www.techinterviewhandbook.org/behavioral-interview/" }
+      ]
+    },
+    "build": {
+      "task": "Run a 45-minute mock project interview (ask a friend, a mentor, or record yourself answering): 5 minutes demo; 10 minutes architecture with your diagram; 20 minutes of questions from docs/mock-questions.md (write 15 first, e.g. 'How do you stop users seeing others' data?', 'What happens if two tabs update the same application?', 'How would you add email reminders?', 'Why PostgreSQL?', 'How would this handle 10,000 users?', 'Walk me through the status-change transaction.'); 10 minutes live code walkthrough of one feature. Record it, watch it back, and write docs/phase5-review.md: what went well, 3 answers to improve (with better versions), and what you'd change in ApplyTrack.",
+      "starterFiles": [],
+      "acceptance": [
+        "15 likely interview questions written with your answers",
+        "45-minute mock interview recorded",
+        "3 weak answers rewritten in phase5-review.md",
+        "Honest list of what you'd change in ApplyTrack and why",
+        "All Phase 5 GitHub issues closed or moved to a 'later' milestone"
+      ]
+    },
+    "hints": [
+      "Scaling questions don't need a complete answer: name the first bottleneck (database queries), how you'd measure it (logs, EXPLAIN ANALYZE), and one fix (indexes, pagination, caching).",
+      "For 'two tabs update the same application', talk about last-write-wins today and optimistic locking with an updated_at or version check as the improvement.",
+      "When you don't know: 'I haven't done that yet; I'd start by ... and check ...' is a strong answer."
+    ],
+    "proof": "Link to docs/phase5-review.md.",
+    "explainBack": [
+      { "q": "How would ApplyTrack handle two tabs editing the same application, and how could you improve it?", "lookFor": ["last write wins currently", "optimistic locking with version/updated_at", "409 Conflict on mismatch", "UI asks to reload"] },
+      { "q": "What would you change if you started ApplyTrack again?", "lookFor": ["specific change", "reason", "trade-off awareness"] }
+    ],
+    "lastHintExplanation": "Project interviews test whether you understand what you built: why each piece exists, what breaks first under load, and what you'd improve. Saying 'currently last write wins; I'd add a version column and return 409 on mismatch' shows more maturity than pretending the system is perfect.",
+    "predict": [],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Phase 5 review",
+      "note": "Re-solve one problem from each Phase 5 pattern from a blank file, under 25 minutes each.",
+      "problems": [
+        { "title": "LeetCode 207: Course Schedule (re-solve)", "url": "https://leetcode.com/problems/course-schedule/" },
+        { "title": "LeetCode 347: Top K Frequent Elements (re-solve)", "url": "https://leetcode.com/problems/top-k-frequent-elements/" },
+        { "title": "LeetCode 322: Coin Change (re-solve)", "url": "https://leetcode.com/problems/coin-change/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Timed test: Phase 5 review",
+      "questions": [
+        { "q": "A shopkeeper gives a 10% discount and still makes a 17% profit. If the cost price is ₹1,000, what is the marked price?", "options": ["₹1,300", "₹1,250", "₹1,170", "₹1,200"], "answer": 0, "why": "SP = 1,170, so MP = 1,170/0.9 = 1,300." },
+        { "q": "A train at 72 km/h passes a pole in 9 seconds. How long is the train?", "options": ["160 m", "180 m", "200 m", "150 m"], "answer": 1, "why": "20 m/s × 9." },
+        { "q": "The average of 4 consecutive odd numbers is 24. What is the largest?", "options": ["25", "27", "29", "23"], "answer": 1, "why": "21, 23, 25, 27." },
+        { "q": "In how many ways can a team of 3 be chosen from 5 boys and 4 girls with exactly 2 girls?", "options": ["30", "40", "60", "20"], "answer": 0, "why": "4C2 × 5C1 = 6 × 5." },
+        { "q": "Which word means the opposite of 'Transparent'?", "options": ["Clear", "Opaque", "Honest", "Thin"], "answer": 1, "why": "Opaque means not see-through." }
+      ]
+    },
+    "revision": ["Phase 5: explain ApplyTrack's architecture, its testing and its deployment in 5 minutes, without notes."]
+  }
+]

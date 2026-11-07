@@ -1,0 +1,427 @@
+[
+  {
+    "day": 13,
+    "module": "git-workflow",
+    "title": "Git branches and merging",
+    "goal": "Work on a feature in its own branch, then merge it back into main cleanly.",
+    "learn": {
+      "concepts": [
+        "What a branch is: a movable pointer to a commit",
+        "git branch, git switch -c feature-name, git switch main",
+        "HEAD: where you are right now",
+        "git merge: fast-forward vs merge commit",
+        "git log --oneline --graph --all to see branches",
+        "Deleting merged branches: git branch -d"
+      ],
+      "resources": [
+        { "title": "Pro Git: Branching in a nutshell", "url": "https://git-scm.com/book/en/v2/Git-Branching-Branches-in-a-Nutshell" },
+        { "title": "Learn Git Branching (interactive)", "url": "https://learngitbranching.js.org/" },
+        { "title": "Pro Git: Basic branching and merging", "url": "https://git-scm.com/book/en/v2/Git-Branching-Basic-Branching-and-Merging" }
+      ]
+    },
+    "build": {
+      "task": "In your jobready-journey repo, create day13/index.html with a simple 'My skills' page on main and commit it. Then create a branch add-dark-section, add a dark-themed 'Currently learning' section with 2 commits, and switch back to main. On main, make one commit that adds a footer. Merge add-dark-section into main (this creates a merge commit because main moved). Push main and the branch. Save the output of git log --oneline --graph --all to day13/graph.txt and commit it.",
+      "starterFiles": [],
+      "acceptance": [
+        "Branch add-dark-section exists on GitHub with 2 commits of its own",
+        "main has a merge commit that joins the branch",
+        "day13/graph.txt shows the fork and the merge in the graph",
+        "Final page on main has both the footer and the dark section",
+        "Complete Learn Git Branching 'Introduction Sequence' levels 1–4 (note it in your commit message or progress log)"
+      ]
+    },
+    "hints": [
+      "Check where you are often: git status shows the current branch on its first line.",
+      "Order: git switch -c add-dark-section → edit, commit twice → git switch main → add footer, commit → git merge add-dark-section.",
+      "If git opens an editor for the merge message (Vim), type :wq and press Enter to accept the default message. To push a new branch: git push -u origin add-dark-section."
+    ],
+    "proof": "Link to the merge commit on GitHub (open main's history and click the merge commit).",
+    "explainBack": [
+      { "q": "Using your graph.txt, explain what a branch actually is and what happened when you merged.", "lookFor": ["branch is a pointer/label to a commit", "commits diverged because main got a footer commit", "merge commit has two parents", "refers to their graph"] },
+      { "q": "When would a merge be a fast-forward instead of creating a merge commit?", "lookFor": ["main has no new commits since the branch started", "git just moves the main pointer forward", "no merge commit needed"] },
+      { "q": "Why do developers use branches instead of committing everything to main?", "lookFor": ["main stays working", "work on features separately", "review via pull requests", "can abandon a branch safely"] }
+    ],
+    "lastHintExplanation": "A branch is just a named pointer to a commit; committing moves the pointer forward. When main and your branch both have new commits, git merge creates a merge commit with two parents that joins the histories. If main had no new commits, Git would fast-forward: just move main's pointer to the branch tip.",
+    "predict": [
+      { "q": "You're on main. You run git switch -c feature, make 2 commits, then git switch main. What do you see in your files?", "options": ["The changes from the 2 commits", "main's files without those changes", "A merge conflict", "Empty folder"], "answer": 1, "why": "Switching branches changes your files to match that branch's latest commit. The feature commits only exist on feature." },
+      { "q": "main hasn't changed since you branched. You run git merge feature on main. What happens?", "options": ["A merge commit is created", "Fast-forward: main moves to feature's latest commit", "Conflict", "Nothing, you must push first"], "answer": 1, "why": "With no divergence, Git simply moves the main pointer forward." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Arrays: index tricks",
+      "note": "Use the index as information. Write out the output for a small input by hand before coding.",
+      "problems": [
+        { "title": "LeetCode 1920: Build Array from Permutation", "url": "https://leetcode.com/problems/build-array-from-permutation/" },
+        { "title": "LeetCode 1295: Find Numbers with Even Number of Digits", "url": "https://leetcode.com/problems/find-numbers-with-even-number-of-digits/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Number system: divisibility and unit digits",
+      "questions": [
+        { "q": "What is the unit digit of 7²³?", "options": ["1", "3", "7", "9"], "answer": 1, "why": "Unit digits of powers of 7 repeat 7, 9, 3, 1. 23 mod 4 = 3, so the digit is 3." },
+        { "q": "Which number is divisible by 9?", "options": ["4527", "3241", "7135", "8216"], "answer": 0, "why": "The digit sum of 4527 is 18, which is divisible by 9." },
+        { "q": "What is the remainder when 2¹⁰ is divided by 7?", "options": ["1", "2", "3", "4"], "answer": 1, "why": "1024 = 7 × 146 + 2." },
+        { "q": "How many zeros are at the end of 25!?", "options": ["4", "5", "6", "7"], "answer": 2, "why": "25/5 + 25/25 = 5 + 1 = 6." },
+        { "q": "What is the sum of the first 20 natural numbers?", "options": ["190", "200", "210", "220"], "answer": 2, "why": "20 × 21 / 2 = 210." }
+      ]
+    },
+    "revision": ["Day 1: without notes, explain the difference between the working folder, the staging area and a commit. Then check with git status in your repo."]
+  },
+  {
+    "day": 14,
+    "module": "git-workflow",
+    "title": "Pull requests and a proper README",
+    "goal": "Open, review and merge a pull request on GitHub, and write a README that explains your repo.",
+    "learn": {
+      "concepts": [
+        "What a pull request (PR) is: a request to merge a branch, with discussion",
+        "PR title and description: what changed, why, how to test",
+        "Reviewing your own diff on GitHub (Files changed tab)",
+        "Merge options: merge commit, squash, rebase (just know they exist)",
+        "Markdown: headings, lists, links, images, code blocks, tables",
+        "git pull to bring GitHub's changes to your computer"
+      ],
+      "resources": [
+        { "title": "GitHub Docs: About pull requests", "url": "https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests" },
+        { "title": "GitHub Docs: Basic writing and formatting syntax", "url": "https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax" },
+        { "title": "Make a README", "url": "https://www.makeareadme.com/" }
+      ]
+    },
+    "build": {
+      "task": "Create a branch readme-upgrade. Rewrite the root README.md of jobready-journey: a one-line intro, a table listing each day so far (day, topic, link to the folder), a 'Tools I use' list, and a code block showing how to open any day's page locally. Push the branch and open a pull request with a clear description (What / Why / How to check). Leave at least one review comment on your own diff, then merge the PR on GitHub. Finally run git switch main and git pull so your laptop has the merge.",
+      "starterFiles": [],
+      "acceptance": [
+        "A merged pull request exists in your repo with a What / Why / How to check description",
+        "The PR has at least one review comment on a specific line",
+        "README has a heading, a table with a row per day, a bullet list and a fenced code block",
+        "Links in the table open the right day folders",
+        "Local main matches GitHub after git pull (git status says up to date)"
+      ]
+    },
+    "hints": [
+      "Markdown table: | Day | Topic | Link | then |---|---|---| then one row per day, e.g. | 3 | Links and images | [day03](day03/) |.",
+      "After git push -u origin readme-upgrade, GitHub shows a 'Compare & pull request' button. Write the description there.",
+      "To comment on a line: open the PR → Files changed → hover a line → click the blue +. Preview your README on the branch before merging."
+    ],
+    "proof": "Link to your merged pull request.",
+    "explainBack": [
+      { "q": "What is the difference between a branch and a pull request?", "lookFor": ["branch is a Git concept, a line of commits", "PR is a GitHub feature to propose merging a branch", "PR adds discussion/review/checks"] },
+      { "q": "After merging on GitHub, why did you need git pull on your laptop?", "lookFor": ["merge happened on GitHub's copy", "local main was behind", "pull = fetch + merge the remote changes"] },
+      { "q": "Read out your PR description. Why does each part matter to a reviewer?", "lookFor": ["what: summary of changes", "why: reason", "how to check: steps to verify", "cites their own description"] }
+    ],
+    "lastHintExplanation": "A branch is a Git line of work; a pull request is GitHub's page for proposing to merge that branch, with a diff, comments and a merge button. Merging on GitHub only changes GitHub's copy, so your laptop's main is behind until you git pull, which fetches new commits and merges them into your local branch.",
+    "predict": [
+      { "q": "You merged a PR on GitHub. On your laptop you're on main and haven't pulled. You run git log --oneline. Do you see the merge commit?", "options": ["Yes, Git syncs automatically", "No, not until you fetch/pull", "Only if you push first", "Only on the branch"], "answer": 1, "why": "Your local repo only learns about new remote commits when you fetch or pull." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Strings: words",
+      "note": "Use split(' ') to turn a sentence into words. Print the array before counting.",
+      "problems": [
+        { "title": "LeetCode 2114: Maximum Number of Words Found in Sentences", "url": "https://leetcode.com/problems/maximum-number-of-words-found-in-sentences/" },
+        { "title": "LeetCode 1773: Count Items Matching a Rule", "url": "https://leetcode.com/problems/count-items-matching-a-rule/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Percentages: votes and marks",
+      "questions": [
+        { "q": "In an election between two candidates, the winner got 60% of the votes and won by 1200 votes. How many votes were cast?", "options": ["5000", "6000", "7200", "8000"], "answer": 1, "why": "The winning margin is 60% − 40% = 20% of the total, so 20% = 1200 and the total is 6000." },
+        { "q": "A student needs 40% to pass. She scored 180 and failed by 20 marks. What are the maximum marks?", "options": ["450", "500", "550", "600"], "answer": 1, "why": "40% = 200, so the maximum is 500." },
+        { "q": "The price of sugar rises by 25%. By what percent must a family cut consumption to keep spending the same?", "options": ["20%", "25%", "15%", "30%"], "answer": 0, "why": "25/125 = 20%." },
+        { "q": "What is 15% of 40% of 500?", "options": ["20", "30", "60", "75"], "answer": 1, "why": "40% of 500 = 200, and 15% of 200 = 30." },
+        { "q": "45% of a class are girls and there are 66 boys. How many students are in the class?", "options": ["110", "120", "130", "150"], "answer": 1, "why": "Boys are 55%, so 66 / 0.55 = 120." }
+      ]
+    },
+    "revision": ["Day 13: draw the commit graph of your Day 13 branch and merge on paper, then compare with graph.txt."]
+  },
+  {
+    "day": 15,
+    "module": "git-workflow",
+    "title": "Merge conflicts: cause them, read them, fix them",
+    "goal": "Create a merge conflict on purpose and resolve it calmly, so real ones don't scare you.",
+    "learn": {
+      "concepts": [
+        "Why conflicts happen: the same lines changed differently on two branches",
+        "Conflict markers: <<<<<<< HEAD, =======, >>>>>>> branch",
+        "Resolving: edit the file to the final version, remove markers, git add, git commit",
+        "git merge --abort to back out",
+        "VS Code's merge editor buttons (Accept Current / Incoming / Both)",
+        "Avoiding conflicts: small branches, pull often"
+      ],
+      "resources": [
+        { "title": "GitHub Docs: Resolving a merge conflict using the command line", "url": "https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/addressing-merge-conflicts/resolving-a-merge-conflict-using-the-command-line" },
+        { "title": "Pro Git: Basic merge conflicts", "url": "https://git-scm.com/book/en/v2/Git-Branching-Basic-Branching-and-Merging#_basic_merge_conflicts" }
+      ]
+    },
+    "build": {
+      "task": "In day15/, create profile.md with lines: Name, City, Favourite language, Goal. Commit on main. Create branch city-update and change City and Goal; commit. Switch to main and change the same two lines differently; commit. Merge city-update into main and get a conflict. Resolve it by keeping City from the branch and writing a new Goal that combines both. Commit the merge. Then do it again with a second conflict and resolve it this time using VS Code's merge buttons. Write day15/conflicts.md explaining in your own words what each conflict marker meant.",
+      "starterFiles": [
+        { "name": "day15/profile.md", "content": "Name: \nCity: \nFavourite language: \nGoal: \n" }
+      ],
+      "acceptance": [
+        "Two merge commits in history that resolved real conflicts",
+        "No leftover <<<<<<<, ======= or >>>>>>> markers in any committed file",
+        "Final profile.md has City from the branch and a combined Goal",
+        "conflicts.md explains HEAD, the ======= divider and the incoming branch section"
+      ]
+    },
+    "hints": [
+      "Git only conflicts when both sides changed the same lines (or neighbouring lines). Change City on both branches to different values.",
+      "When the conflict appears, run git status: files under 'both modified' need fixing. Open one and delete the markers, keeping the text you want.",
+      "After fixing: git add day15/profile.md, then git commit (no -m needed; Git suggests a merge message). Search the repo for <<<<<<< before committing."
+    ],
+    "proof": "Link to one of your conflict-resolving merge commits.",
+    "explainBack": [
+      { "q": "Using your conflict, explain what the text between <<<<<<< HEAD and ======= was, and what came after.", "lookFor": ["top section is the current branch (main/HEAD) version", "bottom section is the incoming branch version", "names their actual values"] },
+      { "q": "Why didn't Git just pick one version automatically?", "lookFor": ["both changed the same lines", "Git can't know which meaning is right", "a human must decide"] },
+      { "q": "Name two habits that make conflicts rarer on a team.", "lookFor": ["small, short-lived branches", "pull/merge main often", "communicate who's editing what", "consistent formatting"] }
+    ],
+    "lastHintExplanation": "A conflict happens when two branches change the same lines differently. Git marks the spot: the section after <<<<<<< HEAD is your current branch's version, ======= divides it from the incoming branch's version ending at >>>>>>> branch-name. You edit the file into the final version, delete the markers, git add it, and commit the merge.",
+    "predict": [
+      { "q": "Branch A changes line 1 of a file. Branch B changes line 20 of the same file. You merge B into A. What happens?", "options": ["Conflict on the whole file", "Merges cleanly with both changes", "B's file replaces A's", "Git refuses to merge"], "answer": 1, "why": "Different, non-adjacent lines changed, so Git combines them automatically." },
+      { "q": "During a conflict you run git merge --abort. What happens?", "options": ["The merge is completed with your version", "Everything goes back to how it was before the merge", "The branch is deleted", "The conflict markers are kept"], "answer": 1, "why": "--abort cancels the merge and restores the pre-merge state." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Arrays: counting in one pass",
+      "note": "Keep a running count and a best-so-far. Say out loud what each variable means.",
+      "problems": [
+        { "title": "LeetCode 485: Max Consecutive Ones", "url": "https://leetcode.com/problems/max-consecutive-ones/" },
+        { "title": "LeetCode 1732: Find the Highest Altitude", "url": "https://leetcode.com/problems/find-the-highest-altitude/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Mixtures and alligation",
+      "questions": [
+        { "q": "60 L of a mixture has milk and water in the ratio 2:1. How much water must be added to make the ratio 1:1?", "options": ["10 L", "20 L", "30 L", "40 L"], "answer": 1, "why": "There is 40 L of milk and 20 L of water. Water must reach 40 L, so add 20 L." },
+        { "q": "Rice at ₹40/kg and ₹60/kg is mixed in the ratio 1:1. What is the price of the mixture per kg?", "options": ["₹45", "₹50", "₹52", "₹55"], "answer": 1, "why": "Equal amounts, so it's the simple average: ₹50." },
+        { "q": "In what ratio must tea at ₹30/kg and ₹50/kg be mixed to get tea worth ₹35/kg?", "options": ["1:3", "3:1", "2:1", "1:2"], "answer": 1, "why": "Alligation: (50 − 35) : (35 − 30) = 15 : 5 = 3:1." },
+        { "q": "A 20 L solution is 10% salt. 5 L of water is added. What is the new salt percentage?", "options": ["8%", "10%", "12%", "5%"], "answer": 0, "why": "2 L of salt in 25 L = 8%." },
+        { "q": "2 kg of sweets at ₹60/kg is mixed with 3 kg at ₹80/kg. What is the price of the mixture per kg?", "options": ["₹70", "₹72", "₹74", "₹75"], "answer": 1, "why": "(120 + 240) / 5 = 72." }
+      ]
+    },
+    "revision": ["Day 14: write a Markdown table and a fenced code block from memory, preview it on GitHub or in VS Code."]
+  },
+  {
+    "day": 16,
+    "module": "web-basics",
+    "title": "How the web works: URLs, DNS, HTTP and DevTools Network",
+    "goal": "Explain what happens between typing a URL and seeing a page, using real evidence from DevTools.",
+    "learn": {
+      "concepts": [
+        "Client and server; what a URL is made of (protocol, domain, path, query)",
+        "DNS: turning a domain name into an IP address",
+        "HTTP request: method, URL, headers, body",
+        "HTTP response: status code, headers, body",
+        "Common status codes: 200, 301, 304, 404, 500",
+        "HTTPS and why the padlock matters",
+        "DevTools Network tab: waterfall, size, timing, headers"
+      ],
+      "resources": [
+        { "title": "MDN: How the web works", "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Getting_started/Web_standards/How_the_web_works" },
+        { "title": "MDN: An overview of HTTP", "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Overview" },
+        { "title": "MDN: HTTP response status codes", "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status" }
+      ]
+    },
+    "build": {
+      "task": "Create day16/how-the-web-works.md. (1) Open any news website with DevTools Network open and record: total requests, total transferred size, how long it took to load, and the 3 largest files. (2) Click the main HTML document request and copy its request method, status code, and 3 response headers you can explain. (3) Run nslookup (or ping) for that domain and record its IP. (4) Visit a page that doesn't exist on that site and record the status code. (5) Finish with a 10-step explanation, in your own words, of what happens from typing the URL to seeing the page. Add one diagram (ASCII or image) of browser → DNS → server.",
+      "starterFiles": [
+        { "name": "day16/how-the-web-works.md", "content": "# How the web works: my notes\n\n## Network tab measurements\n\n## Main document request and response\n\n## DNS lookup\n\n## A 404 page\n\n## From URL to page in 10 steps\n\n1.\n\n## Diagram\n" }
+      ],
+      "acceptance": [
+        "Real numbers from the Network tab (requests, size, load time, 3 largest files)",
+        "Method, status code and 3 explained response headers for the main document",
+        "An IP address from nslookup or ping",
+        "A real 404 observed and noted",
+        "10 steps in your own words, covering DNS, the HTTP request, the response and rendering",
+        "One diagram"
+      ]
+    },
+    "hints": [
+      "Open DevTools → Network, tick 'Disable cache', then reload. The summary bar at the bottom shows requests, transferred size and load time. Click the 'Size' column to sort.",
+      "Headers worth explaining: content-type, cache-control, content-encoding, server, set-cookie. MDN has a page for each.",
+      "On Windows and Mac, nslookup example.com works in the terminal. Your 10 steps should mention DNS, the TCP/TLS connection, the request, the response, then the browser parsing HTML and requesting CSS/JS/images."
+    ],
+    "proof": "Commit with day16/how-the-web-works.md.",
+    "explainBack": [
+      { "q": "Using your notes, explain what happened from typing the URL to seeing the page.", "lookFor": ["DNS lookup to get IP", "connection (TLS for HTTPS)", "HTTP GET request", "response with HTML", "browser parses HTML and fetches CSS/JS/images", "uses their real numbers or site"] },
+      { "q": "Explain one response header you recorded and why the server sent it.", "lookFor": ["names a real header", "correct meaning (e.g. content-type tells browser how to treat the body)"] },
+      { "q": "What is the difference between a 404 and a 500 status code?", "lookFor": ["404: resource not found, client asked for something missing", "500: server error, the server failed", "4xx client, 5xx server"] }
+    ],
+    "lastHintExplanation": "The browser asks DNS for the domain's IP address, opens a connection (with TLS for HTTPS), and sends an HTTP GET request. The server replies with a status code, headers (like content-type: text/html) and the HTML body. The browser parses the HTML, then makes more requests for CSS, JS and images, and finally renders the page. 4xx codes mean the client asked for something wrong (404 not found); 5xx codes mean the server failed.",
+    "predict": [
+      { "q": "A page loads 1 HTML file, 2 CSS files, 3 JS files and 10 images. How many HTTP requests (at minimum, with no cache) does it make?", "options": ["1", "6", "16", "10"], "answer": 2, "why": "Each file is a separate request: 1 + 2 + 3 + 10 = 16." },
+      { "q": "You reload a page and the Network tab shows status 304 for style.css. What does that mean?", "options": ["The file is broken", "Not Modified: the browser's cached copy is still valid", "The file moved permanently", "The server crashed"], "answer": 1, "why": "304 tells the browser to use its cached copy because nothing changed." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Math with loops",
+      "note": "Practise turning a word problem into a loop with a counter. Trace one example by hand first.",
+      "problems": [
+        { "title": "LeetCode 1342: Number of Steps to Reduce a Number to Zero", "url": "https://leetcode.com/problems/number-of-steps-to-reduce-a-number-to-zero/" },
+        { "title": "LeetCode 1822: Sign of the Product of an Array", "url": "https://leetcode.com/problems/sign-of-the-product-of-an-array/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Averages: combined groups and speed",
+      "questions": [
+        { "q": "Class A has 30 students with an average of 60. Class B has 20 students with an average of 70. What is the combined average?", "options": ["64", "65", "66", "63"], "answer": 0, "why": "(1800 + 1400) / 50 = 64." },
+        { "q": "The average of 4 numbers is 15. Three of them are 10, 12 and 18. What is the fourth?", "options": ["18", "20", "22", "24"], "answer": 1, "why": "60 − 40 = 20." },
+        { "q": "A car travels 60 km at 30 km/h and returns at 60 km/h. What is the average speed for the round trip?", "options": ["45 km/h", "40 km/h", "42 km/h", "50 km/h"], "answer": 1, "why": "Total 120 km in 2 h + 1 h = 3 h, so 40 km/h." },
+        { "q": "The average weight of 8 people rises by 2 kg when a 60 kg person is replaced. How heavy is the new person?", "options": ["72 kg", "74 kg", "76 kg", "78 kg"], "answer": 2, "why": "The total rises by 8 × 2 = 16, so the new person weighs 60 + 16 = 76 kg." },
+        { "q": "What is the average of the first 5 multiples of 4?", "options": ["10", "12", "14", "16"], "answer": 1, "why": "(4 + 8 + 12 + 16 + 20) / 5 = 12." }
+      ]
+    },
+    "revision": ["Day 15: explain the three conflict markers to yourself without looking at conflicts.md."]
+  },
+  {
+    "day": 17,
+    "module": "css-advanced",
+    "title": "Positioning, z-index and pseudo-classes",
+    "goal": "Place elements exactly where you want with position, control stacking with z-index, and style states with pseudo-classes.",
+    "learn": {
+      "concepts": [
+        "position: static, relative, absolute, fixed, sticky",
+        "Absolute elements position against the nearest positioned ancestor",
+        "z-index and stacking contexts",
+        "Pseudo-classes: :hover, :focus-visible, :active, :nth-child(), :not()",
+        "Pseudo-elements: ::before, ::after, ::placeholder",
+        "inset: 0 as a shortcut for top/right/bottom/left"
+      ],
+      "resources": [
+        { "title": "MDN: Positioning", "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/CSS_layout/Positioning" },
+        { "title": "MDN: Pseudo-classes and pseudo-elements", "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Styling_basics/Pseudo_classes_and_elements" },
+        { "title": "MDN: Understanding z-index", "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_positioned_layout/Understanding_z-index" }
+      ]
+    },
+    "build": {
+      "task": "In day17/, build: (1) a product card with a 'SALE' badge pinned to its top-right corner using absolute positioning; (2) an image with a dark overlay and centred caption text on top (overlay with ::after or a div and inset: 0); (3) a modal: a 'Open details' link that targets #modal, where #modal:target shows a fixed full-screen backdrop with a centred box above everything (z-index); (4) a striped table using :nth-child(even); (5) clear :hover and :focus-visible styles on all links and buttons.",
+      "starterFiles": [],
+      "acceptance": [
+        "SALE badge stays in the card's corner when the window resizes (card has position: relative)",
+        "Overlay covers the full image and the caption is readable",
+        "Modal opens via the #modal link, covers the page with a backdrop and closes with a close link",
+        "Table rows alternate colours using :nth-child",
+        "Tab through the page with the keyboard: every link/button shows a visible focus style"
+      ]
+    },
+    "hints": [
+      "If your badge flies to the corner of the whole page, the card is missing position: relative. Absolute elements look up the tree for the first ancestor that isn't static.",
+      "Overlay: .figure { position: relative } .figure::after { content: ''; position: absolute; inset: 0; background: rgb(0 0 0 / .5) }. ::after needs content to appear.",
+      "Modal with no JavaScript: #modal { display: none } #modal:target { display: grid; place-items: center; position: fixed; inset: 0; z-index: 100 }. The close link can be href=\"#\"."
+    ],
+    "proof": "Commit with day17/ files.",
+    "explainBack": [
+      { "q": "Your SALE badge uses position: absolute. Explain what it's positioned relative to and what happens if you remove position: relative from the card.", "lookFor": ["nearest positioned ancestor", "card has position: relative", "without it, badge positions against a higher ancestor or the page", "describes their own code"] },
+      { "q": "What is the difference between :hover and ::after?", "lookFor": ["pseudo-class selects an element in a state", "pseudo-element creates/styles a part that isn't in the HTML", "::after needs content"] },
+      { "q": "Why is :focus-visible important for keyboard users?", "lookFor": ["shows where focus is when tabbing", "accessibility for people who don't use a mouse", "removing outlines without a replacement makes pages unusable"] }
+    ],
+    "lastHintExplanation": "position: absolute removes an element from normal flow and positions it against the nearest ancestor that has a non-static position. That's why the card needs position: relative. A pseudo-class (:hover) selects an existing element in a particular state; a pseudo-element (::after) creates a styleable part that isn't in the HTML, and it only appears if content is set. Visible focus styles let keyboard users see where they are.",
+    "predict": [
+      { "q": "A span has position: absolute; top: 0; right: 0. No ancestor has a position set. Where does it appear?", "options": ["Top-right of its parent", "Top-right of the page (initial containing block)", "Where it normally would", "Bottom-left of the page"], "answer": 1, "why": "With no positioned ancestor, it positions against the initial containing block (the page)." },
+      { "q": "div::before { color: red } with no content property. What appears?", "options": ["A red empty box", "Nothing", "The word 'before' in red", "An error"], "answer": 1, "why": "::before and ::after don't render without a content value." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Strings: characters",
+      "note": "Loop through each character of a string. Try a Set as well and compare.",
+      "problems": [
+        { "title": "LeetCode 1832: Check if the Sentence Is Pangram", "url": "https://leetcode.com/problems/check-if-the-sentence-is-pangram/" },
+        { "title": "LeetCode 344: Reverse String", "url": "https://leetcode.com/problems/reverse-string/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Profit and loss: tricky cases",
+      "questions": [
+        { "q": "A dealer sells at cost price but uses a 900 g weight instead of 1 kg. What is his profit %?", "options": ["10%", "11.11%", "9.09%", "12%"], "answer": 1, "why": "He gains 100 g on every 900 g given: 100/900 = 11.11%." },
+        { "q": "Two items are sold for ₹1200 each, one at 20% profit and one at 20% loss. What is the overall result?", "options": ["No profit, no loss", "4% loss", "4% gain", "2% loss"], "answer": 1, "why": "When selling prices are equal with ±x%, there is always a loss of x²/100 = 4%." },
+        { "q": "Selling an item for ₹360 gives a 20% profit. What is the cost price?", "options": ["₹280", "₹300", "₹320", "₹288"], "answer": 1, "why": "360 / 1.2 = 300." },
+        { "q": "Successive discounts of 20% and 10% equal a single discount of:", "options": ["30%", "28%", "25%", "32%"], "answer": 1, "why": "0.8 × 0.9 = 0.72, so 28% off." },
+        { "q": "10 pens are bought for ₹80 and 8 pens are sold for ₹80. What is the profit %?", "options": ["20%", "25%", "30%", "15%"], "answer": 1, "why": "Each pen costs ₹8 and sells for ₹10: 2/8 = 25%." }
+      ]
+    },
+    "revision": ["Day 16: list 5 HTTP status codes from memory with one-line meanings."]
+  },
+  {
+    "day": 18,
+    "module": "css-advanced",
+    "title": "Transitions, animations, and a positioning debug lab",
+    "goal": "Add smooth, purposeful motion to a page and fix a broken dropdown using what you learned this week.",
+    "learn": {
+      "concepts": [
+        "transition: property duration timing-function",
+        "Which properties animate cheaply: transform and opacity",
+        "transform: translate, scale, rotate",
+        "@keyframes and the animation property",
+        "prefers-reduced-motion for users who get motion sick",
+        "Dropdown menus: absolute child inside a relative parent"
+      ],
+      "resources": [
+        { "title": "MDN: Using CSS transitions", "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_transitions/Using_CSS_transitions" },
+        { "title": "MDN: Using CSS animations", "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_animations/Using_CSS_animations" },
+        { "title": "MDN: prefers-reduced-motion", "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion" }
+      ]
+    },
+    "build": {
+      "task": "Part 1: In day18/debug/, the starter dropdown nav is broken in 4 ways. Fix each bug in its own commit. Part 2: In day18/motion/, add to any earlier page of yours: buttons that lift slightly on hover (transform + transition), cards that fade in on load with @keyframes, and a loading spinner made with a rotating border. Wrap all motion in a prefers-reduced-motion check so it's turned off for users who ask.",
+      "starterFiles": [
+        { "name": "day18/debug/index.html", "content": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Broken dropdown</title>\n  <link rel=\"stylesheet\" href=\"style.css\">\n</head>\n<body>\n  <nav class=\"nav\">\n    <a href=\"#\">Home</a>\n    <div class=\"dropdown\">\n      <button class=\"dropdown-toggle\">Courses ▾</button>\n      <ul class=\"dropdown-menu\">\n        <li><a href=\"#\">HTML</a></li>\n        <li><a href=\"#\">CSS</a></li>\n        <li><a href=\"#\">JavaScript</a></li>\n      </ul>\n    </div>\n    <a href=\"#\">Contact</a>\n  </nav>\n  <main class=\"hero\">\n    <h1>Learn to build the web</h1>\n  </main>\n</body>\n</html>\n" },
+        { "name": "day18/debug/style.css", "content": "body { margin: 0; font-family: system-ui, sans-serif; }\n.nav { display: flex; gap: 1rem; align-items: center; padding: 1rem; background: #1e293b; }\n.nav a, .dropdown-toggle { color: white; background: none; border: 0; font: inherit; cursor: pointer; }\n\n.dropdown-menu {\n  position: absolute;\n  top: 100%;\n  left: 0;\n  display: none;\n  margin: 0;\n  padding: 0.5rem 0;\n  list-style: none;\n  background: white;\n  min-width: 160px;\n}\n.dropdown-menu a { display: block; padding: 0.5rem 1rem; color: #1e293b; }\n.dropdown:hover .dropdown-menu { display: block }\n.dropdown-menu:hover { display: none; }\n\n.hero {\n  position: relative;\n  z-index: 10;\n  min-height: 60vh;\n  display: grid;\n  place-items: center;\n  background: linear-gradient(135deg, #0ea5e9, #6366f1);\n  color: white;\n}\n\n.dropdown-toggle:hover { transition: color 0.3s; color: #fbbf24; }\n" }
+      ],
+      "acceptance": [
+        "Dropdown appears directly under 'Courses' (not at the page's left edge)",
+        "Dropdown shows above the hero, not hidden behind it",
+        "Dropdown stays open while the mouse moves into it and onto its links",
+        "The colour transition is smooth both on hover and when the mouse leaves",
+        "Each fix is its own commit with a message naming the bug",
+        "Motion page: hover lift, keyframe fade-in, spinner, all disabled under prefers-reduced-motion: reduce"
+      ]
+    },
+    "hints": [
+      "The menu is absolute, so it needs a positioned ancestor. Which element should be its anchor?",
+      "The hero has z-index: 10 and creates a stacking context. Either give the dropdown (or nav) a higher z-index with a position set, or remove the hero's z-index if it isn't needed. Also look for a rule that hides the menu exactly when you hover it.",
+      "A transition placed only inside :hover applies only on the way in. Move transition to the normal (non-hover) rule so it works both ways."
+    ],
+    "proof": "Link to your last debug-fix commit, plus the day18/motion/ commit.",
+    "explainBack": [
+      { "q": "Name the 4 bugs and how you fixed each one.", "lookFor": ["dropdown parent missing position: relative", "hero z-index covering the menu / menu needs higher z-index", ".dropdown-menu:hover { display:none } hides it", "transition only on :hover so it snaps back"] },
+      { "q": "Why are transform and opacity the recommended properties to animate?", "lookFor": ["don't trigger layout/reflow", "GPU-composited, smooth", "animating width/top causes layout work"] },
+      { "q": "What does your prefers-reduced-motion code do, and who is it for?", "lookFor": ["users who set reduce motion in OS settings", "motion sickness / vestibular disorders", "turns off or reduces animations"] }
+    ],
+    "lastHintExplanation": "Bug 1: .dropdown needs position: relative so the absolute menu anchors under 'Courses'. Bug 2: the hero's z-index: 10 paints over the menu; give the nav position: relative and a higher z-index (or drop the hero's). Bug 3: .dropdown-menu:hover { display:none } hides the menu the moment you enter it, so delete it. Bug 4: a transition declared only inside :hover runs only on the way in; put it on the base rule.",
+    "predict": [
+      { "q": "button { background: blue } button:hover { background: red; transition: background 1s }. What happens when the mouse leaves?", "options": ["Fades back to blue over 1s", "Snaps back to blue instantly", "Stays red", "Fades over 2s"], "answer": 1, "why": "When not hovered, the transition rule doesn't apply, so the change back is instant." },
+      { "q": "Element A has position: relative; z-index: 1. Element B (later in HTML) has position: relative; z-index: 2. They overlap. Which is on top?", "options": ["A", "B", "Whichever is bigger", "Neither, they blend"], "answer": 1, "why": "In the same stacking context, the higher z-index paints on top." }
+    ],
+    "debugLab": {
+      "title": "The broken dropdown",
+      "symptoms": [
+        "Hovering 'Courses' shows the menu at the far left of the page, not under the button",
+        "The menu disappears behind the blue hero section",
+        "Moving the mouse into the menu makes it vanish",
+        "The yellow hover colour fades in but snaps back instantly"
+      ],
+      "files": ["day18/debug/index.html", "day18/debug/style.css"],
+      "bugCount": 4
+    },
+    "dsa": {
+      "pattern": "Week 3 review",
+      "note": "Re-solve Max Consecutive Ones from a blank file. Then solve the new one and explain your approach in a comment at the top.",
+      "problems": [
+        { "title": "LeetCode 485: Max Consecutive Ones (re-solve)", "url": "https://leetcode.com/problems/max-consecutive-ones/" },
+        { "title": "LeetCode 1588: Sum of All Odd Length Subarrays", "url": "https://leetcode.com/problems/sum-of-all-odd-length-subarrays/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Letter and number series",
+      "questions": [
+        { "q": "A, C, E, G, ?", "options": ["H", "I", "J", "K"], "answer": 1, "why": "Skip one letter each time." },
+        { "q": "B, E, H, K, ?", "options": ["M", "N", "O", "L"], "answer": 1, "why": "+3 each time: K (11) + 3 = N (14)." },
+        { "q": "AZ, BY, CX, ?", "options": ["DV", "DW", "EW", "DX"], "answer": 1, "why": "The first letter moves forward and the second moves backward." },
+        { "q": "Z, X, U, Q, ?", "options": ["L", "M", "K", "N"], "answer": 0, "why": "Steps back of −2, −3, −4, −5: Q (17) − 5 = L (12)." },
+        { "q": "1, 1, 2, 3, 5, 8, ?", "options": ["11", "12", "13", "15"], "answer": 2, "why": "Fibonacci: each term is the sum of the previous two." }
+      ]
+    },
+    "revision": ["Days 13–17: re-read your git log for this week and explain each commit in one sentence. Note anything you couldn't explain in your progress log."]
+  }
+]

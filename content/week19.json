@@ -1,0 +1,388 @@
+[
+  {
+    "day": 109,
+    "module": "backend-testing",
+    "title": "Unit tests with Vitest",
+    "goal": "Write fast, focused unit tests for your service logic and learn the arrange-act-assert habit.",
+    "learn": {
+      "concepts": [
+        "Why test: confidence to change code, documentation of behaviour",
+        "The test pyramid: many unit tests, fewer integration, few end-to-end",
+        "Vitest: describe, it/test, expect, toBe vs toEqual, toThrow / rejects.toThrow",
+        "Arrange, act, assert",
+        "Fakes: an in-memory repo implementing the same interface",
+        "vi.fn() and vi.useFakeTimers() for time-dependent code",
+        "Coverage reports (and why 100% isn't the goal)"
+      ],
+      "resources": [
+        { "title": "Vitest: Getting started", "url": "https://vitest.dev/guide/" },
+        { "title": "Vitest: Mocking", "url": "https://vitest.dev/guide/mocking.html" },
+        { "title": "Martin Fowler: The practical test pyramid", "url": "https://martinfowler.com/articles/practical-test-pyramid.html" }
+      ]
+    },
+    "build": {
+      "task": "In api-starter: npm i -D vitest @vitest/coverage-v8 and add scripts test and test:coverage. Write unit tests for your projects and tasks services using the in-memory repos as fakes (your interface design pays off now): creating a project, duplicate names → ConflictError, tasks for a missing project → NotFoundError, filtering, sorting and pagination meta (including the last page and an empty result), and an 'overdue' helper tested with fake timers. Aim for 20+ meaningful tests. Commit the coverage summary in docs/testing.md with notes on what is NOT tested yet.",
+      "starterFiles": [],
+      "acceptance": [
+        "npm test runs 20+ passing tests in under 5 seconds",
+        "Tests use fakes, not the real database",
+        "Each error type is tested (rejects.toThrow with the class)",
+        "Pagination edge cases covered (last page, page beyond the end, empty list)",
+        "Time-based logic tested with vi.useFakeTimers / vi.setSystemTime",
+        "docs/testing.md includes the coverage summary and known gaps"
+      ]
+    },
+    "hints": [
+      "await expect(service.create(userId, { name: 'Website' })).rejects.toThrow(ConflictError);",
+      "toBe checks identity (===); toEqual compares structure. For objects with dates or ids, use expect.objectContaining({ name: 'Website' }) or expect.any(String).",
+      "beforeEach(() => { repo = new InMemoryProjectsRepo(); service = new ProjectsService(repo); }) gives every test a fresh state, so tests can't affect each other."
+    ],
+    "proof": "Commit with the tests and docs/testing.md.",
+    "explainBack": [
+      { "q": "Why did using a repo interface make the services easy to test?", "lookFor": ["swap in an in-memory fake", "no database needed", "fast and isolated", "dependency injection"] },
+      { "q": "What's the difference between toBe and toEqual, with an example where they differ?", "lookFor": ["toBe is === identity", "toEqual is deep equality", "{a:1} toEqual {a:1} passes but toBe fails"] }
+    ],
+    "lastHintExplanation": "Because services depend on a repo interface rather than on PostgreSQL, tests can pass in a fresh in-memory repo, so they run in milliseconds without a database and can't interfere with each other. toBe uses ===, so two separate objects with the same contents fail; toEqual compares contents deeply, which is what you usually want for objects and arrays.",
+    "predict": [
+      { "q": "expect([1, 2]).toBe([1, 2])", "options": ["Passes", "Fails: different array objects", "Throws a syntax error", "Passes only in strict mode"], "answer": 1, "why": "Two array literals are different objects; use toEqual." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Binary search trees",
+      "note": "In a BST, everything left is smaller and everything right is bigger. Use that to search in O(height).",
+      "problems": [
+        { "title": "LeetCode 700: Search in a Binary Search Tree", "url": "https://leetcode.com/problems/search-in-a-binary-search-tree/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Data interpretation: mixed charts",
+      "questions": [
+        { "q": "Employees by city — Pune 120, Mumbai 180, Bengaluru 240, Delhi 60. What percentage work in Bengaluru?", "options": ["30%", "40%", "45%", "35%"], "answer": 1, "why": "240/600." },
+        { "q": "Same data: what is the ratio of Pune to Mumbai?", "options": ["2:3", "3:2", "1:2", "3:4"], "answer": 0, "why": "120:180." },
+        { "q": "Same data: what is the central angle for Delhi in a pie chart?", "options": ["36°", "30°", "60°", "40°"], "answer": 0, "why": "60/600 × 360." },
+        { "q": "Same data: Mumbai's headcount grows by a third. What is it now?", "options": ["220", "240", "200", "260"], "answer": 1, "why": "180 × 4/3." },
+        { "q": "Same data: by what percentage is Bengaluru larger than Pune?", "options": ["50%", "100%", "120%", "200%"], "answer": 1, "why": "240 is double 120." }
+      ]
+    },
+    "revision": ["Day 108: explain jwt.decode vs jwt.verify."]
+  },
+  {
+    "day": 110,
+    "module": "backend-testing",
+    "title": "API integration tests with supertest",
+    "goal": "Test real HTTP requests through your Express app, including validation, errors and status codes.",
+    "learn": {
+      "concepts": [
+        "Integration tests: routes + middleware + services working together",
+        "supertest: request(app).post('/api/...').send(body).expect(201)",
+        "Why createApp() without listen() makes this easy",
+        "Asserting status, headers and body shape",
+        "Injecting in-memory repos into createApp for fast HTTP tests",
+        "Testing the error format consistently"
+      ],
+      "resources": [
+        { "title": "supertest on npm", "url": "https://www.npmjs.com/package/supertest" },
+        { "title": "Vitest: Test context and lifecycle hooks", "url": "https://vitest.dev/api/#setup-and-teardown" }
+      ]
+    },
+    "build": {
+      "task": "In api-starter: npm i -D supertest @types/supertest. Change createApp to accept its dependencies ({ projectsRepo, tasksRepo, usersRepo }) so tests can pass in-memory repos. Write tests/api/*.test.ts covering: register (201, 400 on a weak password, 409 duplicate), login (200 with token, 401 wrong password), every projects and tasks route with a valid token (201/200/204), 401 without a token, 404 for another user's project (IDOR test), 400 for invalid query params, the list meta shape, and X-Request-Id on responses. Write a helper that registers and logs in a user and returns the token.",
+      "starterFiles": [],
+      "acceptance": [
+        "createApp accepts injected dependencies",
+        "Auth, projects and tasks endpoints each have success and failure tests",
+        "An explicit IDOR test proves user B can't access user A's data",
+        "Error responses are checked for your error format",
+        "A reusable auth helper keeps tests short",
+        "npm test runs unit and API tests together"
+      ]
+    },
+    "hints": [
+      "const res = await request(app).post('/api/projects').set('Authorization', `Bearer ${token}`).send({ name: 'Website' }); expect(res.status).toBe(201); expect(res.body).toMatchObject({ name: 'Website' });",
+      "Helper: async function loginAs(app, email) { await request(app).post('/api/auth/register').send({ email, name: 'Test', password: 'password123' }); const r = await request(app).post('/api/auth/login').send({ email, password: 'password123' }); return r.body.token; }",
+      "Use a lower bcrypt cost in tests (e.g. read BCRYPT_COST from config, set it to 4 in test) so auth tests stay fast."
+    ],
+    "proof": "Commit with the API tests.",
+    "explainBack": [
+      { "q": "What do API tests catch that your service unit tests miss?", "lookFor": ["middleware order", "validation and status codes", "auth wiring", "error handler format", "routing mistakes"] },
+      { "q": "Why test the IDOR case explicitly?", "lookFor": ["most common API security bug", "easy to break when adding routes", "test prevents regressions"] }
+    ],
+    "lastHintExplanation": "Unit tests check the service logic in isolation. API tests run the whole HTTP pipeline (routing, middleware order, validation, auth, error formatting), which is where wiring mistakes hide. An explicit IDOR test is a guard rail: a new route that forgets user_id scoping fails the build instead of reaching production.",
+    "predict": [
+      { "q": "A supertest test calls request(app) where app is created with createApp() but never listens. Does it work?", "options": ["No, you must call listen", "Yes, supertest binds a temporary port itself", "Only for GET", "Only with a real database"], "answer": 1, "why": "supertest starts the app on an ephemeral port internally." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "BST: validate",
+      "note": "Pass down min and max bounds; checking only direct children is a classic mistake.",
+      "problems": [
+        { "title": "LeetCode 98: Validate Binary Search Tree", "url": "https://leetcode.com/problems/validate-binary-search-tree/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Verbal ability: para jumbles",
+      "questions": [
+        { "q": "Order — P: As a result, sales rose by 30%. Q: The company launched a new app. R: Customers found it easy to use. S: It allowed ordering in two taps.", "options": ["QSRP", "QRSP", "SQRP", "QPSR"], "answer": 0, "why": "Launch → feature → reaction → result." },
+        { "q": "Order — P: However, he kept practising. Q: Arjun failed his first driving test. R: He passed on his third attempt. S: He was disappointed.", "options": ["QSPR", "QPSR", "SQPR", "QRSP"], "answer": 0, "why": "Fail → feeling → 'However' → success." },
+        { "q": "Order — P: This made the city cleaner. Q: The council introduced waste segregation. R: Residents separated wet and dry waste. S: Recycling rates also improved.", "options": ["QRPS", "QPRS", "RQPS", "QRSP"], "answer": 0, "why": "Policy → action → effect → additional effect ('also')." },
+        { "q": "Order — P: Next, she outlined the chapters. Q: Leela decided to write a book. R: Finally, she found a publisher. S: Then she wrote every morning for a year.", "options": ["QPSR", "QSPR", "PQSR", "QPRS"], "answer": 0, "why": "Decide → next → then → finally." },
+        { "q": "Order — P: Engineers fixed the bug within an hour. Q: Users reported that payments were failing. R: A post-mortem was written the next day. S: The team traced it to a recent deploy.", "options": ["QSPR", "QPSR", "SQPR", "QSRP"], "answer": 0, "why": "Report → diagnose → fix → review." }
+      ]
+    },
+    "revision": ["Day 109: explain arrange-act-assert with one of your tests."]
+  },
+  {
+    "day": 111,
+    "module": "backend-testing",
+    "title": "Testing against a real PostgreSQL database",
+    "goal": "Test your Postgres repositories and SQL against a real test database, with clean data for every test.",
+    "learn": {
+      "concepts": [
+        "Why fakes aren't enough: SQL typos, constraints, joins and types need a real database",
+        "A separate test database (taskmanager_test) via DATABASE_URL in .env.test",
+        "Running migrations before the test suite (globalSetup)",
+        "Resetting data between tests: TRUNCATE ... RESTART IDENTITY CASCADE",
+        "Running DB tests in a single thread to avoid clashes",
+        "Optional: Docker or Testcontainers for a throwaway Postgres"
+      ],
+      "resources": [
+        { "title": "Vitest: globalSetup", "url": "https://vitest.dev/config/#globalsetup" },
+        { "title": "PostgreSQL docs: TRUNCATE", "url": "https://www.postgresql.org/docs/current/sql-truncate.html" },
+        { "title": "Testcontainers for Node.js", "url": "https://node.testcontainers.org/" }
+      ]
+    },
+    "build": {
+      "task": "In api-starter: create taskmanager_test and .env.test. Add a Vitest project (or separate config) for tests/db/*.test.ts with a globalSetup that runs your migrations, and a beforeEach that truncates all tables. Test PostgresProjectsRepo and PostgresTasksRepo directly: create and read back, unique name per user (same name for different users is allowed), CASCADE on project delete, filters, sorting with nulls last, pagination counts, user scoping (another user's id returns nothing), and the task+tags transaction rolling back on failure. Add npm scripts test:unit, test:db and test (both).",
+      "starterFiles": [],
+      "acceptance": [
+        "DB tests run against a separate test database, never the dev one",
+        "Migrations run once before the suite; tables truncated before each test",
+        "Constraint behaviour (unique, FK, CHECK, CASCADE) tested for real",
+        "User scoping tested at the SQL level",
+        "Transaction rollback test proves no partial data is left",
+        "npm run test:unit works without Postgres; npm run test:db needs it"
+      ]
+    },
+    "hints": [
+      "Guard against wiping the wrong database: in setup, if (!process.env.DATABASE_URL?.includes('_test')) throw new Error('Refusing to run DB tests on a non-test database');",
+      "vitest.db.config.ts: test: { include: ['tests/db/**/*.test.ts'], globalSetup: './tests/db/setup.ts', fileParallelism: false }",
+      "Force a rollback: create a task with a tag name that violates a constraint (e.g. too long or null), then assert SELECT COUNT(*) FROM tasks is still 0."
+    ],
+    "proof": "Commit with DB tests and configs.",
+    "explainBack": [
+      { "q": "Name two bugs a DB test would catch that a unit test with fakes would not.", "lookFor": ["SQL syntax/typos", "wrong JOIN dropping rows", "COUNT as string", "constraint violations", "parameter numbering mistakes"] },
+      { "q": "Why must DB tests never run against your development database?", "lookFor": ["they truncate tables", "would destroy real data", "need predictable starting state"] }
+    ],
+    "lastHintExplanation": "Fakes only check that the service logic is right. They can't catch a misspelled column, a JOIN that drops rows, a $3 that should be $4, or a constraint that rejects real data; only a real database can. DB tests truncate tables before each test, so pointing them at the dev database would wipe it, which is why the setup refuses anything not named *_test.",
+    "predict": [
+      { "q": "TRUNCATE projects RESTART IDENTITY CASCADE; while tasks references projects. What happens to tasks?", "options": ["Kept", "Also truncated (CASCADE)", "Error", "Set to NULL"], "answer": 1, "why": "CASCADE truncates referencing tables too." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "BST: in-order traversal",
+      "note": "In-order traversal of a BST visits values in sorted order; stop at the kth.",
+      "problems": [
+        { "title": "LeetCode 230: Kth Smallest Element in a BST", "url": "https://leetcode.com/problems/kth-smallest-element-in-a-bst/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Data interpretation: table with percentages",
+      "questions": [
+        { "q": "Applicants and selection rate by college — A: 400 at 10%; B: 250 at 20%; C: 500 at 8%; D: 350 at 12%. Which college had the most selections?", "options": ["A", "B", "C", "D"], "answer": 1, "why": "A 40, B 50, C 40, D 42." },
+        { "q": "Same data: how many were selected in total?", "options": ["162", "172", "182", "152"], "answer": 1, "why": "40 + 50 + 40 + 42." },
+        { "q": "Same data: what is the overall selection rate (approximately)?", "options": ["10.5%", "11.5%", "12.5%", "9.5%"], "answer": 1, "why": "172/1500 ≈ 11.5%." },
+        { "q": "Same data: which two colleges had the same number of selections?", "options": ["A and C", "B and D", "A and D", "C and D"], "answer": 0, "why": "Both selected 40." },
+        { "q": "Same data: if C's selection rate rose to 10%, how many more would be selected there?", "options": ["5", "10", "15", "20"], "answer": 1, "why": "50 − 40." }
+      ]
+    },
+    "revision": ["Day 110: explain why createApp accepts its dependencies."]
+  },
+  {
+    "day": 112,
+    "module": "backend-testing",
+    "title": "Logging, health checks and API documentation",
+    "goal": "Make your API observable and self-documenting, like a production service.",
+    "learn": {
+      "concepts": [
+        "Structured JSON logging with pino (levels, request id, no secrets)",
+        "pino-http for request logs; pretty output only in development",
+        "Health and readiness: /health (process up) vs /ready (database reachable)",
+        "Graceful shutdown: stop accepting requests, finish in-flight ones, close the pool",
+        "OpenAPI: a machine-readable description of your API",
+        "Swagger UI for interactive docs"
+      ],
+      "resources": [
+        { "title": "pino on npm", "url": "https://www.npmjs.com/package/pino" },
+        { "title": "OpenAPI Specification: Getting started", "url": "https://learn.openapis.org/" },
+        { "title": "swagger-ui-express on npm", "url": "https://www.npmjs.com/package/swagger-ui-express" },
+        { "title": "Express: Health checks and graceful shutdown", "url": "https://expressjs.com/en/advanced/healthcheck-graceful-shutdown.html" }
+      ]
+    },
+    "build": {
+      "task": "In api-starter: replace console logs with pino and pino-http (request id included, authorization header redacted, LOG_LEVEL from config, pino-pretty only in development). Add GET /health and GET /ready (runs SELECT 1; returns 503 if the database is down). Handle SIGTERM and SIGINT: stop the server, wait for requests to finish, close the pg pool, then exit. Write openapi.yaml describing auth, projects and tasks (schemas, security scheme, error format) and serve Swagger UI at /docs in development. Test /ready by stopping Postgres.",
+      "starterFiles": [],
+      "acceptance": [
+        "Logs are JSON with level, time, request id; no tokens or passwords",
+        "/health always 200 while running; /ready 503 when Postgres is stopped",
+        "Ctrl+C shuts down cleanly (log shows the pool closing)",
+        "openapi.yaml covers every endpoint with request and response schemas",
+        "Swagger UI works at /docs and can call the API with a Bearer token"
+      ]
+    },
+    "hints": [
+      "pinoHttp({ logger, genReqId: (req, res) => res.locals.requestId, redact: ['req.headers.authorization', 'req.body.password'] }).",
+      "Shutdown: process.on('SIGTERM', () => { server.close(async () => { await pool.end(); process.exit(0); }); setTimeout(() => process.exit(1), 10_000).unref(); });",
+      "In openapi.yaml, add components.securitySchemes.bearerAuth: { type: http, scheme: bearer, bearerFormat: JWT } and security: [{ bearerAuth: [] }] on protected paths. Swagger UI then shows an Authorize button."
+    ],
+    "proof": "Commit with logging, health, shutdown and openapi.yaml.",
+    "explainBack": [
+      { "q": "What's the difference between /health and /ready, and who uses them?", "lookFor": ["health = process alive", "ready = can serve traffic (dependencies ok)", "used by load balancers/orchestrators like Coolify/Docker", "restart vs stop sending traffic"] },
+      { "q": "Why log in JSON instead of plain text?", "lookFor": ["machine-searchable", "filter by fields like requestId/level", "log tools parse it", "consistent structure"] }
+    ],
+    "lastHintExplanation": "/health answers 'is the process alive?' (if not, restart it). /ready answers 'can it serve requests right now?' (if the database is down, stop sending traffic). Platforms like Docker and Coolify use these checks. JSON logs can be filtered by fields such as requestId or level, so you can follow one failing request through thousands of log lines.",
+    "predict": [
+      { "q": "A deploy sends SIGTERM while a request is half done. Without graceful shutdown, what happens?", "options": ["The request finishes normally", "It's cut off and the client gets an error", "It's retried automatically", "Nothing"], "answer": 1, "why": "The process exits immediately and in-flight requests are dropped." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "BST: lowest common ancestor",
+      "note": "If both values are smaller, go left; if both are bigger, go right; otherwise you're at the answer.",
+      "problems": [
+        { "title": "LeetCode 235: Lowest Common Ancestor of a Binary Search Tree", "url": "https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-search-tree/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Verbal ability: reading comprehension",
+      "questions": [
+        { "q": "Passage: 'Open-source software is built by communities who share code publicly. Companies benefit by reusing reliable components, while contributors gain skills and visibility. Yet many critical projects are maintained by a handful of unpaid volunteers, which creates risks when they burn out or step away.' What is the passage mainly about?", "options": ["How to sell software", "The benefits and a key risk of open source", "Why volunteers are paid", "Company hiring"], "answer": 1, "why": "It describes the benefits and then the maintainer risk." },
+        { "q": "Same passage: how do contributors benefit?", "options": ["Higher salaries", "Skills and visibility", "Free products", "Shorter hours"], "answer": 1, "why": "Stated directly." },
+        { "q": "Same passage: what risk is mentioned?", "options": ["Security laws", "Maintainers burning out or leaving", "High costs", "Too many contributors"], "answer": 1, "why": "Stated directly." },
+        { "q": "Same passage: what does 'a handful of' mean?", "options": ["Many", "A small number of", "No", "Paid"], "answer": 1, "why": "It's an idiom for a few." },
+        { "q": "Same passage: which statement would the author most likely agree with?", "options": ["Open source has no downsides", "Critical projects need more support", "Companies shouldn't use open source", "Volunteers write bad code"], "answer": 1, "why": "Supporting maintainers follows from the risk described." }
+      ]
+    },
+    "revision": ["Day 111: explain why DB tests refuse non-test databases."]
+  },
+  {
+    "day": 113,
+    "module": "backend-testing",
+    "title": "Mini project: full-stack notes with accounts",
+    "goal": "Build a complete small full-stack app end to end, in one day, using everything from Phase 4.",
+    "learn": {
+      "concepts": [
+        "Planning a full-stack feature: schema → API → tests → UI",
+        "Reusing your api-starter structure",
+        "Full-text search in PostgreSQL (to_tsvector, plainto_tsquery) or ILIKE",
+        "Running frontend and backend together (two terminals or npm-run-all)"
+      ],
+      "resources": [
+        { "title": "PostgreSQL docs: Text search intro", "url": "https://www.postgresql.org/docs/current/textsearch-intro.html" },
+        { "title": "concurrently on npm", "url": "https://www.npmjs.com/package/concurrently" }
+      ]
+    },
+    "build": {
+      "task": "Turn your angular-notes app into a full-stack app: create a new repo notes-fullstack (or a monorepo with api/ and web/). Backend: users and notes tables (title, body, tags text[], pinned, timestamps), register/login with JWT, notes CRUD scoped by user, search across title and body, and filtering by tag. At least 10 API tests including an IDOR test. Frontend: reuse your Angular notes UI, add login/register, the auth interceptor and guard, and point the store at the API. A root npm run dev starts both. README with setup steps, .env.example and screenshots.",
+      "starterFiles": [],
+      "acceptance": [
+        "Register, login, and full notes CRUD work end to end",
+        "Each user only sees their own notes (tested)",
+        "Search across title and body works, plus tag filtering",
+        "10+ API tests pass",
+        "One command starts frontend and backend",
+        "README lets a stranger run the app from scratch"
+      ]
+    },
+    "hints": [
+      "Plan in this order: migration → repo → service → routes → API tests → Angular. Don't touch the UI until the API tests pass.",
+      "Tags as a Postgres array: tags TEXT[] NOT NULL DEFAULT '{}', and filter with WHERE $2 = ANY(tags).",
+      "Root package.json: \"dev\": \"concurrently -n api,web \\\"npm --prefix api run dev\\\" \\\"npm --prefix web start\\\"\""
+    ],
+    "proof": "Link to your notes-fullstack repo.",
+    "explainBack": [
+      { "q": "Walk through what happens when a logged-in user creates a note, from the click to the database and back.", "lookFor": ["form → store → service → HttpClient", "interceptor adds token", "requireAuth → validate → controller → service → repo INSERT with user_id", "201 response → store updates signal → UI"] },
+      { "q": "Which part took longest and what would you do differently?", "lookFor": ["specific part", "honest reason", "concrete change"] }
+    ],
+    "lastHintExplanation": "Building API-first with tests means the UI connects to something you already trust. When the Angular side misbehaves, you know the bug is in the frontend. The request path is: form → store → HttpClient → auth interceptor → requireAuth → validation → controller → service → repo (scoped by user_id) → response → signal update.",
+    "predict": [],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Trees: diameter",
+      "note": "At each node, the longest path through it is depth(left) + depth(right). Track the maximum while computing depths.",
+      "problems": [
+        { "title": "LeetCode 543: Diameter of Binary Tree", "url": "https://leetcode.com/problems/diameter-of-binary-tree/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Mixed timed set (10 minutes)",
+      "questions": [
+        { "q": "Of 60 people, 35 like Hindi films, 30 like English films and 12 like both. How many like neither?", "options": ["5", "7", "10", "3"], "answer": 1, "why": "60 − (35 + 30 − 12) = 7." },
+        { "q": "A shop's sales grow from ₹40,000 to ₹50,000. What is the percentage increase?", "options": ["20%", "25%", "10%", "12.5%"], "answer": 1, "why": "10,000/40,000." },
+        { "q": "Which word means the same as 'Resilient'?", "options": ["Fragile", "Able to recover quickly", "Stubborn", "Weak"], "answer": 1, "why": "Resilient means bouncing back from difficulty." },
+        { "q": "What is the probability of getting at least one head in two coin tosses?", "options": ["1/2", "3/4", "1/4", "2/3"], "answer": 1, "why": "1 − 1/4." },
+        { "q": "'She has worked here ___ 2019.'", "options": ["for", "since", "from", "in"], "answer": 1, "why": "since + a starting point." }
+      ]
+    },
+    "revision": ["Day 112: explain /health vs /ready."]
+  },
+  {
+    "day": 114,
+    "module": "backend-testing",
+    "title": "Phase 4 review: backend machine coding",
+    "goal": "Prove Phase 4 stuck by building a small, tested, secure API from scratch under time pressure.",
+    "learn": {
+      "concepts": [
+        "Phase 4 summary: Node, Express, REST, validation, PostgreSQL, auth, security, testing",
+        "Backend interview rounds: build an API in 90–120 minutes and explain your choices",
+        "Prioritise: correct schema, working endpoints, validation and auth, then tests"
+      ],
+      "resources": [
+        { "title": "Express: Guide (refresher)", "url": "https://expressjs.com/en/guide/routing.html" },
+        { "title": "PostgreSQL Tutorial (refresher)", "url": "https://www.postgresql.org/docs/current/tutorial.html" }
+      ]
+    },
+    "build": {
+      "task": "Timed (2 hours, no notes for the first 75 minutes): new repo 'bookmarks-api'. Users register and log in (JWT). Bookmarks: url (valid URL), title, tags, created_at; CRUD scoped by user; list with ?tag= and ?q= (search title and url) and pagination. Validation with zod, consistent errors, PostgreSQL with migrations, rate-limited auth, and at least 8 supertest tests including IDOR. Commit 'checkpoint: no notes' at 75 minutes. Then write docs/phase4-review.md: what you built unaided, what you looked up, your top 3 weak topics and a plan for each.",
+      "starterFiles": [],
+      "acceptance": [
+        "'checkpoint: no notes' commit within 75 minutes",
+        "Auth and bookmarks CRUD work, scoped by user",
+        "Filtering, search and pagination work",
+        "8+ tests pass, including an IDOR test",
+        "phase4-review.md is honest and specific"
+      ]
+    },
+    "hints": [
+      "First 10 minutes: write the migration and the list of endpoints with status codes. Then build auth → bookmarks → list queries → tests.",
+      "Copy patterns, not files: you've written every piece of this in the last five weeks.",
+      "If you get stuck on something for more than 10 minutes in the no-notes part, leave a TODO and move on."
+    ],
+    "proof": "Links to the checkpoint commit and the final commit.",
+    "explainBack": [
+      { "q": "Explain how a request to GET /bookmarks?tag=dev&page=2 is handled, layer by layer.", "lookFor": ["rate limit/CORS/json", "requireAuth sets user", "validate query (coerce page)", "controller → service → repo", "parameterised SQL with user_id, tag, LIMIT/OFFSET", "data + meta response"] },
+      { "q": "Which Phase 4 topic are you least confident in, and what's your plan?", "lookFor": ["specific topic", "honest reason", "concrete practice plan"] }
+    ],
+    "lastHintExplanation": "Backend interviewers look for a sound schema, correct status codes, validation, auth with per-user scoping, parameterised SQL and a few meaningful tests, in roughly that order. Being able to explain the path of one request through every layer shows you understand the system, not just the syntax.",
+    "predict": [],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Phase 4 review",
+      "note": "Re-solve one problem from each Phase 4 pattern from a blank file, under 20 minutes each.",
+      "problems": [
+        { "title": "LeetCode 33: Search in Rotated Sorted Array (re-solve)", "url": "https://leetcode.com/problems/search-in-rotated-sorted-array/" },
+        { "title": "LeetCode 21: Merge Two Sorted Lists (re-solve)", "url": "https://leetcode.com/problems/merge-two-sorted-lists/" },
+        { "title": "LeetCode 98: Validate Binary Search Tree (re-solve)", "url": "https://leetcode.com/problems/validate-binary-search-tree/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Timed test: Phase 4 topics",
+      "questions": [
+        { "q": "Revenue was ₹80 lakh, of which 25% came from exports. Exports grow by 50% and the rest stays the same. What is the new total?", "options": ["₹90 lakh", "₹100 lakh", "₹95 lakh", "₹110 lakh"], "answer": 0, "why": "Exports go from 20 to 30, so the total rises by 10." },
+        { "q": "A pie sector shows 15% of a ₹2,40,000 budget. How much is that?", "options": ["₹30,000", "₹36,000", "₹40,000", "₹24,000"], "answer": 1, "why": "0.15 × 2,40,000." },
+        { "q": "Which word means the opposite of 'Verbose'?", "options": ["Wordy", "Concise", "Loud", "Clear"], "answer": 1, "why": "Verbose means using too many words." },
+        { "q": "Find the error: 'Neither Ravi nor his friends was present.'", "options": ["Neither Ravi", "nor his friends", "was", "present"], "answer": 2, "why": "The verb agrees with the nearer subject (friends), so 'were'." },
+        { "q": "Bus : Driver :: Aeroplane : ?", "options": ["Passenger", "Pilot", "Airport", "Engineer"], "answer": 1, "why": "The person who operates it." }
+      ]
+    },
+    "revision": ["Phase 4: from memory, write a migration, a parameterised scoped query, requireAuth and one supertest test."]
+  }
+]

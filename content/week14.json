@@ -1,0 +1,384 @@
+[
+  {
+    "day": 79,
+    "module": "angular-http",
+    "title": "HttpClient and just enough RxJS",
+    "goal": "Fetch data in Angular with HttpClient and understand Observables well enough to use them confidently.",
+    "learn": {
+      "concepts": [
+        "provideHttpClient(withFetch()) in app.config.ts",
+        "HttpClient.get<T>(url) returns an Observable (lazy: nothing happens until subscribed)",
+        "Observable vs Promise: many values, cancellable, lazy",
+        "pipe with map, catchError, tap; switchMap for 'latest request wins'",
+        "Turning Observables into signals with toSignal, or into promises with firstValueFrom",
+        "Put HTTP calls in services, not components"
+      ],
+      "resources": [
+        { "title": "Angular: HTTP client overview", "url": "https://angular.dev/guide/http" },
+        { "title": "Angular: Making requests", "url": "https://angular.dev/guide/http/making-requests" },
+        { "title": "RxJS: Overview", "url": "https://rxjs.dev/guide/overview" }
+      ]
+    },
+    "build": {
+      "task": "In angular-playground, create UsersApi (service) using HttpClient against https://jsonplaceholder.typicode.com: getUsers(), getUser(id), getUserPosts(id), with typed interfaces. Build /users (list, using toSignal) and /users/:id (detail with the user's posts). Then build a live search box using a FormControl's valueChanges with debounceTime(300), distinctUntilChanged() and switchMap to call https://api.github.com/search/users?q=… and show results. Write docs/rxjs.md explaining each operator you used in your own words.",
+      "starterFiles": [],
+      "acceptance": [
+        "provideHttpClient(withFetch()) configured",
+        "All HTTP calls live in services with typed return values",
+        "Users list and detail pages work, including direct URL loads",
+        "Search uses debounceTime, distinctUntilChanged and switchMap (check the Network tab: old requests are cancelled)",
+        "docs/rxjs.md explains each operator in your own words"
+      ]
+    },
+    "hints": [
+      "users = toSignal(this.api.getUsers(), { initialValue: [] }); then @for (u of users(); track u.id) in the template.",
+      "results = toSignal(this.search.valueChanges.pipe(debounceTime(300), distinctUntilChanged(), switchMap(q => q ? this.api.searchGithub(q) : of([]))), { initialValue: [] }).",
+      "switchMap unsubscribes from the previous inner request when a new value arrives. HttpClient then cancels that request, and you'll see it marked as cancelled in DevTools."
+    ],
+    "proof": "Commit with the services, pages and docs/rxjs.md.",
+    "explainBack": [
+      { "q": "Why doesn't this.http.get(url) send a request until something subscribes?", "lookFor": ["Observables are lazy", "subscribe/toSignal/firstValueFrom triggers it", "each subscription sends a new request"] },
+      { "q": "Explain what switchMap does in your search and what bug it prevents.", "lookFor": ["maps each query to a request", "cancels previous request", "prevents stale results arriving out of order"] }
+    ],
+    "lastHintExplanation": "Observables are lazy: http.get only describes a request, and each subscription (via subscribe, toSignal or firstValueFrom) actually sends one. In the search pipe, debounceTime waits for a typing pause, distinctUntilChanged skips repeated queries, and switchMap starts a request per query while cancelling the previous one, so a slow old response can't overwrite newer results.",
+    "predict": [
+      { "q": "const obs = this.http.get('/api/x'); obs.subscribe(); obs.subscribe(); How many HTTP requests are sent?", "options": ["0", "1", "2", "It depends on caching"], "answer": 2, "why": "Each subscription to a cold HTTP observable sends its own request." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Sliding window: counts",
+      "note": "Fixed-size window comparing character counts; collect every start index that matches.",
+      "problems": [
+        { "title": "LeetCode 438: Find All Anagrams in a String", "url": "https://leetcode.com/problems/find-all-anagrams-in-a-string/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Mixed reasoning puzzles",
+      "questions": [
+        { "q": "In a code, MANGO is written as NBOHP. How is APPLE written?", "options": ["BQQMF", "ZOOKD", "BQPMF", "AQQLE"], "answer": 0, "why": "Each letter moves +1." },
+        { "q": "A is 3 years older than B, and B is 2 years older than C. Their ages add up to 28. How old is C?", "options": ["6", "7", "8", "9"], "answer": 1, "why": "3C + 7 = 28." },
+        { "q": "At a party there were 28 handshakes, each pair shaking once. How many people were there?", "options": ["7", "8", "9", "14"], "answer": 1, "why": "n(n − 1)/2 = 28 gives n = 8." },
+        { "q": "From 2 red and 2 blue balls, 2 are drawn. What is the probability they're the same colour?", "options": ["1/3", "1/2", "2/3", "1/4"], "answer": 0, "why": "2 same-colour pairs (RR, BB) out of 4C2 = 6." },
+        { "q": "If yesterday was Monday, what day is the day after tomorrow?", "options": ["Wednesday", "Thursday", "Friday", "Saturday"], "answer": 1, "why": "Today is Tuesday." }
+      ]
+    },
+    "revision": ["Day 78: explain why an empty-path redirect needs pathMatch: 'full'."]
+  },
+  {
+    "day": 80,
+    "module": "angular-http",
+    "title": "Full CRUD with a mock REST API",
+    "goal": "Create, read, update and delete data on a REST API from Angular, keeping the UI in sync.",
+    "learn": {
+      "concepts": [
+        "json-server: a fake REST API from a db.json file",
+        "HTTP verbs in HttpClient: get, post, put, patch, delete",
+        "Environment config for the API base URL",
+        "Updating local state after server responses (or optimistic updates with rollback)",
+        "Error handling with catchError and user-friendly messages",
+        "HTTP status codes you'll see: 200, 201, 204, 400, 404, 500"
+      ],
+      "resources": [
+        { "title": "json-server on npm", "url": "https://www.npmjs.com/package/json-server" },
+        { "title": "Angular: Making requests (mutations)", "url": "https://angular.dev/guide/http/making-requests#mutating-server-state" },
+        { "title": "Angular CLI: Configuring environments", "url": "https://angular.dev/tools/cli/environments" }
+      ]
+    },
+    "build": {
+      "task": "Move your angular-notes app from localStorage to a REST API. Add api/db.json with a notes array and run npx json-server api/db.json --port 3001. Create NotesApi (service) with list, get, create (POST), update (PATCH), remove (DELETE), with the base URL from an environment file. NotesStore now loads from the API and updates its signals from server responses. Show a loading skeleton while listing, disable buttons while saving, and show error toasts if the server is down (stop json-server to test). Add an npm script \"api\" to start json-server.",
+      "starterFiles": [
+        { "name": "api/db.json", "content": "{\n  \"notes\": [\n    { \"id\": \"1\", \"title\": \"Welcome\", \"body\": \"Your first note from the API.\", \"tags\": [\"intro\"], \"pinned\": true, \"createdAt\": \"2026-01-10T10:00:00.000Z\", \"updatedAt\": \"2026-01-10T10:00:00.000Z\" }\n  ]\n}\n" }
+      ],
+      "acceptance": [
+        "All CRUD operations hit the API (visible in the Network tab and in db.json)",
+        "Base URL comes from environment config, not hard-coded in services",
+        "Loading skeleton on list; save/delete buttons disabled while in flight",
+        "With the API stopped, the app shows friendly errors and doesn't break",
+        "npm run api starts the mock server; README updated with run steps"
+      ]
+    },
+    "hints": [
+      "create(note: NewNote) { return this.http.post<Note>(`${this.base}/notes`, note); } The server returns the saved note including its id.",
+      "In the store: this.saving.set(true); try { const saved = await firstValueFrom(this.api.create(n)); this._notes.update(list => [saved, ...list]); } catch { toast.error(...) } finally { this.saving.set(false); }",
+      "Run both servers in two terminals: npm run api and ng serve. If you get CORS errors, check the URL and port; json-server allows CORS by default."
+    ],
+    "proof": "Commit with the API service, updated store and db.json.",
+    "explainBack": [
+      { "q": "When you create a note, why do you add the server's response to the list instead of the form value?", "lookFor": ["server assigns id/timestamps", "server is source of truth", "response may differ from what was sent"] },
+      { "q": "PUT vs PATCH: which did you use for updates and why?", "lookFor": ["PUT replaces the whole resource", "PATCH changes only sent fields", "reason tied to their code"] }
+    ],
+    "lastHintExplanation": "The server decides the final record: it assigns the id and timestamps and may normalise fields, so adding its response keeps your state honest. PUT replaces the whole resource with what you send; PATCH updates only the fields you send, which is safer when you edit just a title or a pinned flag.",
+    "predict": [
+      { "q": "DELETE /notes/1 succeeds and the server returns 204. What's in the response body?", "options": ["The deleted note", "Nothing (No Content)", "true", "An error"], "answer": 1, "why": "204 means success with no body." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Sliding window: at most k types",
+      "note": "Keep a Map of fruit counts; shrink when you have more than 2 types.",
+      "problems": [
+        { "title": "LeetCode 904: Fruit Into Baskets", "url": "https://leetcode.com/problems/fruit-into-baskets/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Venn diagrams and sets",
+      "questions": [
+        { "q": "Of 40 students, 25 play cricket, 20 play football and 10 play both. How many play neither?", "options": ["5", "10", "15", "0"], "answer": 0, "why": "40 − (25 + 20 − 10) = 5." },
+        { "q": "Of 100 people, 60 like tea, 50 like coffee and 20 like both. How many like only tea?", "options": ["40", "60", "20", "30"], "answer": 0, "why": "60 − 20." },
+        { "q": "70 people like A, 50 like B, 30 like both, and everyone likes at least one. How many people are there?", "options": ["90", "120", "100", "80"], "answer": 0, "why": "70 + 50 − 30." },
+        { "q": "Of 50 people, 30 speak Hindi, 25 speak English and 10 speak neither. How many speak both?", "options": ["5", "10", "15", "20"], "answer": 2, "why": "40 speak at least one, so both = 30 + 25 − 40 = 15." },
+        { "q": "Of 100 people, 60 like A and 45 like B. What is the most people who could like both?", "options": ["45", "60", "5", "105"], "answer": 0, "why": "It can't be more than the smaller group." }
+      ]
+    },
+    "revision": ["Day 79: explain debounceTime, distinctUntilChanged and switchMap in one line each."]
+  },
+  {
+    "day": 81,
+    "module": "angular-http",
+    "title": "Interceptors, loading state and retries",
+    "goal": "Handle cross-cutting HTTP concerns (base URL, headers, errors, loading) once, with interceptors.",
+    "learn": {
+      "concepts": [
+        "Functional interceptors: HttpInterceptorFn and withInterceptors([...])",
+        "Cloning requests to add headers (Authorization comes in Phase 4)",
+        "A global error interceptor that shows toasts for 5xx and network errors",
+        "A loading interceptor with a pending-requests counter signal",
+        "retry({ count, delay }) for flaky GET requests only",
+        "Why not to retry POST blindly (duplicate creates)"
+      ],
+      "resources": [
+        { "title": "Angular: Interceptors", "url": "https://angular.dev/guide/http/interceptors" },
+        { "title": "RxJS: retry operator", "url": "https://rxjs.dev/api/operators/retry" }
+      ]
+    },
+    "build": {
+      "task": "In angular-notes, add three functional interceptors: (1) apiPrefixInterceptor: requests starting with /api get the environment base URL; (2) loadingInterceptor: increments a LoadingService pending signal and decrements it in finalize; show a thin progress bar at the top of the app while pending() > 0; (3) errorInterceptor: maps network errors and 5xx to a friendly toast, and 404 to a 'not found' message, then rethrows. Add retry with 2 attempts and a 500 ms delay to GET requests only. Remove duplicated try/catch toasts from components.",
+      "starterFiles": [],
+      "acceptance": [
+        "Three interceptors registered with withInterceptors in the right order",
+        "Services use relative /api/... URLs",
+        "Top progress bar shows during any request",
+        "Friendly toasts for network/5xx errors without per-component code",
+        "GETs retry twice with a delay; POST/PATCH/DELETE never retry"
+      ]
+    },
+    "hints": [
+      "export const loadingInterceptor: HttpInterceptorFn = (req, next) => { const l = inject(LoadingService); l.start(); return next(req).pipe(finalize(() => l.stop())); };",
+      "Prefix: if (req.url.startsWith('/api')) req = req.clone({ url: environment.apiUrl + req.url.slice(4) });",
+      "Retry only GETs: next(req).pipe(req.method === 'GET' ? retry({ count: 2, delay: 500 }) : identity). Test by stopping json-server and watching the Network tab."
+    ],
+    "proof": "Commit with interceptors.",
+    "explainBack": [
+      { "q": "Why use interceptors instead of handling errors and loading in every component?", "lookFor": ["one place for cross-cutting logic", "consistent behaviour", "components stay simple", "less duplication"] },
+      { "q": "Why shouldn't you automatically retry POST requests?", "lookFor": ["not idempotent", "could create duplicates if the first actually succeeded", "GET is safe to repeat"] }
+    ],
+    "lastHintExplanation": "Interceptors wrap every request, so things every call needs (base URL, headers, loading count, error toasts) live in one place instead of being copied into each component. GET is safe to repeat; POST isn't idempotent. If a POST succeeded but its response was lost, retrying would create a duplicate record.",
+    "predict": [
+      { "q": "An interceptor does req.headers.set('X-App', '1') and then next(req). Does the header get sent?", "options": ["Yes", "No, requests are immutable; you must clone", "Only for GET", "Only in production"], "answer": 1, "why": "HttpRequest is immutable; set() returns new headers. Use req.clone({ setHeaders: ... })." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Two pointers: in-place",
+      "note": "Allow each value at most twice; compare with the element two places back in the output.",
+      "problems": [
+        { "title": "LeetCode 80: Remove Duplicates from Sorted Array II", "url": "https://leetcode.com/problems/remove-duplicates-from-sorted-array-ii/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Data interpretation: reading a table",
+      "questions": [
+        { "q": "A shop sold 120, 150, 90, 180 and 160 units Monday to Friday. What is the total?", "options": ["680", "700", "720", "650"], "answer": 1, "why": "120 + 150 + 90 + 180 + 160 = 700." },
+        { "q": "Using the same data, what is the daily average?", "options": ["130", "140", "150", "135"], "answer": 1, "why": "700 / 5." },
+        { "q": "What is the percentage increase from Monday to Tuesday?", "options": ["20%", "25%", "30%", "15%"], "answer": 1, "why": "30/120 = 25%." },
+        { "q": "Which day had the lowest sales?", "options": ["Mon", "Wed", "Fri", "Tue"], "answer": 1, "why": "90 on Wednesday." },
+        { "q": "Thursday's sales are about what percent of the total?", "options": ["25.7%", "18%", "30%", "22.5%"], "answer": 0, "why": "180/700 ≈ 25.7%." }
+      ]
+    },
+    "revision": ["Day 80: list the HTTP verbs and what each does to a resource."]
+  },
+  {
+    "day": 82,
+    "module": "angular-http",
+    "title": "Project: book finder (part 1)",
+    "goal": "Build a polished Angular app on a real public API: search, results, pagination and good UX states.",
+    "learn": {
+      "concepts": [
+        "Reading a real API's docs and response shape (Open Library)",
+        "Mapping API responses to your own clean interfaces",
+        "Search state in the URL (query params) for shareable links",
+        "Pagination with page and limit",
+        "Image fallbacks for missing covers"
+      ],
+      "resources": [
+        { "title": "Open Library: Search API", "url": "https://openlibrary.org/dev/docs/api/search" },
+        { "title": "Open Library: Covers API", "url": "https://openlibrary.org/dev/docs/api/covers" }
+      ]
+    },
+    "build": {
+      "task": "Create a NEW repo book-finder (Angular + Tailwind). Search page: a search box synced to ?q=&page=, debounced; results grid showing cover, title, authors and first-publish year; pagination (20 per page) with Previous/Next and 'Page X of Y'; skeleton cards while loading; empty and error states; a fallback image when there's no cover. Map Open Library's response to your own Book interface in a BooksApi service (components never see the raw API shape).",
+      "starterFiles": [],
+      "acceptance": [
+        "Search is debounced and reflected in the URL; reloading keeps the results",
+        "Pagination works and shows the total pages",
+        "Raw API types are mapped to a clean Book interface in the service",
+        "Skeleton, empty and error states all reachable",
+        "Missing covers show a fallback; images have alt text and lazy loading"
+      ]
+    },
+    "hints": [
+      "Search: https://openlibrary.org/search.json?q=harry+potter&page=1&limit=20&fields=key,title,author_name,first_publish_year,cover_i. The fields parameter makes responses much smaller.",
+      "Cover URL: https://covers.openlibrary.org/b/id/{cover_i}-M.jpg. If cover_i is missing, use a local placeholder in public/.",
+      "Total pages: Math.ceil(numFound / 20). Drive everything from route query params: q = input(''), page = input(1, { transform: numberAttribute })."
+    ],
+    "proof": "Link to your book-finder repo.",
+    "explainBack": [
+      { "q": "Why map the API response to your own Book interface?", "lookFor": ["components don't depend on the API's shape", "one place to change if the API changes", "cleaner names and types"] },
+      { "q": "How does putting q and page in the URL improve the app?", "lookFor": ["shareable links", "reload keeps state", "back/forward works"] }
+    ],
+    "lastHintExplanation": "Mapping raw responses into your own Book interface means only BooksApi knows Open Library's field names (author_name, cover_i). If the API changes, you fix one file. Keeping q and page in the URL makes the URL the state: links can be shared, reloads restore the results, and the browser's back button walks through earlier searches.",
+    "predict": [
+      { "q": "numFound = 41 and limit = 20. How many pages are there?", "options": ["2", "3", "2.05", "4"], "answer": 1, "why": "Math.ceil(41/20) = 3." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Sliding window: flips",
+      "note": "Allow at most k zeros in the window.",
+      "problems": [
+        { "title": "LeetCode 1004: Max Consecutive Ones III", "url": "https://leetcode.com/problems/max-consecutive-ones-iii/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Cubes and dice",
+      "questions": [
+        { "q": "A cube painted on all sides is cut into 27 equal small cubes. How many have exactly 2 painted faces?", "options": ["8", "12", "6", "1"], "answer": 1, "why": "The edge middles: 12 edges × 1." },
+        { "q": "In the same cut, how many small cubes have no paint?", "options": ["0", "1", "6", "8"], "answer": 1, "why": "Only the centre cube." },
+        { "q": "In the same cut, how many have 3 painted faces?", "options": ["6", "8", "12", "4"], "answer": 1, "why": "The 8 corners." },
+        { "q": "On a standard die, opposite faces add up to:", "options": ["6", "7", "8", "12"], "answer": 1, "why": "1–6, 2–5 and 3–4." },
+        { "q": "A painted cube is cut into 64 small cubes (4×4×4). How many have exactly one painted face?", "options": ["24", "16", "32", "8"], "answer": 0, "why": "Each of the 6 faces has a 2×2 centre: 6 × 4 = 24." }
+      ]
+    },
+    "revision": ["Day 81: explain why POST requests shouldn't be retried automatically."]
+  },
+  {
+    "day": 83,
+    "module": "angular-http",
+    "title": "Project: book finder (part 2) and deploy",
+    "goal": "Add details and favourites to the book finder, then deploy it.",
+    "learn": {
+      "concepts": [
+        "Combining requests with forkJoin (work + author details)",
+        "Favourites in a signal store persisted to localStorage",
+        "Route-level loading with resolvers or component loading state",
+        "Building for production: ng build, base href",
+        "Deploying an Angular app to GitHub Pages (angular-cli-ghpages) or Netlify"
+      ],
+      "resources": [
+        { "title": "Open Library: Works API", "url": "https://openlibrary.org/dev/docs/api/books" },
+        { "title": "RxJS: forkJoin", "url": "https://rxjs.dev/api/index/function/forkJoin" },
+        { "title": "Angular: Deployment", "url": "https://angular.dev/tools/cli/deployment" }
+      ]
+    },
+    "build": {
+      "task": "Add /books/:workId: fetch the work (https://openlibrary.org/works/{id}.json) and its first author in parallel, and show cover, description (handle string or { value } shapes), subjects (first 10 as chips) and author name. Add a favourites store (signals + localStorage) with a heart toggle on cards and the detail page, plus a /favourites page. Deploy to GitHub Pages (ng build --base-href /book-finder/ then npx angular-cli-ghpages --dir=dist/book-finder/browser) and add a 404.html copy of index.html so deep links work. Update the README with a screenshot and live link.",
+      "starterFiles": [],
+      "acceptance": [
+        "Detail page loads work and author in parallel (forkJoin), handling both description shapes",
+        "Favourites toggle on cards and detail; /favourites lists them; persisted",
+        "Deployed and working at the live URL, including reloading a deep link like /book-finder/books/OL82563W",
+        "README has a screenshot, live link, features and tech",
+        "Lighthouse Performance and Accessibility 90+ on the search page"
+      ]
+    },
+    "hints": [
+      "description can be a string or an object: typeof d === 'string' ? d : d?.value ?? 'No description'.",
+      "forkJoin({ work: this.getWork(id), author: this.getAuthor(authorKey) }) emits once when both complete. Get the author key from work.authors[0].author.key.",
+      "GitHub Pages has no server-side routing, so reloading /book-finder/books/x returns 404. Copying index.html to 404.html makes the Angular app load and route correctly."
+    ],
+    "proof": "Live URL of your deployed book finder.",
+    "explainBack": [
+      { "q": "Why did deep-link reloads 404 on GitHub Pages, and how did 404.html fix it?", "lookFor": ["static host looks for a real file at that path", "Angular routes exist only in the browser", "404.html serves the app which then routes"] },
+      { "q": "What does forkJoin do and when would it be the wrong choice?", "lookFor": ["runs observables in parallel, emits when all complete", "wrong if one never completes or for streams", "fails if any errors unless handled"] }
+    ],
+    "lastHintExplanation": "Angular routes exist only in the browser. GitHub Pages is a static file host, so reloading /books/x makes it look for a real file and return 404. Serving index.html as 404.html loads the app, and Angular's router then shows the right page. forkJoin waits for all inner observables to complete and emits their last values together, so it suits one-shot HTTP calls, not endless streams.",
+    "predict": [
+      { "q": "forkJoin([http.get(a), http.get(b)]) and request b fails. What happens?", "options": ["Emits [a, undefined]", "Errors; nothing is emitted", "Emits a only", "Retries b"], "answer": 1, "why": "forkJoin errors if any inner observable errors (unless you catchError inside)." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Monotonic stack: circular",
+      "note": "Loop twice over the array (index % n) to handle wrap-around.",
+      "problems": [
+        { "title": "LeetCode 503: Next Greater Element II", "url": "https://leetcode.com/problems/next-greater-element-ii/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Counting and probability revision",
+      "questions": [
+        { "q": "In how many ways can 5 people sit in a circle?", "options": ["120", "24", "60", "12"], "answer": 1, "why": "(5 − 1)!." },
+        { "q": "What is the probability that a randomly chosen month has 31 days?", "options": ["7/12", "5/12", "1/2", "1/3"], "answer": 0, "why": "Jan, Mar, May, Jul, Aug, Oct and Dec." },
+        { "q": "What is 10C8?", "options": ["45", "90", "80", "10"], "answer": 0, "why": "10C8 = 10C2 = 45." },
+        { "q": "A die is rolled twice. What is the probability the first roll is higher than the second?", "options": ["5/12", "1/2", "7/12", "1/6"], "answer": 0, "why": "Not equal in 30 of 36 outcomes, half of those first > second: 15/36." },
+        { "q": "In how many ways can a captain and a vice-captain be chosen from 11 players?", "options": ["55", "110", "121", "22"], "answer": 1, "why": "11 × 10." }
+      ]
+    },
+    "revision": ["Day 82: explain why the URL should hold search state."]
+  },
+  {
+    "day": 84,
+    "module": "angular-http",
+    "title": "Phase 3 review: Angular machine coding",
+    "goal": "Prove Phase 3 stuck by building a small Angular feature from scratch, timed, then plan your weak spots.",
+    "learn": {
+      "concepts": [
+        "Phase 3 summary: TypeScript, Tailwind, components, signals, services, routing, forms, HTTP",
+        "Machine-coding rounds: plan for 5 minutes, build the core first, polish last",
+        "Honest self-assessment"
+      ],
+      "resources": [
+        { "title": "Angular: Essentials (refresher)", "url": "https://angular.dev/essentials" }
+      ]
+    },
+    "build": {
+      "task": "Timed (2 hours, no notes for the first 75 minutes): new Angular app 'contact-manager' with Tailwind. Use json-server for /contacts. Features: list with search (debounced) and sort; add/edit form (reactive, validated: name required, email valid, phone Indian mobile); delete with confirmation; a detail route; loading and error states via an interceptor. Commit 'checkpoint: no notes' at 75 minutes. Then write docs/phase3-review.md: what you built unaided, what you looked up, your top 3 weak topics, and a plan for them.",
+      "starterFiles": [],
+      "acceptance": [
+        "'checkpoint: no notes' commit within 75 minutes",
+        "List, search, sort, add, edit, delete and detail all work against json-server",
+        "Validated reactive form with clear messages",
+        "Loading/error handled through an interceptor",
+        "phase3-review.md is honest and specific"
+      ]
+    },
+    "hints": [
+      "Spend the first 5–10 minutes writing the routes, the Contact interface and the service method names. Then build list → form → detail → polish.",
+      "If something blocks you for more than 10 minutes in the no-notes part, leave a TODO and move on.",
+      "Reuse patterns, not files: you already wrote all of these pieces in the last 4 weeks."
+    ],
+    "proof": "Links to the checkpoint commit and the final commit.",
+    "explainBack": [
+      { "q": "Which part of the build was slowest, and why?", "lookFor": ["specific feature", "honest cause (forgot API, typing issues, etc.)", "plan to fix"] },
+      { "q": "Explain your app's data flow from the API to the list on screen.", "lookFor": ["service with HttpClient", "store/signals", "components read signals", "interceptor for loading/errors"] }
+    ],
+    "lastHintExplanation": "In a machine-coding round, interviewers look for a working core first: clear data flow (service → state → components), validation, and handled loading and error states. Then they look for polish. Planning the model and routes before coding saves time and stops you painting yourself into a corner.",
+    "predict": [],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Phase 3 review",
+      "note": "Re-solve both from a blank file, under 25 minutes each.",
+      "problems": [
+        { "title": "LeetCode 15: 3Sum (re-solve)", "url": "https://leetcode.com/problems/3sum/" },
+        { "title": "LeetCode 3: Longest Substring Without Repeating Characters (re-solve)", "url": "https://leetcode.com/problems/longest-substring-without-repeating-characters/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Timed test: Phase 3 topics",
+      "questions": [
+        { "q": "6!/4! = ?", "options": ["30", "24", "2", "720"], "answer": 0, "why": "6 × 5." },
+        { "q": "What is the probability that a card is NOT a face card?", "options": ["10/13", "3/13", "9/13", "12/13"], "answer": 0, "why": "40/52." },
+        { "q": "Of 30 people, 18 like tea, 15 like coffee and 5 like neither. How many like both?", "options": ["8", "3", "5", "10"], "answer": 0, "why": "25 like at least one, so 18 + 15 − 25 = 8." },
+        { "q": "Ravi is 12th from the left in a row of 30. What is his position from the right?", "options": ["18", "19", "17", "20"], "answer": 1, "why": "30 − 12 + 1." },
+        { "q": "A painted cube is cut into 27 small cubes. How many have exactly one painted face?", "options": ["6", "8", "12", "1"], "answer": 0, "why": "The centre of each face." }
+      ]
+    },
+    "revision": ["Phase 3: rebuild a signal store with a computed and an effect, and an interceptor, from memory."]
+  }
+]

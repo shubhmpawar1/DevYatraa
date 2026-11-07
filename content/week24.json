@@ -1,0 +1,944 @@
+[
+  {
+    "day": 139,
+    "module": "capstone-2",
+    "title": "Capstone 2 kickoff: Firebase project and authentication",
+    "goal": "Start StandupBoard, a real-time team standup app, and add sign-in with Firebase Authentication.",
+    "learn": {
+      "concepts": [
+        "The capstone: StandupBoard. Teams post daily updates (yesterday, today, blockers) that appear live for everyone",
+        "Firebase: a backend-as-a-service (Auth, Firestore, Hosting); the free Spark plan is enough",
+        "When to use Firebase vs your own Express + PostgreSQL (and why this project uses both)",
+        "Firebase JS SDK (modular): initializeApp, getAuth",
+        "Sign-in methods: email/password and Google; onAuthStateChanged",
+        "ID tokens: short-lived JWTs issued by Firebase"
+      ],
+      "resources": [
+        {
+          "title": "Firebase: Add Firebase to your JavaScript project",
+          "url": "https://firebase.google.com/docs/web/setup"
+        },
+        {
+          "title": "Firebase Authentication: Get started (web)",
+          "url": "https://firebase.google.com/docs/auth/web/start"
+        },
+        {
+          "title": "Firebase: Pricing plans (Spark is free)",
+          "url": "https://firebase.google.com/pricing"
+        }
+      ]
+    },
+    "build": {
+      "task": "Create a NEW repo standupboard with web/ (Angular + Tailwind) and api/ (Express + TypeScript). Write docs/product.md with 8 user stories (sign in, create a team, invite by code, post today's standup, see the team's standups live, flag blockers, admins can remove posts and members, history by date). Create a Firebase project, enable email/password and Google sign-in, and put the web config in Angular environment files. Build an AuthService with signals wrapping onAuthStateChanged, sign-up, sign-in (email and Google) and sign-out, plus login/register pages and an auth guard. Show the user's name and photo in the header.",
+      "starterFiles": [],
+      "acceptance": [
+        "docs/product.md with 8 user stories and a 'not in MVP' list",
+        "Email/password and Google sign-in both work",
+        "Auth state is exposed as signals; the guard waits for the first auth state before deciding",
+        "Firebase web config in environment files (it is not secret, but service account keys are)",
+        "Header shows the signed-in user; sign-out works"
+      ]
+    },
+    "hints": [
+      "Wrap the callback in a signal: user = signal<User | null | undefined>(undefined); onAuthStateChanged(auth, u => this.user.set(u)). undefined means 'still checking', so the guard waits until it's no longer undefined.",
+      "Google sign-in: await signInWithPopup(auth, new GoogleAuthProvider()). Add localhost and your future domain under Authentication → Settings → Authorised domains.",
+      "The Firebase web config (apiKey and so on) identifies your project and is safe in client code. Security comes from Auth and security rules. A service account JSON is a real secret and must never go in git."
+    ],
+    "proof": "Link to the standupboard repo.",
+    "explainBack": [
+      {
+        "q": "The Firebase apiKey is in your frontend code. Why isn't that a security hole?",
+        "lookFor": [
+          "it identifies the project, doesn't grant access",
+          "access is controlled by Auth and security rules",
+          "service account keys are the real secrets"
+        ]
+      },
+      {
+        "q": "Why does the auth guard need a 'still checking' state?",
+        "lookFor": [
+          "Firebase restores the session asynchronously",
+          "otherwise it redirects to login on reload",
+          "wait for first onAuthStateChanged"
+        ]
+      }
+    ],
+    "lastHintExplanation": "The Firebase web config only tells the SDK which project to talk to. What a user can actually read or write is decided by Firebase Auth and your security rules on the server side. On reload, Firebase restores the session asynchronously, so a guard that checks immediately sees 'no user' and wrongly redirects. Waiting for the first auth event fixes that.",
+    "predict": [],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "DP: knapsack-style subset sum",
+      "note": "Can the array be split into two equal sums? dp[s] = true if some subset reaches s; loop s downwards for each number.",
+      "problems": [
+        {
+          "title": "LeetCode 416: Partition Equal Subset Sum",
+          "url": "https://leetcode.com/problems/partition-equal-subset-sum/"
+        }
+      ]
+    },
+    "aptitude": {
+      "topic": "Company-style test 1: quantitative (12 minutes)",
+      "questions": [
+        {
+          "q": "The ratio of A's to B's salary is 4:5. A gets a 25% raise and B a 20% raise. What is the new ratio?",
+          "options": [
+            "5:6",
+            "6:5",
+            "1:1",
+            "4:5"
+          ],
+          "answer": 0,
+          "why": "4 × 1.25 = 5 and 5 × 1.2 = 6."
+        },
+        {
+          "q": "A, B and C can finish a job in 20, 30 and 60 days. How long do they take working together?",
+          "options": [
+            "10 days",
+            "12 days",
+            "15 days",
+            "8 days"
+          ],
+          "answer": 0,
+          "why": "3/60 + 2/60 + 1/60 = 1/10."
+        },
+        {
+          "q": "A sum becomes ₹1,331 in 3 years at 10% compound interest. What is the principal?",
+          "options": [
+            "₹1,000",
+            "₹1,100",
+            "₹900",
+            "₹1,210"
+          ],
+          "answer": 0,
+          "why": "1,331/1.331."
+        },
+        {
+          "q": "Two numbers are in the ratio 3:4 and their LCM is 180. What is the smaller number?",
+          "options": [
+            "45",
+            "36",
+            "60",
+            "30"
+          ],
+          "answer": 0,
+          "why": "LCM = 12k = 180, so k = 15 and the numbers are 45 and 60."
+        },
+        {
+          "q": "How many 3-digit numbers are divisible by 7?",
+          "options": [
+            "128",
+            "129",
+            "130",
+            "127"
+          ],
+          "answer": 0,
+          "why": "From 105 to 994: (994 − 105)/7 + 1 = 128."
+        }
+      ]
+    },
+    "revision": [
+      "Re-read your phase5-review.md and practise one weak answer aloud."
+    ]
+  },
+  {
+    "day": 140,
+    "module": "capstone-2",
+    "title": "Firestore: data model and real-time listeners",
+    "goal": "Model StandupBoard in Firestore and stream live updates into Angular signals.",
+    "learn": {
+      "concepts": [
+        "Firestore: collections, documents, subcollections; no joins",
+        "Modelling for reads: teams/{teamId}/standups/{standupId}, members stored on the team",
+        "Denormalisation: copying the author's name and photo into each standup",
+        "addDoc, setDoc, updateDoc, serverTimestamp()",
+        "Queries: where, orderBy, limit; composite indexes",
+        "onSnapshot for real-time updates, and unsubscribing on destroy"
+      ],
+      "resources": [
+        {
+          "title": "Firestore: Data model",
+          "url": "https://firebase.google.com/docs/firestore/data-model"
+        },
+        {
+          "title": "Firestore: Get real-time updates",
+          "url": "https://firebase.google.com/docs/firestore/query-data/listen"
+        },
+        {
+          "title": "Firestore: Choose a data structure",
+          "url": "https://firebase.google.com/docs/firestore/manage-data/structure-data"
+        }
+      ]
+    },
+    "build": {
+      "task": "In standupboard/web: create Firestore (test mode for today only; rules come on Day 142). Model teams/{teamId} with name, inviteCode, ownerUid and a members map { uid: { role, name, photoURL } }, and teams/{teamId}/standups/{id} with uid, authorName, yesterday, today, blockers, hasBlocker, date (YYYY-MM-DD) and createdAt (serverTimestamp). Build: create team, join by invite code, a team page with today's standups streaming live via onSnapshot into a signal (unsubscribe on destroy), a post/edit-my-standup form (one per user per day: use the doc id `${date}_${uid}`), and a date picker for past days. Open two browsers with two users and watch updates arrive live. Write docs/firestore-model.md explaining your structure and denormalisation choices.",
+      "starterFiles": [],
+      "acceptance": [
+        "Teams and standups stored as described; one standup per user per day",
+        "Team page updates live in a second browser without refreshing",
+        "Listeners unsubscribe when leaving the page (no duplicate updates when returning)",
+        "Past days viewable via the date picker",
+        "docs/firestore-model.md explains the structure and why data is denormalised"
+      ]
+    },
+    "hints": [
+      "Live signal: const unsub = onSnapshot(query(collection(db, 'teams', teamId, 'standups'), where('date', '==', date), orderBy('createdAt')), snap => this.standups.set(snap.docs.map(d => ({ id: d.id, ...d.data() })))); inject(DestroyRef).onDestroy(unsub);",
+      "where + orderBy on different fields needs a composite index. The error message in the console contains a link that creates it for you.",
+      "Using the id `${date}_${uid}` with setDoc(..., { merge: true }) makes 'one standup per user per day' automatic: posting again just updates it."
+    ],
+    "proof": "Commit with the Firestore model, team pages and docs.",
+    "explainBack": [
+      {
+        "q": "Why copy the author's name into each standup instead of looking it up?",
+        "lookFor": [
+          "Firestore has no joins",
+          "one read instead of many",
+          "trade-off: must update copies if the name changes"
+        ]
+      },
+      {
+        "q": "What happens if you forget to unsubscribe from onSnapshot?",
+        "lookFor": [
+          "listener keeps running",
+          "duplicate updates when you come back",
+          "extra reads cost quota",
+          "memory leak"
+        ]
+      }
+    ],
+    "lastHintExplanation": "Firestore has no joins, so you design documents around the screens that read them. Copying the author's name into each standup makes the board a single query; the cost is updating the copies if a name changes. Every onSnapshot keeps a live connection until you call its unsubscribe function, so forgotten listeners pile up, duplicate updates and use up your free read quota.",
+    "predict": [
+      {
+        "q": "You call setDoc on teams/t1/standups/2026-12-01_u1 twice with different text. How many documents exist?",
+        "options": [
+          "2",
+          "1 (the second write overwrites or merges)",
+          "0",
+          "Error: duplicate id"
+        ],
+        "answer": 1,
+        "why": "A document id is unique within a collection; setDoc writes to that one document."
+      }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "DP: target sum",
+      "note": "Count the ways to assign + and − to reach the target. Memoise on (index, sum), or transform it into a subset-sum count.",
+      "problems": [
+        {
+          "title": "LeetCode 494: Target Sum",
+          "url": "https://leetcode.com/problems/target-sum/"
+        }
+      ]
+    },
+    "aptitude": {
+      "topic": "Company-style test 2: logical reasoning (12 minutes)",
+      "questions": [
+        {
+          "q": "Five friends sit in a row. B is to the immediate right of A, E is at the left end, and D is between C and A, with C next to E. Who is in the middle?",
+          "options": [
+            "A",
+            "B",
+            "C",
+            "D"
+          ],
+          "answer": 3,
+          "why": "The order is E C D A B, so D is in the middle."
+        },
+        {
+          "q": "If in a certain code TABLE is written as UBCMF, how is CHAIR written?",
+          "options": [
+            "DIBJS",
+            "DIBKS",
+            "BGZHQ",
+            "DHBJS"
+          ],
+          "answer": 0,
+          "why": "Each letter moves +1."
+        },
+        {
+          "q": "Statements: Some pens are books. All books are bags. Conclusion I: Some pens are bags. Conclusion II: All bags are pens.",
+          "options": [
+            "Only I follows",
+            "Only II follows",
+            "Both follow",
+            "Neither follows"
+          ],
+          "answer": 0,
+          "why": "The pens that are books are also bags; II doesn't follow."
+        },
+        {
+          "q": "Next in the series: AZ, BY, CX, DW, ?",
+          "options": [
+            "EV",
+            "EU",
+            "FV",
+            "EW"
+          ],
+          "answer": 0,
+          "why": "The first letter goes forward and the second goes back."
+        },
+        {
+          "q": "Raj walks 10 m south, turns left and walks 5 m, then turns left and walks 10 m. Which direction is he from the start?",
+          "options": [
+            "East",
+            "West",
+            "North",
+            "South"
+          ],
+          "answer": 0,
+          "why": "He ends 5 m east of the starting point."
+        }
+      ]
+    },
+    "revision": [
+      "Day 139: explain why the Firebase apiKey isn't a secret."
+    ]
+  },
+  {
+    "day": 141,
+    "module": "capstone-2",
+    "title": "Express + Firebase Admin: verifying users and roles",
+    "goal": "Connect your own Express API to Firebase users: verify ID tokens and manage roles with custom claims.",
+    "learn": {
+      "concepts": [
+        "Why an Express API alongside Firebase: trusted server logic, admin tasks, integrations, reports",
+        "Firebase Admin SDK with a service account (an env var, never committed)",
+        "verifyIdToken(idToken): checks signature, expiry and project",
+        "Sending the ID token from Angular: await user.getIdToken() in an interceptor",
+        "Custom claims for roles (admin/member) and forcing a token refresh",
+        "Admin SDK writes bypass security rules, so validate carefully"
+      ],
+      "resources": [
+        {
+          "title": "Firebase Admin: Add the SDK to your server",
+          "url": "https://firebase.google.com/docs/admin/setup"
+        },
+        {
+          "title": "Firebase Admin: Verify ID tokens",
+          "url": "https://firebase.google.com/docs/auth/admin/verify-id-tokens"
+        },
+        {
+          "title": "Firebase Admin: Custom claims",
+          "url": "https://firebase.google.com/docs/auth/admin/custom-claims"
+        }
+      ]
+    },
+    "build": {
+      "task": "In standupboard/api: install firebase-admin and load credentials from a FIREBASE_SERVICE_ACCOUNT env var (JSON string, validated by zod; never committed). Write requireFirebaseUser middleware (Bearer ID token → verifyIdToken → res.locals.user = { uid, email, role }; 401 otherwise). Endpoints: GET /api/me; POST /api/teams/:teamId/members/:uid/role (team owner only) that sets the role in the team's members map; GET /api/teams/:teamId/report?from=&to= that returns per-member standup counts and blocker counts (members only). In Angular, add an interceptor that attaches await auth.currentUser.getIdToken() to /api requests. Write supertest tests with verifyIdToken injected as a fake.",
+      "starterFiles": [],
+      "acceptance": [
+        "Service account loaded from env; nothing secret in git",
+        "Invalid, expired or missing tokens get 401",
+        "Only the team owner can change roles (403 otherwise); non-members get 404 on the report",
+        "Angular sends a fresh ID token automatically",
+        "Tests use an injected fake verifier and cover 401, 403, 404 and success"
+      ]
+    },
+    "hints": [
+      "Credentials: initializeApp({ credential: cert(JSON.parse(config.FIREBASE_SERVICE_ACCOUNT)) }). In .env, put the JSON on one line in single quotes.",
+      "Interceptor with an async token: return from(auth.currentUser?.getIdToken() ?? Promise.resolve(null)).pipe(switchMap(t => next(t ? req.clone({ setHeaders: { Authorization: `Bearer ${t}` } }) : req))). getIdToken refreshes automatically when needed.",
+      "Make the app testable: createApp({ verifyIdToken, db }) so tests pass a fake verifier instead of calling Google."
+    ],
+    "proof": "Commit with the Admin SDK setup, middleware, endpoints and tests.",
+    "explainBack": [
+      {
+        "q": "Why must the server verify the ID token instead of trusting a uid sent by the client?",
+        "lookFor": [
+          "client can send any uid",
+          "verification proves Firebase issued it to that user",
+          "signature + expiry + project checks"
+        ]
+      },
+      {
+        "q": "Admin SDK writes bypass security rules. What does that mean for your API code?",
+        "lookFor": [
+          "API must enforce permissions itself",
+          "validate input",
+          "check membership/roles before writes"
+        ]
+      }
+    ],
+    "lastHintExplanation": "Anyone can send { uid: 'someone-else' } to your API. Only a verified ID token proves Firebase signed in that user recently for your project. The Admin SDK runs with full privileges and ignores security rules, so every permission check (membership, owner-only actions) must be in your Express code, just like the user_id scoping in Phase 4.",
+    "predict": [
+      {
+        "q": "An admin sets a custom claim role: 'admin' on a user who is already signed in. When does their ID token include it?",
+        "options": [
+          "Immediately",
+          "After the token refreshes (up to an hour, or when forced with getIdToken(true))",
+          "Never",
+          "Only after deleting the account"
+        ],
+        "answer": 1,
+        "why": "Claims are embedded in tokens, which refresh about hourly or when forced."
+      }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Backtracking: subsets",
+      "note": "New pattern. At each index, choose to include it or not; record the path at each step. Draw the decision tree.",
+      "problems": [
+        {
+          "title": "LeetCode 78: Subsets",
+          "url": "https://leetcode.com/problems/subsets/"
+        }
+      ]
+    },
+    "aptitude": {
+      "topic": "Company-style test 3: verbal (12 minutes)",
+      "questions": [
+        {
+          "q": "Choose the correct sentence.",
+          "options": [
+            "Me and him went to the office.",
+            "He and I went to the office.",
+            "Him and I went to the office.",
+            "He and me went to the office."
+          ],
+          "answer": 1,
+          "why": "Subject pronouns: he and I."
+        },
+        {
+          "q": "Which word means the same as 'Pragmatic'?",
+          "options": [
+            "Idealistic",
+            "Practical",
+            "Emotional",
+            "Careless"
+          ],
+          "answer": 1,
+          "why": "Pragmatic means dealing with things sensibly and practically."
+        },
+        {
+          "q": "'Hardly had he reached the station ___ the train left.'",
+          "options": [
+            "than",
+            "when",
+            "then",
+            "and"
+          ],
+          "answer": 1,
+          "why": "The pattern is 'hardly … when' ('no sooner … than')."
+        },
+        {
+          "q": "What is a word that is spelt the same backwards called?",
+          "options": [
+            "Anagram",
+            "Palindrome",
+            "Acronym",
+            "Homonym"
+          ],
+          "answer": 1,
+          "why": "Like 'level' or 'madam'."
+        },
+        {
+          "q": "Which word means the opposite of 'Diligent'?",
+          "options": [
+            "Hard-working",
+            "Lazy",
+            "Careful",
+            "Honest"
+          ],
+          "answer": 1,
+          "why": "Diligent means hard-working."
+        }
+      ]
+    },
+    "revision": [
+      "Day 140: explain denormalisation in Firestore with your standup example."
+    ]
+  },
+  {
+    "day": 142,
+    "module": "capstone-2",
+    "title": "Security rules and role-based access",
+    "goal": "Lock down Firestore with security rules so the database itself enforces who can read and write what.",
+    "learn": {
+      "concepts": [
+        "Security rules: match paths, allow read/write if conditions",
+        "request.auth, resource.data (existing doc) and request.resource.data (incoming doc)",
+        "Helper functions: isSignedIn(), isMember(teamId), isAdmin(teamId) with get()",
+        "Validating fields: types, sizes, allowed keys (keys().hasOnly)",
+        "Preventing users from changing their own role",
+        "The Firebase Emulator Suite and @firebase/rules-unit-testing"
+      ],
+      "resources": [
+        {
+          "title": "Firestore: Get started with security rules",
+          "url": "https://firebase.google.com/docs/firestore/security/get-started"
+        },
+        {
+          "title": "Firestore: Writing conditions for security rules",
+          "url": "https://firebase.google.com/docs/firestore/security/rules-conditions"
+        },
+        {
+          "title": "Firebase: Test security rules with the emulator",
+          "url": "https://firebase.google.com/docs/rules/unit-tests"
+        }
+      ]
+    },
+    "build": {
+      "task": "In standupboard: write firestore.rules. Teams: members can read; signed-in users can create a team where they are the owner and an admin; only admins can update the name; nobody can change their own role through the client. Standups: members can read; a user can create or update only a standup whose id ends with their uid and whose uid field equals request.auth.uid; text fields are strings under 1,000 characters; only the listed keys are allowed; the author or a team admin can delete. Install the Firebase CLI, run the emulators, and write 12+ rules tests with @firebase/rules-unit-testing (members vs non-members, editing someone else's standup, changing your own role, oversized text). Deploy the rules and remove test mode.",
+      "starterFiles": [
+        {
+          "name": "firestore.rules",
+          "content": "rules_version = '2';\nservice cloud.firestore {\n  match /databases/{database}/documents {\n    function isSignedIn() { return request.auth != null; }\n    function team(teamId) { return get(/databases/$(database)/documents/teams/$(teamId)).data; }\n    function isMember(teamId) { return isSignedIn() && request.auth.uid in team(teamId).members; }\n    function isAdmin(teamId) { return isMember(teamId) && team(teamId).members[request.auth.uid].role == 'admin'; }\n\n    match /teams/{teamId} {\n      // TODO: read, create, update rules\n\n      match /standups/{standupId} {\n        // TODO: read, create, update, delete rules with validation\n      }\n    }\n  }\n}\n"
+        }
+      ],
+      "acceptance": [
+        "Test mode removed; rules deployed",
+        "Non-members can't read a team or its standups",
+        "Users can't write standups as someone else or change their own role",
+        "Field validation: types, sizes and allowed keys",
+        "12+ passing rules tests against the emulator",
+        "The app still works for legitimate users"
+      ]
+    },
+    "hints": [
+      "Ownership on create: allow create: if isMember(teamId) && request.resource.data.uid == request.auth.uid && standupId.matches('.*_' + request.auth.uid);",
+      "Block role self-promotion on team updates: require request.resource.data.members[request.auth.uid].role == resource.data.members[request.auth.uid].role for non-admins, or route all role changes through your Express API and deny them in rules.",
+      "Test pattern: const alice = testEnv.authenticatedContext('alice').firestore(); await assertFails(setDoc(doc(alice, 'teams/t1/standups/2026-12-01_bob'), {...}));"
+    ],
+    "proof": "Commit with firestore.rules and the rules tests.",
+    "explainBack": [
+      {
+        "q": "Your Angular app already hides the delete button for non-admins. Why do you still need rules?",
+        "lookFor": [
+          "clients talk to Firestore directly",
+          "anyone can call the SDK from the console",
+          "rules are the server-side enforcement"
+        ]
+      },
+      {
+        "q": "Explain resource.data vs request.resource.data.",
+        "lookFor": [
+          "resource.data = the document as it is now",
+          "request.resource.data = what it would be after the write",
+          "compare them to block changes to fields"
+        ]
+      }
+    ],
+    "lastHintExplanation": "With Firebase, the browser talks to the database directly, so anyone can open DevTools and call setDoc with any data. Security rules are the only server-side gatekeeper. resource.data is the stored document and request.resource.data is the document as it would look after the write, so comparing them lets you forbid changing particular fields, such as your own role.",
+    "predict": [
+      {
+        "q": "Rules: allow read, write: if request.auth != null; on /teams/{teamId}. What can any signed-in user do?",
+        "options": [
+          "Only read their own team",
+          "Read and write every team",
+          "Nothing",
+          "Only create"
+        ],
+        "answer": 1,
+        "why": "The rule only checks sign-in, not membership."
+      }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Backtracking: permutations",
+      "note": "Build the permutation one position at a time, tracking which numbers are used; undo the choice after recursing.",
+      "problems": [
+        {
+          "title": "LeetCode 46: Permutations",
+          "url": "https://leetcode.com/problems/permutations/"
+        }
+      ]
+    },
+    "aptitude": {
+      "topic": "Company-style test 4: quantitative (12 minutes)",
+      "questions": [
+        {
+          "q": "A man buys 4 kg of apples for ₹480 and sells them at ₹150 per kg. What is his profit percentage?",
+          "options": [
+            "20%",
+            "25%",
+            "30%",
+            "15%"
+          ],
+          "answer": 1,
+          "why": "Cost ₹120/kg; profit 30/120."
+        },
+        {
+          "q": "A train covers a distance in 4 hours at 60 km/h. At what speed must it go to cover it in 3 hours?",
+          "options": [
+            "70 km/h",
+            "80 km/h",
+            "75 km/h",
+            "90 km/h"
+          ],
+          "answer": 1,
+          "why": "240/3."
+        },
+        {
+          "q": "The sum of the ages of a father and son is 50. Five years ago, the father was 4 times as old as the son. How old is the son now?",
+          "options": [
+            "12",
+            "13",
+            "15",
+            "10"
+          ],
+          "answer": 1,
+          "why": "45 − s = 4(s − 5), so s = 13. Check: the father is 37; five years ago they were 32 and 8."
+        },
+        {
+          "q": "What is the remainder when 2^10 is divided by 7?",
+          "options": [
+            "1",
+            "2",
+            "4",
+            "3"
+          ],
+          "answer": 1,
+          "why": "1024 = 7 × 146 + 2."
+        },
+        {
+          "q": "A box has 6 red and 4 green balls. Two are drawn. What is the probability both are red?",
+          "options": [
+            "1/3",
+            "2/5",
+            "1/2",
+            "3/10"
+          ],
+          "answer": 0,
+          "why": "6C2/10C2 = 15/45."
+        }
+      ]
+    },
+    "revision": [
+      "Day 141: explain why the server verifies ID tokens."
+    ]
+  },
+  {
+    "day": 143,
+    "module": "capstone-2",
+    "title": "Real-time features: presence, reactions and offline",
+    "goal": "Make StandupBoard feel alive: who's online, live reactions, a blockers panel, and graceful offline behaviour.",
+    "learn": {
+      "concepts": [
+        "Presence: a lastSeen timestamp updated on an interval while the tab is visible",
+        "The Page Visibility API (document.visibilityState)",
+        "Atomic updates: increment(), arrayUnion(), arrayRemove()",
+        "Transactions and batched writes in Firestore",
+        "Offline persistence: the persistentLocalCache option; pending writes (hasPendingWrites)",
+        "Showing sync state to users"
+      ],
+      "resources": [
+        {
+          "title": "Firestore: Add and update data (increment, arrayUnion)",
+          "url": "https://firebase.google.com/docs/firestore/manage-data/add-data#update_elements_in_an_array"
+        },
+        {
+          "title": "Firestore: Access data offline",
+          "url": "https://firebase.google.com/docs/firestore/manage-data/enable-offline"
+        },
+        {
+          "title": "MDN: Page Visibility API",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/API/Page_Visibility_API"
+        }
+      ]
+    },
+    "build": {
+      "task": "In standupboard/web: presence (each member's lastSeen in teams/{teamId}/presence/{uid}, updated every 60 seconds while the tab is visible; avatars show 'online' if lastSeen is under 2 minutes ago); emoji reactions on standups using a reactions map with arrayUnion/arrayRemove of uids (toggle); a live 'Blockers today' panel with a query on hasBlocker == true; a 'Mark blocker resolved' action by the author or an admin. Enable offline persistence and show a 'Saving…/Saved/Offline' indicator using hasPendingWrites and the browser's online/offline events. Update the security rules and rules tests for presence and reactions (users may only add or remove their own uid).",
+      "starterFiles": [],
+      "acceptance": [
+        "Online indicators update across browsers within about a minute",
+        "Presence pauses when the tab is hidden",
+        "Reactions toggle atomically and users can only change their own reaction",
+        "Blockers panel updates live; resolving works with the right permissions",
+        "Offline: posting works, shows 'Offline', and syncs when back online",
+        "Rules and tests updated for the new data"
+      ]
+    },
+    "hints": [
+      "Toggle reaction: updateDoc(ref, { [`reactions.${emoji}`]: hasReacted ? arrayRemove(uid) : arrayUnion(uid) }). Concurrent reactions from different users won't overwrite each other.",
+      "Pending writes: onSnapshot(q, { includeMetadataChanges: true }, snap => this.saving.set(snap.metadata.hasPendingWrites)).",
+      "Rules for reactions: allow update if only the reactions field changed (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions'])). Checking that only your own uid was added is harder; keep it simple and document the limitation, or move reactions to a subcollection keyed by uid."
+    ],
+    "proof": "Commit with presence, reactions, blockers panel and offline support, plus a short GIF of two browsers side by side.",
+    "explainBack": [
+      {
+        "q": "Why use arrayUnion instead of reading the array, adding your uid and writing it back?",
+        "lookFor": [
+          "atomic on the server",
+          "no lost updates when two users react at once",
+          "read-modify-write race"
+        ]
+      },
+      {
+        "q": "What does the user see when they post a standup while offline?",
+        "lookFor": [
+          "write saved locally",
+          "UI updates immediately",
+          "pending indicator",
+          "syncs automatically when online"
+        ]
+      }
+    ],
+    "lastHintExplanation": "Read-modify-write loses updates: if two people read the same reactions array at once and each writes back their own version, one reaction disappears. arrayUnion and increment are applied on the server atomically. With offline persistence, writes go into a local cache, the UI updates at once, and Firestore syncs them when the connection returns; hasPendingWrites tells you which state you're in.",
+    "predict": [
+      {
+        "q": "Two users increment a likes counter at the same moment using increment(1). Starting at 5, what's the result?",
+        "options": [
+          "6",
+          "7",
+          "5",
+          "Error"
+        ],
+        "answer": 1,
+        "why": "increment is applied atomically on the server, so both count."
+      }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Backtracking: combinations with reuse",
+      "note": "Numbers may be reused; pass the same start index again after choosing one. Stop when the sum goes over the target.",
+      "problems": [
+        {
+          "title": "LeetCode 39: Combination Sum",
+          "url": "https://leetcode.com/problems/combination-sum/"
+        }
+      ]
+    },
+    "aptitude": {
+      "topic": "Company-style test 5: logical reasoning (12 minutes)",
+      "questions": [
+        {
+          "q": "Six people (P, Q, R, S, T, U) sit around a round table facing the centre. P is opposite S. Q is to P's immediate left. R is between Q and S. Who is opposite Q?",
+          "options": [
+            "T",
+            "U",
+            "R",
+            "S"
+          ],
+          "answer": 0,
+          "why": "Going round: P, Q, R, S, T, U, so Q (position 2) is opposite T (position 5)."
+        },
+        {
+          "q": "Odd one out: 121, 144, 169, 196, 210",
+          "options": [
+            "144",
+            "169",
+            "196",
+            "210"
+          ],
+          "answer": 3,
+          "why": "210 isn't a perfect square."
+        },
+        {
+          "q": "If '+' means '×', '×' means '−' and '−' means '+', what is 6 + 3 × 4 − 2?",
+          "options": [
+            "16",
+            "20",
+            "12",
+            "24"
+          ],
+          "answer": 0,
+          "why": "This becomes 6 × 3 − 4 + 2 = 16."
+        },
+        {
+          "q": "Statements: No cars are trucks. All trucks are vehicles. Conclusion I: No cars are vehicles. Conclusion II: Some vehicles are not cars.",
+          "options": [
+            "Only I follows",
+            "Only II follows",
+            "Both follow",
+            "Neither follows"
+          ],
+          "answer": 1,
+          "why": "Trucks are vehicles that aren't cars; I doesn't follow."
+        },
+        {
+          "q": "Next in the series: 7, 10, 8, 11, 9, 12, ?",
+          "options": [
+            "10",
+            "13",
+            "11",
+            "14"
+          ],
+          "answer": 0,
+          "why": "The pattern alternates +3, −2."
+        }
+      ]
+    },
+    "revision": [
+      "Day 142: explain resource.data vs request.resource.data."
+    ]
+  },
+  {
+    "day": 144,
+    "module": "capstone-2",
+    "title": "Debug lab: the trusting team API, and week review",
+    "goal": "Fix authentication and authorisation bugs in an Express API that uses Firebase tokens.",
+    "learn": {
+      "concepts": [
+        "Async token verification must be awaited (a Promise is always truthy)",
+        "Never take a role from the request body",
+        "Assignment (=) vs comparison (===) in conditions",
+        "Membership checks for team-scoped data",
+        "Testing auth code with an injected fake verifier"
+      ],
+      "resources": [
+        {
+          "title": "Firebase Admin: Verify ID tokens",
+          "url": "https://firebase.google.com/docs/auth/admin/verify-id-tokens"
+        },
+        {
+          "title": "OWASP API Security: Broken Function Level Authorization",
+          "url": "https://owasp.org/API-Security/editions/2023/en/0xa5-broken-function-level-authorization/"
+        }
+      ]
+    },
+    "build": {
+      "task": "Copy the starter into day144-debug/ in node-playground, run npm install, then node check.js. It uses a fake verifyIdToken, so no Firebase account is needed. Expected output: bad token → 401; Meena (not in the team) listing standups → 404; Ravi listing → 200; Ravi deleting with {\"role\":\"admin\"} in the body → 403; Asha (an admin) deleting → 204. Right now the script crashes. There are 4 bugs. Fix each in its own commit and paste the final output into RESULTS.md. Write week24-notes.md (Days 139–143).",
+      "starterFiles": [
+        {
+          "name": "day144-debug/package.json",
+          "content": "{\n  \"name\": \"day144-debug\",\n  \"type\": \"module\",\n  \"dependencies\": { \"express\": \"^5.1.0\" }\n}\n"
+        },
+        {
+          "name": "day144-debug/app.js",
+          "content": "import express from 'express';\n\nexport function createApp({ verifyIdToken, db }) {\n  const app = express();\n  app.use(express.json());\n\n  async function requireUser(req, res, next) {\n    const header = req.get('authorization') ?? '';\n    const token = header.replace('Bearer ', '');\n    const decoded = verifyIdToken(token);\n    if (!decoded) return res.status(401).json({ error: 'Not signed in' });\n    req.user = decoded;\n    next();\n  }\n\n  function requireRole(role) {\n    return (req, res, next) => {\n      let userRole = req.body?.role ?? req.user.role;\n      if (userRole = role) return next();\n      res.status(403).json({ error: 'Forbidden' });\n    };\n  }\n\n  app.get('/teams/:teamId/standups', requireUser, async (req, res) => {\n    const team = await db.getTeam(req.params.teamId);\n    if (!team) return res.status(404).json({ error: 'Team not found' });\n    res.json(await db.listStandups(team.id));\n  });\n\n  app.delete('/teams/:teamId/standups/:id', requireUser, requireRole('admin'), async (req, res) => {\n    await db.deleteStandup(req.params.teamId, req.params.id);\n    res.sendStatus(204);\n  });\n\n  return app;\n}\n"
+        },
+        {
+          "name": "day144-debug/check.js",
+          "content": "import { createApp } from './app.js';\n\n// Fake Firebase: real verifyIdToken is async and rejects for bad tokens.\nconst tokens = {\n  'asha-token': { uid: 'asha', role: 'admin' },\n  'ravi-token': { uid: 'ravi', role: 'member' },\n  'meena-token': { uid: 'meena', role: 'member' },\n};\nconst verifyIdToken = async (t) => {\n  if (!tokens[t]) throw new Error('invalid token');\n  return tokens[t];\n};\n\nconst teams = { t1: { id: 't1', members: ['asha', 'ravi'] } };\nlet standups = [{ id: 's1', teamId: 't1', uid: 'ravi', text: 'Fixed the login bug' }];\nconst db = {\n  getTeam: async (id) => teams[id] ?? null,\n  listStandups: async (teamId) => standups.filter((s) => s.teamId === teamId),\n  deleteStandup: async (teamId, id) => { standups = standups.filter((s) => s.id !== id); },\n};\n\nconst server = createApp({ verifyIdToken, db }).listen(0);\nconst base = `http://localhost:${server.address().port}`;\n\nasync function call(method, path, token, body) {\n  const headers = { 'content-type': 'application/json' };\n  if (token) headers.authorization = `Bearer ${token}`;\n  const res = await fetch(base + path, { method, headers, body: body ? JSON.stringify(body) : undefined });\n  return res.status;\n}\n\nconsole.log('bad token list:', await call('GET', '/teams/t1/standups', 'nope'), '(expect 401)');\nconsole.log('meena list:', await call('GET', '/teams/t1/standups', 'meena-token'), '(expect 404)');\nconsole.log('ravi list:', await call('GET', '/teams/t1/standups', 'ravi-token'), '(expect 200)');\nconsole.log('ravi delete with role in body:', await call('DELETE', '/teams/t1/standups/s1', 'ravi-token', { role: 'admin' }), '(expect 403)');\nconsole.log('asha delete:', await call('DELETE', '/teams/t1/standups/s1', 'asha-token'), '(expect 204)');\nserver.close();\n"
+        }
+      ],
+      "acceptance": [
+        "Bad tokens get 401 and nothing crashes",
+        "Non-members get 404 for team data",
+        "A role in the request body is ignored; members get 403 on admin routes",
+        "Admins can delete (204)",
+        "4 fix commits; RESULTS.md and week24-notes.md written"
+      ]
+    },
+    "hints": [
+      "The script dies with an unhandled 'invalid token' rejection. What does verifyIdToken return, and is it awaited? Once it is, a bad token throws, so wrap it in try/catch and return 401.",
+      "Meena isn't in team t1's members but still gets 200. Nothing checks team.members.includes(req.user.uid).",
+      "In requireRole, where does userRole come from first? And read the if condition very slowly: is it comparing or assigning?"
+    ],
+    "proof": "Link to your last fix commit.",
+    "explainBack": [
+      {
+        "q": "List the 4 bugs and the fix for each.",
+        "lookFor": [
+          "verifyIdToken not awaited → await in try/catch, 401",
+          "no membership check → 404 for non-members",
+          "role read from req.body → use req.user.role only",
+          "= instead of === → always true"
+        ]
+      },
+      {
+        "q": "Why is an un-awaited verifyIdToken so dangerous?",
+        "lookFor": [
+          "a Promise is truthy",
+          "every token passes the check",
+          "rejection is unhandled and can crash the server"
+        ]
+      }
+    ],
+    "lastHintExplanation": "1) verifyIdToken is async, so without await, decoded is a Promise, which is always truthy: every token passes, and the rejection then crashes Node. Await it in try/catch and return 401. 2) The list route never checks that the user is in team.members. 3) requireRole trusts req.body.role, so anyone can send { role: 'admin' }; use the verified token only. 4) userRole = role assigns instead of comparing, so the check always passes; use ===.",
+    "predict": [
+      {
+        "q": "if (someAsyncFunction()) { ... } where the function returns a Promise that resolves to false. Does the block run?",
+        "options": [
+          "No",
+          "Yes: a Promise object is truthy",
+          "Only after it resolves",
+          "It throws"
+        ],
+        "answer": 1,
+        "why": "Without await you test the Promise itself, which is truthy."
+      }
+    ],
+    "debugLab": {
+      "title": "The trusting team API",
+      "symptoms": [
+        "check.js crashes with an unhandled 'invalid token' rejection",
+        "A user outside the team can list its standups",
+        "A member can delete posts by sending {\"role\":\"admin\"} in the body",
+        "The admin check passes for everyone"
+      ],
+      "files": [
+        "day144-debug/package.json",
+        "day144-debug/app.js",
+        "day144-debug/check.js"
+      ],
+      "bugCount": 4
+    },
+    "dsa": {
+      "pattern": "Backtracking: review",
+      "note": "Letter combinations of a phone number: one recursion level per digit. Then re-solve Subsets from a blank file.",
+      "problems": [
+        {
+          "title": "LeetCode 17: Letter Combinations of a Phone Number",
+          "url": "https://leetcode.com/problems/letter-combinations-of-a-phone-number/"
+        },
+        {
+          "title": "LeetCode 78: Subsets (re-solve)",
+          "url": "https://leetcode.com/problems/subsets/"
+        }
+      ]
+    },
+    "aptitude": {
+      "topic": "Company-style test 6: mixed (12 minutes)",
+      "questions": [
+        {
+          "q": "A price is increased by 25%. By what percentage must it now be reduced to return to the original?",
+          "options": [
+            "25%",
+            "20%",
+            "15%",
+            "30%"
+          ],
+          "answer": 1,
+          "why": "25/125."
+        },
+        {
+          "q": "Pipes A and B fill a tank in 10 and 15 minutes. Both are opened together. How long does it take to fill?",
+          "options": [
+            "6 min",
+            "7.5 min",
+            "12.5 min",
+            "5 min"
+          ],
+          "answer": 0,
+          "why": "1/10 + 1/15 = 1/6."
+        },
+        {
+          "q": "Choose the correct sentence.",
+          "options": [
+            "I am knowing the answer.",
+            "I know the answer.",
+            "I am know the answer.",
+            "I knowing the answer."
+          ],
+          "answer": 1,
+          "why": "'Know' is a state verb and isn't normally used in continuous tenses."
+        },
+        {
+          "q": "If A = 1 and Z = 26, what is the sum of the letters in 'JOB'?",
+          "options": [
+            "27",
+            "28",
+            "29",
+            "26"
+          ],
+          "answer": 0,
+          "why": "10 + 15 + 2."
+        },
+        {
+          "q": "A die is rolled. What is the probability of getting a number greater than 4?",
+          "options": [
+            "1/3",
+            "1/2",
+            "2/3",
+            "1/6"
+          ],
+          "answer": 0,
+          "why": "5 or 6: 2/6."
+        }
+      ]
+    },
+    "revision": [
+      "Days 139–143: explain where StandupBoard enforces security: Auth, rules, and the Express API."
+    ]
+  }
+]

@@ -1,0 +1,404 @@
+[
+  {
+    "day": 73,
+    "module": "angular-routing-forms",
+    "title": "Angular router: routes, links and parameters",
+    "goal": "Turn your playground into a multi-page app with routes, navigation links and URL parameters.",
+    "learn": {
+      "concepts": [
+        "Routes array: path, component, redirectTo with pathMatch: 'full', and '**' last",
+        "<router-outlet /> and provideRouter(routes)",
+        "routerLink and routerLinkActive for navigation",
+        "Route parameters (/courses/:id) read as component inputs with withComponentInputBinding()",
+        "Query parameters (?level=beginner) and Router.navigate",
+        "Order matters: the first matching route wins"
+      ],
+      "resources": [
+        { "title": "Angular: Routing overview", "url": "https://angular.dev/guide/routing" },
+        { "title": "Angular: Define routes", "url": "https://angular.dev/guide/routing/define-routes" },
+        { "title": "Angular: Read route state (component input binding)", "url": "https://angular.dev/guide/routing/read-route-state" }
+      ]
+    },
+    "build": {
+      "task": "In angular-playground, add routing: / (home), /courses (course page), /courses/:id (course detail), /board (task board), /ui (showcase) and a ** not-found page. Add a top nav with routerLink and routerLinkActive highlighting. The course detail page reads id as an input (withComponentInputBinding), finds the course in CourseStore via a computed, and shows 'Course not found' for bad ids. Course filters sync to query params (?q=…&level=…) so a filtered URL can be shared and reloaded.",
+      "starterFiles": [],
+      "acceptance": [
+        "All routes work, including direct URL entry and browser back/forward",
+        "Active nav link highlighted with routerLinkActive",
+        "/courses/:id reads id as a component input and handles unknown ids",
+        "Filters are reflected in query params and restored on reload",
+        "** route is last and shows a helpful 404 page with a link home"
+      ]
+    },
+    "hints": [
+      "app.config.ts: provideRouter(routes, withComponentInputBinding()). Then in the detail component: id = input.required<string>(); course = computed(() => this.store.byId(this.id())).",
+      "Query params: inject Router and call this.router.navigate([], { queryParams: { q, level }, queryParamsHandling: 'merge' }). Read them back with inputs too (q = input<string>()).",
+      "routerLinkActive=\"font-semibold text-brand-600\" plus [routerLinkActiveOptions]=\"{ exact: true }\" on the home link, otherwise '/' is active everywhere."
+    ],
+    "proof": "Commit with routing changes.",
+    "explainBack": [
+      { "q": "How does the id in /courses/42 reach your detail component?", "lookFor": [":id in the route path", "withComponentInputBinding maps params to inputs", "input named id", "computed finds the course"] },
+      { "q": "Why must the ** route be last?", "lookFor": ["router uses first match", "** matches everything", "would hide all routes after it"] }
+    ],
+    "lastHintExplanation": "The router matches the URL against routes in order. /courses/:id captures '42' as the id parameter, and withComponentInputBinding() hands route params (and query params) to component inputs with the same name. ** matches every URL, so it must come last or it will swallow every route below it.",
+    "predict": [
+      { "q": "Routes: [{ path: 'courses', ... }, { path: 'courses/:id', ... }]. URL: /courses/new. Which route matches?", "options": ["courses", "courses/:id with id = 'new'", "None", "Both"], "answer": 1, "why": "'courses' only matches the full path /courses; 'courses/:id' matches with id 'new'." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Monotonic stack",
+      "note": "Keep a stack of numbers waiting for their next greater element.",
+      "problems": [
+        { "title": "LeetCode 496: Next Greater Element I", "url": "https://leetcode.com/problems/next-greater-element-i/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Permutations and combinations: harder",
+      "questions": [
+        { "q": "How many ways can the letters of MISSISSIPPI be arranged?", "options": ["34650", "39916800", "4950", "69300"], "answer": 0, "why": "11!/(4! × 4! × 2!) = 34650." },
+        { "q": "In how many ways can 6 people sit in a row if A and B must sit together?", "options": ["120", "240", "720", "480"], "answer": 1, "why": "Treat AB as one unit: 5! × 2 = 240." },
+        { "q": "In how many ways can 4 people be chosen from 10 if one particular person is excluded?", "options": ["126", "210", "84", "252"], "answer": 0, "why": "9C4 = 126." },
+        { "q": "How many 3-letter codes can be made from 26 letters without repetition?", "options": ["15600", "17576", "2600", "78"], "answer": 0, "why": "26 × 25 × 24." },
+        { "q": "In how many ways can 5 different balls go into 2 boxes (a box may be empty)?", "options": ["10", "25", "32", "64"], "answer": 2, "why": "Each ball has 2 choices: 2⁵." }
+      ]
+    },
+    "revision": ["Day 72: explain value=\"x\" vs [value]=\"x\"."]
+  },
+  {
+    "day": 74,
+    "module": "angular-routing-forms",
+    "title": "Lazy loading, guards and redirects",
+    "goal": "Split your app into lazily loaded pages and protect routes with guards.",
+    "learn": {
+      "concepts": [
+        "loadComponent for lazy loading a page",
+        "Seeing lazy chunks in the build output and Network tab",
+        "Functional guards: CanActivateFn returning true, false or a UrlTree",
+        "CanDeactivateFn for 'unsaved changes' warnings",
+        "Route data and titles (title: 'Courses')",
+        "Child routes and layouts"
+      ],
+      "resources": [
+        { "title": "Angular: Lazy loading routes", "url": "https://angular.dev/guide/routing/define-routes#lazily-loaded-components" },
+        { "title": "Angular: Route guards", "url": "https://angular.dev/guide/routing/route-guards" },
+        { "title": "Angular: Page titles", "url": "https://angular.dev/guide/routing/define-routes#page-titles" }
+      ]
+    },
+    "build": {
+      "task": "In angular-playground: convert every page route to loadComponent and confirm separate chunks with ng build. Add a fake AuthService (signal isLoggedIn, login(), logout()) and a /login page. Protect /board with an authGuard that redirects to /login?returnUrl=/board, and after login navigate back to returnUrl. Add a CanDeactivate guard on a new /board/new page with a form, which asks 'Discard unsaved changes?' if the form is dirty. Give every route a title.",
+      "starterFiles": [],
+      "acceptance": [
+        "All pages lazy-loaded; ng build output lists separate chunks",
+        "Visiting /board logged out redirects to /login with returnUrl, then back after login",
+        "Leaving /board/new with unsaved changes asks for confirmation; clean form leaves freely",
+        "Every route sets the browser tab title",
+        "Guards are functional (CanActivateFn / CanDeactivateFn) using inject()"
+      ]
+    },
+    "hints": [
+      "{ path: 'board', canActivate: [authGuard], loadComponent: () => import('./board/board').then(m => m.Board) }",
+      "Guard: export const authGuard: CanActivateFn = (_route, state) => inject(AuthService).isLoggedIn() || inject(Router).createUrlTree(['/login'], { queryParams: { returnUrl: state.url } });",
+      "CanDeactivate: give the page component a hasUnsavedChanges() method; the guard calls it and returns confirm(...) only if it's true. (Using confirm here is fine for practice.)"
+    ],
+    "proof": "Commit with guards and lazy routes; paste the ng build chunk list in the commit message.",
+    "explainBack": [
+      { "q": "What does lazy loading change for a user opening the home page?", "lookFor": ["smaller initial download", "page code fetched only when visited", "faster first load"] },
+      { "q": "Walk through your authGuard redirect and how returnUrl brings the user back.", "lookFor": ["guard checks login", "returns UrlTree to /login with returnUrl", "login reads returnUrl and navigates there"] },
+      { "q": "Is a client-side guard real security? Why or why not?", "lookFor": ["no, users can change client code", "it's UX only", "the server must check auth for data"] }
+    ],
+    "lastHintExplanation": "loadComponent splits each page into its own JavaScript chunk that's downloaded only when the route is visited, so the first load is smaller. A guard returning a UrlTree tells the router to redirect, and carrying returnUrl lets login send the user back. Guards are UX, not security: anyone can bypass client code, so the server must protect the data.",
+    "predict": [
+      { "q": "A CanActivateFn returns false (not a UrlTree) when the user isn't logged in. What happens when they click the link?", "options": ["Redirect to /login", "Navigation is cancelled; they stay where they are", "Error page", "Page loads anyway"], "answer": 1, "why": "false just blocks navigation; a UrlTree redirects." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Monotonic stack",
+      "note": "Store indexes of days waiting for a warmer day.",
+      "problems": [
+        { "title": "LeetCode 739: Daily Temperatures", "url": "https://leetcode.com/problems/daily-temperatures/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Probability: harder",
+      "questions": [
+        { "q": "What is the probability that two dice add up to 10 or more?", "options": ["1/6", "1/4", "1/12", "5/36"], "answer": 0, "why": "(4,6), (5,5), (6,4), (5,6), (6,5), (6,6): 6/36." },
+        { "q": "What is the probability of at least one six in two rolls?", "options": ["11/36", "1/3", "1/6", "10/36"], "answer": 0, "why": "1 − (5/6)² = 11/36." },
+        { "q": "A and B are independent, with P(A) = 0.5 and P(B) = 0.4. What is P(A and B)?", "options": ["0.9", "0.2", "0.1", "0.45"], "answer": 1, "why": "Multiply: 0.5 × 0.4 = 0.2." },
+        { "q": "A bag has 5 red and 3 green balls. You draw one, replace it, and draw again. What is the probability both are green?", "options": ["9/64", "3/28", "3/8", "6/64"], "answer": 0, "why": "3/8 × 3/8." },
+        { "q": "What is the probability that a number from 1 to 20 is a multiple of 3 or 5?", "options": ["9/20", "10/20", "1/2", "7/20"], "answer": 0, "why": "6 multiples of 3 + 4 multiples of 5 − 1 counted twice (15) = 9." }
+      ]
+    },
+    "revision": ["Day 73: write a routes array with a param route and ** from memory."]
+  },
+  {
+    "day": 75,
+    "module": "angular-routing-forms",
+    "title": "Reactive forms",
+    "goal": "Build forms with typed reactive form controls and built-in validators.",
+    "learn": {
+      "concepts": [
+        "Template-driven vs reactive forms (we use reactive)",
+        "FormControl, FormGroup, FormArray; FormBuilder with nonNullable",
+        "Validators: required, minLength, maxLength, email, pattern, min, max",
+        "Binding: [formGroup], formControlName, (ngSubmit)",
+        "Form state: valid/invalid, touched/dirty, value vs getRawValue()",
+        "Import ReactiveFormsModule in the component"
+      ],
+      "resources": [
+        { "title": "Angular: Reactive forms", "url": "https://angular.dev/guide/forms/reactive-forms" },
+        { "title": "Angular: Typed forms", "url": "https://angular.dev/guide/forms/typed-forms" },
+        { "title": "Angular: Validating form input", "url": "https://angular.dev/guide/forms/form-validation" }
+      ]
+    },
+    "build": {
+      "task": "In angular-playground, build /signup with a reactive form: name (required, 2–50 chars), email (required, email), phone (Indian mobile: pattern ^[6-9]\\d{9}$), password (required, min 8), course (select, required), and a FormArray of 'skills' where the user can add and remove skill inputs (at least 1). Disable submit while invalid; on submit, mark all as touched, and if valid show the typed value in a summary card and reset the form. Use FormBuilder.nonNullable so values are typed without null.",
+      "starterFiles": [],
+      "acceptance": [
+        "ReactiveFormsModule imported; form built with fb.nonNullable",
+        "All listed validators applied; the phone pattern rejects 5123456789 and 98765",
+        "Skills FormArray supports add and remove, with at least one required",
+        "Submit button disabled while invalid; ngSubmit used",
+        "Summary shows the typed value; form resets afterwards"
+      ]
+    },
+    "hints": [
+      "this.fb.nonNullable.group({ name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]], ... }). Note the validators go in an array as the second item.",
+      "FormArray: skills: this.fb.nonNullable.array([this.fb.nonNullable.control('', Validators.required)]). In the template, loop over skills.controls with @for and use [formControl]=\"ctrl\".",
+      "Reading values: this.form.getRawValue() includes disabled controls and is fully typed."
+    ],
+    "proof": "Commit with the signup form.",
+    "explainBack": [
+      { "q": "What's the difference between dirty and touched?", "lookFor": ["dirty: value changed by user", "touched: field was focused then blurred", "used to decide when to show errors"] },
+      { "q": "Why use reactive forms instead of reading inputs manually like in Week 7?", "lookFor": ["form model in TypeScript", "built-in validation and state", "typed values", "testable", "dynamic fields like FormArray"] }
+    ],
+    "lastHintExplanation": "dirty means the user changed the value; touched means the field was focused and then left. Showing errors only once a field is touched (or after submit) avoids yelling at users before they've typed. Reactive forms keep the whole form model, its validation and its state in typed TypeScript, which is easier to test and extend than reading the DOM manually.",
+    "predict": [
+      { "q": "fb.group({ age: [null as number | null, Validators.min(18)] }); the user leaves age empty. Is the control valid?", "options": ["Valid", "Invalid", "Pending", "Error"], "answer": 0, "why": "min only checks values that are present; add required to forbid empty." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Stack: simulation",
+      "note": "Push right-moving asteroids; resolve collisions when a left-mover arrives.",
+      "problems": [
+        { "title": "LeetCode 735: Asteroid Collision", "url": "https://leetcode.com/problems/asteroid-collision/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Number puzzles",
+      "questions": [
+        { "q": "2, 4, 8 / 3, 9, 27 / 4, 16, ?", "options": ["32", "48", "64", "128"], "answer": 2, "why": "Each row is n, n², n³: 4³ = 64." },
+        { "q": "If 1 = 5, 2 = 25, 3 = 125 and 4 = 625, then 5 = ?", "options": ["3125", "1", "5", "625"], "answer": 1, "why": "The question says 1 = 5, so 5 = 1." },
+        { "q": "A man buys a cow for ₹800, sells it for ₹1000, buys it back for ₹1100 and sells it for ₹1300. What is his total profit?", "options": ["₹200", "₹300", "₹400", "₹500"], "answer": 2, "why": "He makes 200 on each deal: 200 + 200." },
+        { "q": "A triangle is split by one line from its top corner to the base. How many triangles are there?", "options": ["2", "3", "4", "5"], "answer": 1, "why": "Two small ones plus the whole triangle." },
+        { "q": "7, 14, 28, ?, 112", "options": ["42", "49", "56", "64"], "answer": 2, "why": "Each term doubles." }
+      ]
+    },
+    "revision": ["Day 74: explain why client-side guards aren't security."]
+  },
+  {
+    "day": 76,
+    "module": "angular-routing-forms",
+    "title": "Validation messages and custom validators",
+    "goal": "Show clear validation messages and write your own field and cross-field validators.",
+    "learn": {
+      "concepts": [
+        "Reading errors: control.hasError('required'), control.errors",
+        "When to show errors: touched or submitted",
+        "Custom validator function: (control) => ValidationErrors | null",
+        "Cross-field validators on the FormGroup (password match, date range)",
+        "Async validators (e.g. 'username taken') with a debounce",
+        "A reusable field-error component"
+      ],
+      "resources": [
+        { "title": "Angular: Defining custom validators", "url": "https://angular.dev/guide/forms/form-validation#defining-custom-validators" },
+        { "title": "Angular: Cross-field validation", "url": "https://angular.dev/guide/forms/form-validation#cross-field-validation" },
+        { "title": "Angular: Async validation", "url": "https://angular.dev/guide/forms/form-validation#creating-asynchronous-validators" }
+      ]
+    },
+    "build": {
+      "task": "Improve /signup: add confirmPassword with a group-level passwordsMatch validator; a custom strongPassword validator (upper, lower, digit, 8+) that reports which rules are missing; a noWhitespace validator for name; and an async usernameAvailable validator that checks against a fake list after a 400 ms delay (show 'Checking…'). Build a reusable field-error component that takes a control and a map of messages and shows the right message only when touched or after submit. Write unit tests for the 3 sync validators.",
+      "starterFiles": [],
+      "acceptance": [
+        "passwordsMatch is applied to the FormGroup and shows the error under confirm password",
+        "strongPassword returns which rules failed, and the UI lists them",
+        "Async username check shows 'Checking…' and an error for taken names",
+        "field-error component reused for every field; errors appear only after touch/submit",
+        "Validator unit tests pass (ng test)"
+      ]
+    },
+    "hints": [
+      "Sync validator: export function noWhitespace(c: AbstractControl): ValidationErrors | null { return c.value?.trim() ? null : { whitespace: true }; }",
+      "Group validator: this.fb.group({...}, { validators: passwordsMatch }); inside, read group.get('password')?.value and group.get('confirmPassword')?.value.",
+      "Async validator: return (c) => timer(400).pipe(map(() => taken.includes(c.value) ? { taken: true } : null)). The control's status is 'PENDING' while it runs."
+    ],
+    "proof": "Commit with validators, field-error component and tests.",
+    "explainBack": [
+      { "q": "Why does passwordsMatch go on the group instead of on one control?", "lookFor": ["it needs two controls' values", "a control validator only sees its own value", "re-runs when either changes"] },
+      { "q": "What does your validator return when the value is valid, and why?", "lookFor": ["null", "Angular treats null as no errors", "object with keys means errors"] }
+    ],
+    "lastHintExplanation": "A validator returns null when the value is valid, or an object of error keys (with optional details) when it isn't. A control-level validator only sees its own value, so a rule comparing two fields (password and confirm) belongs on the parent FormGroup, which re-validates when either field changes.",
+    "predict": [
+      { "q": "A validator function returns {} (an empty object) for a valid value. What does Angular think?", "options": ["Valid", "Invalid, because errors is a non-null object", "Pending", "Error"], "answer": 1, "why": "Angular treats any non-null result as errors; return null for valid." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Stack: nested structures",
+      "note": "Use two stacks (counts and strings) or one stack of pairs. Medium.",
+      "problems": [
+        { "title": "LeetCode 394: Decode String", "url": "https://leetcode.com/problems/decode-string/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Arrangement puzzles and clocks",
+      "questions": [
+        { "q": "Five boxes are stacked. Yellow is on top, Red is above Blue, White is between Red and Blue, and Green is below Blue. Which box is at the bottom?", "options": ["Red", "Blue", "Green", "White"], "answer": 2, "why": "From the top: Yellow, Red, White, Blue, Green." },
+        { "q": "Using the same stack, which box is in the middle?", "options": ["Red", "White", "Blue", "Yellow"], "answer": 1, "why": "It's 3rd from the top." },
+        { "q": "The 1st of a month is a Tuesday. What day is the 25th?", "options": ["Thursday", "Friday", "Saturday", "Wednesday"], "answer": 1, "why": "24 days later, and 24 mod 7 = 3: Tuesday + 3 = Friday." },
+        { "q": "A clock gains 5 minutes every hour. It's set correctly at 8 AM. What does it show at 2 PM?", "options": ["2:30", "2:25", "2:35", "2:00"], "answer": 0, "why": "6 hours × 5 min = 30 minutes fast." },
+        { "q": "If PEN = 35 (the sum of letter positions), what is INK?", "options": ["33", "34", "35", "36"], "answer": 1, "why": "9 + 14 + 11 = 34." }
+      ]
+    },
+    "revision": ["Day 75: write a FormBuilder group with 3 validated fields from memory."]
+  },
+  {
+    "day": 77,
+    "module": "angular-routing-forms",
+    "title": "Project: a notes app with routing and forms",
+    "goal": "Combine routing, forms, services and signals into a complete multi-page notes app.",
+    "learn": {
+      "concepts": [
+        "Feature planning: routes, components, store, forms",
+        "Create and edit sharing one form component",
+        "Navigating after save; showing a toast message",
+        "Unsaved-changes guard on the editor",
+        "Search, tags and sort with computed signals"
+      ],
+      "resources": [
+        { "title": "Angular: Navigate to routes (Router.navigate)", "url": "https://angular.dev/guide/routing/navigate-to-routes" },
+        { "title": "Angular: Forms guide", "url": "https://angular.dev/guide/forms" }
+      ]
+    },
+    "build": {
+      "task": "Create a NEW repo angular-notes (Angular + Tailwind). Routes: /notes (list with search, tag filter and sort), /notes/new and /notes/:id/edit (the same NoteEditor component in create or edit mode), /notes/:id (detail with rendered tags, created/updated dates, delete with confirmation modal) and **. A NotesStore (signals) persists to localStorage. The editor uses a reactive form (title required 3–100, body required, tags as comma-separated input converted to an array, pinned checkbox), a CanDeactivate guard, and shows a toast after saving. Pinned notes appear first.",
+      "starterFiles": [],
+      "acceptance": [
+        "All routes work with direct URLs and back/forward",
+        "One editor component handles create and edit (pre-filled in edit mode)",
+        "Search, tag filter and sort combine; pinned notes always first",
+        "Unsaved changes prompt when leaving a dirty editor",
+        "Delete asks for confirmation using your ui-modal",
+        "Data persists; README explains features and how to run"
+      ]
+    },
+    "hints": [
+      "Editor mode: id = input<string>(); isEdit = computed(() => !!this.id()). In the constructor or an effect, if editing, patchValue the form with the existing note (once).",
+      "Tags: 'angular, forms, ' → value.split(',').map(t => t.trim()).filter(Boolean). Store them lowercase to make filtering easy.",
+      "Toast: a small ToastService with a messages signal and show(text) that removes the message after 3 seconds; render it once in the app component."
+    ],
+    "proof": "Link to your angular-notes repo.",
+    "explainBack": [
+      { "q": "How does one NoteEditor component know whether it's creating or editing?", "lookFor": ["route param id present or not", "input binding", "isEdit computed", "patchValue in edit mode", "save calls add vs update"] },
+      { "q": "Explain how your pinned-first sort works together with the user's chosen sort.", "lookFor": ["sort by pinned first then by chosen key", "compare function with two levels", "copy before sort"] }
+    ],
+    "lastHintExplanation": "The editor knows its mode from the route: /notes/new has no id and /notes/:id/edit does. With input binding, id() is undefined or a string, and isEdit is computed from it. In edit mode the form is patched once with the note's values, and save calls update instead of add. A two-level sort compares pinned first and falls back to the chosen key.",
+    "predict": [
+      { "q": "'a, ,b,'.split(',').map(s => s.trim()).filter(Boolean)", "options": ["['a', '', 'b', '']", "['a', 'b']", "['a', 'b', '']", "['a,b']"], "answer": 1, "why": "trim turns ' ' into '', and filter(Boolean) removes empty strings." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Stack and queue design",
+      "note": "Two stacks make a queue: one for input, one for output.",
+      "problems": [
+        { "title": "LeetCode 232: Implement Queue using Stacks", "url": "https://leetcode.com/problems/implement-queue-using-stacks/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Counting and probability mix",
+      "questions": [
+        { "q": "How many committees of 3 with at least one woman can be formed from 4 men and 3 women?", "options": ["31", "34", "35", "27"], "answer": 0, "why": "All committees (7C3 = 35) minus all-men committees (4C3 = 4) = 31." },
+        { "q": "A letter is picked at random from EDUCATION. What is the probability it's a vowel?", "options": ["5/9", "4/9", "1/2", "5/26"], "answer": 0, "why": "E, U, A, I and O: 5 of 9 letters." },
+        { "q": "In how many ways can 3 boys and 2 girls stand in a row with the girls at both ends?", "options": ["12", "24", "6", "120"], "answer": 0, "why": "2! for the girls × 3! for the boys." },
+        { "q": "What is the probability that a card is a heart or a king?", "options": ["4/13", "17/52", "1/4", "1/13"], "answer": 0, "why": "13 + 4 − 1 = 16 cards, and 16/52 = 4/13." },
+        { "q": "How many 2-digit numbers have two different digits?", "options": ["90", "81", "72", "100"], "answer": 1, "why": "9 choices for the first digit × 9 for the second." }
+      ]
+    },
+    "revision": ["Day 76: write a group-level passwordsMatch validator from memory."]
+  },
+  {
+    "day": 78,
+    "module": "angular-routing-forms",
+    "title": "Debug lab: broken routes and forms, and week review",
+    "goal": "Fix routing and reactive-form setup mistakes by reading Angular's error messages carefully.",
+    "learn": {
+      "concepts": [
+        "Route order and the wildcard route",
+        "Empty-path redirects need pathMatch: 'full'",
+        "Validator arrays vs async validator position",
+        "'Can't bind to formGroup': missing ReactiveFormsModule",
+        "'Cannot find control with name': formControlName typos"
+      ],
+      "resources": [
+        { "title": "Angular: Redirecting routes", "url": "https://angular.dev/guide/routing/redirecting-routes" },
+        { "title": "Angular: Error encyclopedia", "url": "https://angular.dev/errors" }
+      ]
+    },
+    "build": {
+      "task": "In angular-playground, create a branch debug-week13. Generate components note-list, note-detail and not-found (any simple content). Replace src/app/app.routes.ts with the starter routes and add the note-form starter. Expected: / redirects to /notes; /notes shows the list; /notes/new shows the form; /anything-else shows not-found; the form requires a title of 3+ characters and logs { title, body } on save. There are 5 bugs. Fix each in its own commit, then write docs/week13-notes.md (Days 73–77).",
+      "starterFiles": [
+        { "name": "src/app/app.routes.ts", "content": "import { Routes } from '@angular/router';\nimport { NoteList } from './note-list/note-list';\nimport { NoteDetail } from './note-detail/note-detail';\nimport { NotFound } from './not-found/not-found';\nimport { NoteForm } from './note-form/note-form';\n\nexport const routes: Routes = [\n  { path: '**', component: NotFound },\n  { path: '', redirectTo: 'notes' },\n  { path: 'notes', component: NoteList },\n  { path: 'notes/new', component: NoteForm },\n  { path: 'notes/:id', component: NoteDetail },\n];\n" },
+        { "name": "src/app/note-form/note-form.ts", "content": "import { Component, inject } from '@angular/core';\nimport { FormBuilder, Validators } from '@angular/forms';\n\n@Component({\n  selector: 'app-note-form',\n  template: `\n    <form [formGroup]=\"form\" (ngSubmit)=\"save()\" class=\"space-y-3\">\n      <label class=\"block\">Title <input class=\"border\" formControlName=\"tittle\"></label>\n      <label class=\"block\">Body <textarea class=\"border\" formControlName=\"body\"></textarea></label>\n      <button class=\"rounded bg-slate-900 px-3 py-1 text-white\" [disabled]=\"form.invalid\">Save</button>\n    </form>\n  `,\n})\nexport class NoteForm {\n  private fb = inject(FormBuilder);\n  form = this.fb.nonNullable.group({\n    title: ['', Validators.required, Validators.minLength(3)],\n    body: [''],\n  });\n\n  save() {\n    console.log(this.form.getRawValue());\n  }\n}\n" }
+      ],
+      "acceptance": [
+        "/ redirects to /notes; /notes, /notes/new and /notes/1 show the right components; unknown URLs show not-found",
+        "No console errors when the form loads",
+        "Title is required and needs 3+ characters; Save disabled until valid",
+        "Save logs { title, body }",
+        "5 separate fix commits; week13-notes.md written"
+      ]
+    },
+    "hints": [
+      "Every URL shows not-found: what does the router do with the first route that matches?",
+      "The redirect throws an error in the console about pathMatch. Read it: an empty path matches every URL as a prefix.",
+      "For the form, read the template errors in the console one by one. One is about binding to formGroup (what must the component import?), one is about a control name. Also: what's the third item in a FormBuilder control array?"
+    ],
+    "proof": "Link to the merged debug branch or the last fix commit.",
+    "explainBack": [
+      { "q": "List the 5 bugs and the exact error or symptom that led you to each.", "lookFor": ["** first catches everything", "empty-path redirect needs pathMatch full", "ReactiveFormsModule not imported → can't bind to formGroup", "formControlName typo 'tittle'", "minLength passed as async validator → must be in an array"] },
+      { "q": "Why does an empty-path redirect need pathMatch: 'full'?", "lookFor": ["'' is a prefix of every URL", "prefix matching would redirect everything", "full means only exactly empty"] }
+    ],
+    "lastHintExplanation": "1) '**' first matches every URL, so move it last. 2) path '' with prefix matching would match every URL, so Angular requires pathMatch: 'full' on that redirect. 3) [formGroup] only exists with ReactiveFormsModule in the component's imports. 4) formControlName=\"tittle\" doesn't match the control 'title'. 5) In ['', a, b], the third item is the async validators slot, so wrap sync validators in one array: ['', [Validators.required, Validators.minLength(3)]].",
+    "predict": [
+      { "q": "fb.control('', Validators.required, Validators.minLength(3)). What is minLength used as?", "options": ["A sync validator", "An async validator (wrong)", "Ignored", "A default value"], "answer": 1, "why": "The third argument is for async validators." }
+    ],
+    "debugLab": {
+      "title": "Broken routes and forms",
+      "symptoms": [
+        "Every URL shows the not-found page",
+        "Console error about a redirect and pathMatch",
+        "Console errors about binding to formGroup and a missing control",
+        "Validation behaves strangely even after those are fixed"
+      ],
+      "files": ["src/app/app.routes.ts", "src/app/note-form/note-form.ts"],
+      "bugCount": 5
+    },
+    "dsa": {
+      "pattern": "Stack and queue review",
+      "note": "Do the new one, then re-solve Daily Temperatures from a blank file.",
+      "problems": [
+        { "title": "LeetCode 225: Implement Stack using Queues", "url": "https://leetcode.com/problems/implement-stack-using-queues/" },
+        { "title": "LeetCode 739: Daily Temperatures (re-solve)", "url": "https://leetcode.com/problems/daily-temperatures/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Timed mixed: Phase 3 topics",
+      "questions": [
+        { "q": "What is 7C2?", "options": ["14", "21", "42", "49"], "answer": 1, "why": "7 × 6 / 2." },
+        { "q": "What is the probability that two dice add up to 2?", "options": ["1/36", "1/18", "1/6", "2/36"], "answer": 0, "why": "Only (1, 1)." },
+        { "q": "Facing west, you turn 180°. Which way are you facing?", "options": ["North", "South", "East", "West"], "answer": 2, "why": "The opposite of west." },
+        { "q": "How many ways can the letters of DEED be arranged?", "options": ["24", "12", "6", "4"], "answer": 2, "why": "4!/(2! × 2!) = 6." },
+        { "q": "Some A are B and some B are C. Conclusion: Some A are C.", "options": ["Definitely true", "Definitely false", "Can't say", "Always true for half"], "answer": 2, "why": "The overlaps might not share any members." }
+      ]
+    },
+    "revision": ["Days 73–77: sketch the route tree of your notes app from memory."]
+  }
+]

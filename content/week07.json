@@ -1,0 +1,409 @@
+[
+  {
+    "day": 37,
+    "module": "js-dom",
+    "title": "The DOM: selecting and changing the page",
+    "goal": "Use JavaScript to find elements on a page and change their text, attributes, classes and styles.",
+    "learn": {
+      "concepts": [
+        "The DOM is a tree of objects the browser builds from your HTML",
+        "Loading scripts: <script src defer> or at the end of body",
+        "querySelector and querySelectorAll with CSS selectors",
+        "textContent vs innerHTML (and why innerHTML with user input is dangerous)",
+        "classList.add/remove/toggle/contains instead of changing style directly",
+        "Attributes and dataset: getAttribute, setAttribute, data-* attributes"
+      ],
+      "resources": [
+        { "title": "javascript.info: Document (DOM chapter)", "url": "https://javascript.info/document" },
+        { "title": "MDN: Manipulating documents", "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/DOM_scripting" }
+      ]
+    },
+    "build": {
+      "task": "In day37/, build a 'profile switcher' page: an HTML card showing name, role, photo and a skills list, plus three buttons with data-person=\"0|1|2\". In app.js, store 3 people as an array of objects. You don't have events yet (tomorrow), so for today write a function showPerson(index) that updates the card's text, image src and alt, skills list, and toggles a 'highlight' class when the person has more than 4 skills. Call showPerson(0), showPerson(1), showPerson(2) from the console to test. Also write a function countElements() that logs how many elements of each tag the page has, using querySelectorAll('*').",
+      "starterFiles": [],
+      "acceptance": [
+        "Script loaded with defer (or at the end of body)",
+        "showPerson updates name, role, image src and alt, and rebuilds the skills list",
+        "Uses textContent for text (not innerHTML)",
+        "Uses classList.toggle(name, condition) for the highlight",
+        "countElements logs a correct object of tag counts"
+      ]
+    },
+    "hints": [
+      "Select once at the top: const nameEl = document.querySelector('.card-name'); then reuse it.",
+      "Rebuild a list: ul.textContent = ''; then for each skill create an li with document.createElement('li'), set its textContent, and ul.append(li).",
+      "classList.toggle('highlight', person.skills.length > 4) adds or removes the class based on the condition."
+    ],
+    "proof": "Commit with day37/ files.",
+    "explainBack": [
+      { "q": "Why does your script need defer? What happens without it in the <head>?", "lookFor": ["script runs before HTML is parsed", "querySelector returns null", "defer waits until the DOM is ready"] },
+      { "q": "Why use textContent instead of innerHTML for names coming from data?", "lookFor": ["innerHTML parses HTML", "user text could inject markup/scripts (XSS)", "textContent treats it as plain text"] }
+    ],
+    "lastHintExplanation": "A script in the <head> without defer runs before the body is parsed, so querySelector finds nothing and returns null. defer waits until the HTML is parsed. textContent inserts plain text, while innerHTML parses its input as HTML, so untrusted data could inject markup or scripts (XSS).",
+    "predict": [
+      { "q": "<p id=\"x\">Hi</p> and JS: document.querySelector('#x').innerHTML = '<b>Yo</b>'. What does the user see?", "options": ["<b>Yo</b> as text", "Yo in bold", "Hi", "Nothing"], "answer": 1, "why": "innerHTML parses the string as HTML." },
+      { "q": "document.querySelectorAll('li').length on a page with no li elements", "options": ["null", "0", "undefined", "Error"], "answer": 1, "why": "querySelectorAll returns an empty NodeList, whose length is 0." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Strings",
+      "note": "Compare characters across strings, column by column.",
+      "problems": [
+        { "title": "LeetCode 14: Longest Common Prefix", "url": "https://leetcode.com/problems/longest-common-prefix/" },
+        { "title": "LeetCode 58: Length of Last Word", "url": "https://leetcode.com/problems/length-of-last-word/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Time and work: efficiency",
+      "questions": [
+        { "q": "A is 50% more efficient than B. B takes 30 days. How long does A take?", "options": ["15 days", "20 days", "25 days", "45 days"], "answer": 1, "why": "A's rate is 1.5 times B's, so 30 / 1.5 = 20." },
+        { "q": "A and B together take 10 days and B alone takes 15. How long does A take alone?", "options": ["25 days", "30 days", "20 days", "35 days"], "answer": 1, "why": "1/10 − 1/15 = 1/30." },
+        { "q": "A takes 10 days and B is 25% more efficient. How long does B take?", "options": ["7.5 days", "8 days", "12.5 days", "6 days"], "answer": 1, "why": "10 / 1.25 = 8." },
+        { "q": "4 men and 6 women finish a job in 8 days; 3 men and 7 women finish it in 10 days. How long would 10 women take?", "options": ["35 days", "40 days", "45 days", "50 days"], "answer": 1, "why": "8(4m + 6w) = 10(3m + 7w) gives m = 11w. The job is 8 × 50w = 400 woman-days, so 10 women need 40 days." },
+        { "q": "A finishes 40% of a job in 8 days. How many more days does the rest take?", "options": ["10", "12", "16", "20"], "answer": 1, "why": "The whole job takes 20 days, so the remaining 60% takes 12." }
+      ]
+    },
+    "revision": ["Day 36: explain in one sentence each why map callbacks shouldn't mutate."]
+  },
+  {
+    "day": 38,
+    "module": "js-dom",
+    "title": "Events: clicks, input and forms",
+    "goal": "Make pages respond to users with event listeners, and handle forms without reloading the page.",
+    "learn": {
+      "concepts": [
+        "addEventListener('click' | 'input' | 'change' | 'submit' | 'keydown', handler)",
+        "The event object: target, currentTarget, key, preventDefault()",
+        "Form submit: preventDefault, reading values, FormData",
+        "Live validation on input events; showing error messages",
+        "Event bubbling: events travel up to parents",
+        "Removing listeners and avoiding inline onclick"
+      ],
+      "resources": [
+        { "title": "javascript.info: Introduction to browser events", "url": "https://javascript.info/introduction-browser-events" },
+        { "title": "javascript.info: Bubbling and capturing", "url": "https://javascript.info/bubbling-and-capturing" },
+        { "title": "MDN: Client-side form validation", "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Forms/Form_validation" }
+      ]
+    },
+    "build": {
+      "task": "In day38/: (1) connect yesterday's profile switcher buttons with click events; (2) build a signup form (name, email, password, confirm password, terms checkbox) with live validation on input: show a specific message under each field, a password strength meter (weak/medium/strong) and a submit button that's disabled until everything is valid. On submit, preventDefault, read values with FormData, and show a success card instead of the form. (3) Add a keyboard shortcut: pressing '/' focuses the name field.",
+      "starterFiles": [],
+      "acceptance": [
+        "No inline onclick attributes; all events via addEventListener",
+        "Each field shows its own error message while typing, clearing when fixed",
+        "Password strength updates live with at least 3 levels and clear rules",
+        "Submit is disabled until all fields are valid; page never reloads on submit",
+        "Success card shows the submitted name and email",
+        "'/' focuses the name field (but not while typing in another input)"
+      ]
+    },
+    "hints": [
+      "One validate() function that checks everything and returns an object of errors makes life easy. Call it on every input event and on submit.",
+      "Error messages: put an empty <p class=\"error\" id=\"email-error\" aria-live=\"polite\"></p> under each field and set its textContent.",
+      "For the '/' shortcut: document.addEventListener('keydown', e => { if (e.key === '/' && e.target.tagName !== 'INPUT') { e.preventDefault(); nameInput.focus(); } })."
+    ],
+    "proof": "Commit with day38/ files.",
+    "explainBack": [
+      { "q": "Why do you call preventDefault() in the submit handler?", "lookFor": ["default submit sends the form and reloads/navigates", "we handle it in JS instead", "keeps state on the page"] },
+      { "q": "What's the difference between e.target and e.currentTarget?", "lookFor": ["target is the element actually clicked", "currentTarget is the element the listener is attached to", "differ when bubbling from a child"] },
+      { "q": "Walk through what happens in your code from typing one character in the email field to the error message updating.", "lookFor": ["input event fires", "handler runs validation", "error text set via textContent", "submit button enabled/disabled"] }
+    ],
+    "lastHintExplanation": "A form's default submit action sends the data and reloads or navigates the page, so preventDefault() lets you handle it in JavaScript. e.target is the element where the event started (e.g. a span inside a button); e.currentTarget is the element whose listener is running. Events bubble from the target up through its ancestors.",
+    "predict": [
+      { "q": "A button inside a div. Both have click listeners logging 'button' and 'div'. You click the button. What's logged?", "options": ["button", "div", "button then div", "div then button"], "answer": 2, "why": "The event fires on the button, then bubbles up to the div." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Strings: two ends",
+      "note": "Check characters from both ends moving inwards. Skip non-alphanumeric characters.",
+      "problems": [
+        { "title": "LeetCode 125: Valid Palindrome", "url": "https://leetcode.com/problems/valid-palindrome/" },
+        { "title": "LeetCode 345: Reverse Vowels of a String", "url": "https://leetcode.com/problems/reverse-vowels-of-a-string/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Interest: harder questions",
+      "questions": [
+        { "q": "What is the compound interest on ₹5000 at 8% for 2 years?", "options": ["₹800", "₹816", "₹832", "₹840"], "answer": 2, "why": "5000 × 1.1664 = 5832, so the interest is 832." },
+        { "q": "The simple interest on ₹1200 for 3 years is ₹360. What is the rate?", "options": ["8%", "10%", "12%", "9%"], "answer": 1, "why": "360 / (1200 × 3) = 10%." },
+        { "q": "A sum becomes 1.44 times itself in 2 years at compound interest. What is the rate?", "options": ["12%", "20%", "22%", "24%"], "answer": 1, "why": "√1.44 = 1.2, so 20%." },
+        { "q": "What does ₹10,000 grow to at 10% compound interest for 3 years?", "options": ["₹13,000", "₹13,100", "₹13,310", "₹13,410"], "answer": 2, "why": "10,000 × 1.331 = 13,310." },
+        { "q": "The difference between compound and simple interest for 2 years at 5% is ₹15. What is the principal?", "options": ["₹5000", "₹6000", "₹7500", "₹3000"], "answer": 1, "why": "P × 0.05² = 15, so P = 6000." }
+      ]
+    },
+    "revision": ["Day 37: explain defer and textContent vs innerHTML without notes."]
+  },
+  {
+    "day": 39,
+    "module": "js-dom",
+    "title": "Rendering lists from data",
+    "goal": "Keep your data in an array and render the page from it, so the UI always matches the data.",
+    "learn": {
+      "concepts": [
+        "Data first: the array is the source of truth, the DOM is a view of it",
+        "A render() function that rebuilds the list from data",
+        "createElement, append, and DocumentFragment for many items",
+        "Search and filter: render a filtered copy, don't delete data",
+        "Sorting controls that re-render",
+        "Empty states: what to show when there's nothing"
+      ],
+      "resources": [
+        { "title": "javascript.info: Modifying the document", "url": "https://javascript.info/modifying-document" },
+        { "title": "MDN: DocumentFragment", "url": "https://developer.mozilla.org/en-US/docs/Web/API/DocumentFragment" }
+      ]
+    },
+    "build": {
+      "task": "In day39/, build a 'Course catalogue' page. Data: an array of at least 12 course objects (title, category, level, price, rating). UI: a search box (filters by title as you type), a category dropdown, a level filter (checkboxes), a sort select (price low→high, high→low, rating), and a results count ('Showing 5 of 12'). Render course cards from the filtered and sorted data with a render() function. Show a friendly empty state when nothing matches, with a 'Clear filters' button.",
+      "starterFiles": [],
+      "acceptance": [
+        "All UI is rendered from the data array through one render() function",
+        "Search, category, level and sort work together (combined filters)",
+        "Original data array never changes when filtering or sorting",
+        "Results count is always correct",
+        "Empty state appears when nothing matches; Clear filters resets every control and re-renders",
+        "Search is case-insensitive"
+      ]
+    },
+    "hints": [
+      "Keep the filter state in one object: const state = { query: '', category: 'all', levels: [], sort: 'none' }. Each control updates state and calls render().",
+      "render(): let list = courses.filter(...).filter(...); then sort a copy; then build cards. Never touch courses itself.",
+      "Use a DocumentFragment or build an array of elements and call container.replaceChildren(...cards) for one DOM update."
+    ],
+    "proof": "Commit with day39/ files.",
+    "explainBack": [
+      { "q": "Explain the flow from changing the category dropdown to the cards updating.", "lookFor": ["change event updates state", "render() recalculates filtered list from original data", "DOM rebuilt from that list", "count updated"] },
+      { "q": "Why is it better to filter a copy and re-render than to hide/remove DOM elements directly?", "lookFor": ["single source of truth", "filters combine easily", "no lost data", "UI always matches state"] }
+    ],
+    "lastHintExplanation": "With 'data first', the array plus a small state object are the truth, and render() is a function of them: it filters and sorts a copy and rebuilds the DOM. Every control just updates state and calls render(), so filters combine naturally and the UI can never drift from the data. This is the same idea Angular uses later.",
+    "predict": [
+      { "q": "const all = [3, 1, 2]; const shown = all.sort(); console.log(all)", "options": ["[3, 1, 2]", "[1, 2, 3]", "undefined", "Error"], "answer": 1, "why": "sort mutates the original array and returns it." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Arrays and hashing",
+      "note": "Use a Set and only start counting from numbers that begin a sequence. Medium problem.",
+      "problems": [
+        { "title": "LeetCode 128: Longest Consecutive Sequence", "url": "https://leetcode.com/problems/longest-consecutive-sequence/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Clocks",
+      "questions": [
+        { "q": "What is the angle between the hands at 3:00?", "options": ["60°", "90°", "120°", "180°"], "answer": 1, "why": "Each hour mark is 30°, so 3 × 30 = 90°." },
+        { "q": "What is the angle between the hands at 3:30?", "options": ["75°", "90°", "60°", "82.5°"], "answer": 0, "why": "|30 × 3 − 5.5 × 30| = |90 − 165| = 75°." },
+        { "q": "How many times do the hands overlap in 12 hours?", "options": ["11", "12", "22", "24"], "answer": 0, "why": "They meet every 12/11 hours, which is 11 times in 12 hours." },
+        { "q": "What is the smaller angle between the hands at 9:15?", "options": ["172.5°", "180°", "165°", "157.5°"], "answer": 0, "why": "|270 − 82.5| = 187.5°, so the smaller angle is 360 − 187.5 = 172.5°." },
+        { "q": "How many degrees does the minute hand move per minute?", "options": ["1°", "6°", "0.5°", "12°"], "answer": 1, "why": "360° / 60 = 6°." }
+      ]
+    },
+    "revision": ["Day 38: write a submit handler with preventDefault and FormData from memory."]
+  },
+  {
+    "day": 40,
+    "module": "js-dom",
+    "title": "Project: a to-do app",
+    "goal": "Build a complete to-do app with add, complete, edit, delete and filters, using the data-first pattern.",
+    "learn": {
+      "concepts": [
+        "Planning state: an array of { id, text, done, createdAt }",
+        "Unique ids: crypto.randomUUID() or Date.now()",
+        "Actions as functions: addTodo, toggleTodo, editTodo, deleteTodo",
+        "Inline editing: double-click to edit, Enter to save, Escape to cancel",
+        "Filters: all / active / completed, and 'clear completed'"
+      ],
+      "resources": [
+        { "title": "MDN: Crypto.randomUUID()", "url": "https://developer.mozilla.org/en-US/docs/Web/API/Crypto/randomUUID" },
+        { "title": "TodoMVC (see how a to-do app behaves)", "url": "https://todomvc.com/" }
+      ]
+    },
+    "build": {
+      "task": "Build a to-do app in day40/ (index.html, style.css, app.js). Features: add a task (Enter or button; ignore empty input), mark complete with a checkbox, edit by double-clicking the text (Enter saves, Escape cancels, empty text deletes), delete button, filter buttons All/Active/Completed with the active filter highlighted, an 'X items left' counter, and 'Clear completed'. All changes go through action functions that update the array and then call render().",
+      "starterFiles": [],
+      "acceptance": [
+        "Every feature listed works, including Escape-to-cancel while editing",
+        "State is a single array of objects with unique ids; DOM is only changed in render()",
+        "Items-left counter and filters are always correct",
+        "Accessible: checkbox has a label, buttons have accessible names, works with keyboard",
+        "Styled and usable on a phone"
+      ]
+    },
+    "hints": [
+      "Find items by id, not array index: todos.find(t => t.id === id). Indexes change when filtering.",
+      "Put data-id on each li, and read it in handlers with e.target.closest('li').dataset.id.",
+      "For edit mode, keep let editingId = null in state. render() shows an <input> for that item instead of text, and focuses it."
+    ],
+    "proof": "Commit with day40/ files. Add a short GIF or screenshots in the commit or README if you can.",
+    "explainBack": [
+      { "q": "Walk through what happens in your code when the user ticks a checkbox.", "lookFor": ["event handler gets the id", "toggleTodo updates the object's done", "render() runs", "counter and filter update"] },
+      { "q": "Why did you use ids instead of array indexes to find todos?", "lookFor": ["indexes change after delete/filter", "id is stable", "filtered view index doesn't match the real array"] }
+    ],
+    "lastHintExplanation": "Each action function changes the todos array and then calls render(), so the screen always reflects the data. Ids are stable while indexes shift whenever you delete or filter: index 2 in the 'Active' view may be index 5 in the real array. Stable ids prevent editing or deleting the wrong item.",
+    "predict": [
+      { "q": "const todos = [{ id: 1 }, { id: 2 }, { id: 3 }]; todos.splice(0, 1); What is todos[0].id?", "options": ["1", "2", "3", "undefined"], "answer": 1, "why": "Removing the first item shifts everything left, so indexes change; ids don't." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Strings",
+      "note": "Walk two indexes through two strings.",
+      "problems": [
+        { "title": "LeetCode 392: Is Subsequence", "url": "https://leetcode.com/problems/is-subsequence/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Calendars",
+      "questions": [
+        { "q": "1 January 2025 was a Wednesday. What day was 1 January 2026?", "options": ["Wednesday", "Thursday", "Friday", "Tuesday"], "answer": 1, "why": "2025 isn't a leap year: 365 days = 52 weeks + 1 day." },
+        { "q": "How many odd days are there in a leap year?", "options": ["0", "1", "2", "3"], "answer": 2, "why": "366 = 52 weeks + 2 days." },
+        { "q": "Today is Monday. What day will it be 61 days from now?", "options": ["Friday", "Saturday", "Sunday", "Thursday"], "answer": 1, "why": "61 mod 7 = 5, and Monday + 5 = Saturday." },
+        { "q": "Which of these is a leap year?", "options": ["1900", "2000", "2100", "2023"], "answer": 1, "why": "Century years must be divisible by 400; 2000 is." },
+        { "q": "15 August 1947 was a Friday. What day was 15 August 1948?", "options": ["Saturday", "Sunday", "Monday", "Friday"], "answer": 1, "why": "The period includes 29 Feb 1948, so it's 366 days: 2 odd days, and Friday + 2 = Sunday." }
+      ]
+    },
+    "revision": ["Day 39: explain the data-first render pattern in 3 sentences."]
+  },
+  {
+    "day": 41,
+    "module": "js-dom",
+    "title": "localStorage and event delegation",
+    "goal": "Make your to-do app remember tasks after a reload, and handle events for many items with one listener.",
+    "learn": {
+      "concepts": [
+        "localStorage.setItem/getItem/removeItem: strings only",
+        "Saving objects with JSON.stringify and loading with JSON.parse",
+        "Handling missing or corrupted saved data with try/catch",
+        "Event delegation: one listener on the parent, use e.target.closest()",
+        "Why delegation works for items rendered later",
+        "sessionStorage vs localStorage; what never to store (passwords, tokens)"
+      ],
+      "resources": [
+        { "title": "javascript.info: localStorage, sessionStorage", "url": "https://javascript.info/localstorage" },
+        { "title": "javascript.info: Event delegation", "url": "https://javascript.info/event-delegation" }
+      ]
+    },
+    "build": {
+      "task": "Copy your Day 40 app into day41/. (1) Save todos and the current filter to localStorage on every change, and load them on start. Wrap loading in try/catch so corrupted data (test by setting localStorage.todos = 'oops' in the console) falls back to an empty list instead of crashing. (2) Replace per-item listeners with ONE click listener and ONE change listener on the list (event delegation). (3) Add a 'theme' toggle (light/dark) remembered in localStorage. (4) Add an export button that downloads todos as a JSON file.",
+      "starterFiles": [],
+      "acceptance": [
+        "Reloading keeps todos, completion state and the active filter",
+        "Corrupted localStorage doesn't crash the app (tested and noted in a comment)",
+        "No listeners are attached to individual items; delegation on the list handles toggle, delete and edit",
+        "Theme choice survives reload",
+        "Export downloads a valid .json file of the todos"
+      ]
+    },
+    "hints": [
+      "Wrap storage in two helpers: save() { localStorage.setItem('todos', JSON.stringify(todos)) } and load() { try { return JSON.parse(localStorage.getItem('todos')) ?? [] } catch { return [] } }.",
+      "Delegation: list.addEventListener('click', e => { const li = e.target.closest('li'); if (!li) return; if (e.target.matches('.delete')) deleteTodo(li.dataset.id); }).",
+      "Download: const blob = new Blob([JSON.stringify(todos, null, 2)], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'todos.json'; a.click();"
+    ],
+    "proof": "Commit with day41/ files.",
+    "explainBack": [
+      { "q": "Explain how event delegation works in your list, and why it keeps working after render() replaces all items.", "lookFor": ["listener on the parent", "events bubble up from items", "closest/matches identify the item and action", "parent isn't replaced so listener survives"] },
+      { "q": "Why must you JSON.stringify before saving to localStorage?", "lookFor": ["localStorage stores strings only", "objects become '[object Object]' otherwise", "parse when reading"] },
+      { "q": "What should never be stored in localStorage and why?", "lookFor": ["secrets/passwords/sensitive tokens", "any script on the page can read it (XSS)", "not encrypted"] }
+    ],
+    "lastHintExplanation": "Event delegation puts one listener on a parent that never gets replaced. Clicks on any item bubble up to it, and e.target.closest('li') identifies which item was hit, so it works for items rendered later. localStorage only stores strings: without JSON.stringify an object is saved as '[object Object]'. Any script on the page can read localStorage, so never put secrets there.",
+    "predict": [
+      { "q": "localStorage.setItem('n', 5); console.log(typeof localStorage.getItem('n'))", "options": ["number", "string", "object", "undefined"], "answer": 1, "why": "localStorage converts every value to a string." },
+      { "q": "localStorage.setItem('u', { a: 1 }); console.log(localStorage.getItem('u'))", "options": ["{\"a\":1}", "[object Object]", "{ a: 1 }", "null"], "answer": 1, "why": "The object is converted with String(), which gives '[object Object]'." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Strings and hashing",
+      "note": "Two-way mapping again, then a lookup-table problem.",
+      "problems": [
+        { "title": "LeetCode 290: Word Pattern", "url": "https://leetcode.com/problems/word-pattern/" },
+        { "title": "LeetCode 13: Roman to Integer", "url": "https://leetcode.com/problems/roman-to-integer/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Problems on numbers",
+      "questions": [
+        { "q": "Two numbers add up to 50 and differ by 10. What is the larger?", "options": ["25", "30", "35", "40"], "answer": 1, "why": "(50 + 10)/2 = 30." },
+        { "q": "A number doubled and increased by 7 gives 31. What is the number?", "options": ["10", "12", "14", "19"], "answer": 1, "why": "2x + 7 = 31, so x = 12." },
+        { "q": "Three consecutive numbers add up to 72. What is the smallest?", "options": ["22", "23", "24", "25"], "answer": 1, "why": "The middle number is 24, so they are 23, 24, 25." },
+        { "q": "A two-digit number has digits adding to 9. Reversing the digits makes it 27 bigger. What is the number?", "options": ["36", "45", "27", "63"], "answer": 0, "why": "9(b − a) = 27 gives b − a = 3, and with a + b = 9: a = 3, b = 6." },
+        { "q": "A number is 12 more than one-third of itself. What is the number?", "options": ["15", "18", "24", "36"], "answer": 1, "why": "x − x/3 = 12, so x = 18." }
+      ]
+    },
+    "revision": ["Day 40: list your to-do app's action functions from memory and what each changes."]
+  },
+  {
+    "day": 42,
+    "module": "js-dom",
+    "title": "Debug lab: the broken to-do app, and week review",
+    "goal": "Fix a buggy DOM app using the Console, Elements and Application panels in DevTools.",
+    "learn": {
+      "concepts": [
+        "Console errors: 'Cannot read properties of null' usually means a selector found nothing",
+        "Application panel: inspect and edit localStorage",
+        "Preserve log in the Console to see errors before a reload",
+        "Checking which listeners are attached (Elements → Event Listeners)",
+        "XSS: why rendering user text with innerHTML is a security bug"
+      ],
+      "resources": [
+        { "title": "Chrome DevTools: View and edit local storage", "url": "https://developer.chrome.com/docs/devtools/storage/localstorage" },
+        { "title": "OWASP: Cross Site Scripting (XSS)", "url": "https://owasp.org/www-community/attacks/xss/" }
+      ]
+    },
+    "build": {
+      "task": "Copy the starter into day42/debug/ and open index.html. The app should add tasks, delete them with ✕, and keep them after reload. It has 5 bugs, including one security bug (adding the task <img src=x onerror=alert(1)> must show that text literally, not run code). Fix each bug in its own commit. Then write day42/week7-notes.md with one confident and one weak topic for each of Days 37–41.",
+      "starterFiles": [
+        { "name": "day42/debug/index.html", "content": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Broken todos</title>\n  <script src=\"app.js\"></script>\n</head>\n<body>\n  <h1>Todos</h1>\n  <form id=\"todo-form\">\n    <label for=\"todo-input\">New task</label>\n    <input id=\"todo-input\" autocomplete=\"off\">\n    <button>Add</button>\n  </form>\n  <ul id=\"todo-list\"></ul>\n</body>\n</html>\n" },
+        { "name": "day42/debug/app.js", "content": "const form = document.querySelector('#todo-form');\nconst input = document.querySelector('#todo-input');\nconst list = document.querySelector('#todo-list');\n\nlet todos = JSON.parse(localStorage.getItem('todos')) || [];\n\nfunction save() {\n  localStorage.setItem('todos', todos);\n}\n\nfunction render() {\n  list.innerHTML = '';\n  for (const todo of todos) {\n    const li = document.createElement('li');\n    li.innerHTML = `${todo.text} <button class=\"delete\" data-id=\"${todo.id}\" aria-label=\"Delete\">✕</button>`;\n    list.append(li);\n  }\n}\n\nform.addEventListener('submit', (e) => {\n  const text = input.value.trim();\n  if (!text) return;\n  todos.push({ id: Date.now(), text });\n  input.value = '';\n  save();\n  render();\n});\n\nlist.addEventListener('click', (e) => {\n  if (e.target.class === 'delete') {\n    const id = Number(e.target.dataset.id);\n    todos = todos.filter((t) => t.id !== id);\n    save();\n    render();\n  }\n});\n\nrender();\n" }
+      ],
+      "acceptance": [
+        "Adding, deleting and reloading all work with no console errors",
+        "Typing <img src=x onerror=alert(1)> as a task shows the text and runs nothing",
+        "Loading tolerates bad saved data without crashing",
+        "5 separate fix commits naming each bug",
+        "week7-notes.md covers Days 37–41"
+      ]
+    },
+    "hints": [
+      "Open the Console first. The very first error is about null. Which element is null and why, given where the script tag is?",
+      "When you click Add the page flashes and the task disappears: the form is doing its default action. After that, check Application → Local Storage: what was actually saved?",
+      "e.target.class doesn't exist; elements have className and classList. For the XSS bug, build the li with textContent for the text and createElement for the button."
+    ],
+    "proof": "Link to your final fix commit.",
+    "explainBack": [
+      { "q": "List the 5 bugs with how DevTools revealed each one.", "lookFor": ["script without defer → null elements (Console)", "no preventDefault → page reloads", "saving array without JSON.stringify (Application panel)", "e.target.class undefined → use classList.contains/matches", "innerHTML with user text → XSS"] },
+      { "q": "Explain the XSS bug: what could an attacker do if this were a real shared app?", "lookFor": ["user input becomes HTML/JS", "runs code in other users' browsers", "steal data/tokens, act as the user", "fix with textContent"] }
+    ],
+    "lastHintExplanation": "1) The script in <head> runs before the form exists, so add defer. 2) submit without e.preventDefault() reloads the page. 3) localStorage.setItem('todos', todos) saves '[object Object]', so stringify it, and parse inside try/catch. 4) e.target.class is undefined; use e.target.matches('.delete') or classList.contains. 5) innerHTML with user text lets HTML/JS run (XSS); set the text with textContent.",
+    "predict": [
+      { "q": "A script in <head> without defer runs document.querySelector('#app').textContent = 'hi'. #app is in the body. What happens?", "options": ["Works", "TypeError: Cannot set properties of null", "Nothing, silently", "The browser waits automatically"], "answer": 1, "why": "#app doesn't exist yet, so querySelector returns null." }
+    ],
+    "debugLab": {
+      "title": "The broken to-do app",
+      "symptoms": [
+        "Console shows an error about null as soon as the page loads",
+        "Clicking Add flashes the page and nothing is added",
+        "After a reload the app crashes with a JSON error",
+        "The ✕ buttons do nothing",
+        "A task containing HTML is rendered as HTML (security problem)"
+      ],
+      "files": ["day42/debug/index.html", "day42/debug/app.js"],
+      "bugCount": 5
+    },
+    "dsa": {
+      "pattern": "Week 7 review: strings",
+      "note": "Do the new problem, then re-solve Group Anagrams from a blank file.",
+      "problems": [
+        { "title": "LeetCode 443: String Compression", "url": "https://leetcode.com/problems/string-compression/" },
+        { "title": "LeetCode 49: Group Anagrams (re-solve)", "url": "https://leetcode.com/problems/group-anagrams/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Timed mixed: Week 7",
+      "questions": [
+        { "q": "A, B and C take 20, 30 and 60 days alone. How long do they take together?", "options": ["10 days", "12 days", "15 days", "8 days"], "answer": 0, "why": "(3 + 2 + 1)/60 = 1/10." },
+        { "q": "What is the compound interest on ₹1000 at 10% for 2 years?", "options": ["₹200", "₹210", "₹220", "₹110"], "answer": 1, "why": "1000 × 1.21 − 1000 = 210." },
+        { "q": "What is the angle between the hands at 6:00?", "options": ["90°", "180°", "150°", "0°"], "answer": 1, "why": "6 × 30 = 180°." },
+        { "q": "How far do you go at 72 km/h in 15 minutes?", "options": ["15 km", "18 km", "20 km", "24 km"], "answer": 1, "why": "72 × 0.25 = 18." },
+        { "q": "Two numbers in the ratio 3:5 add up to 40. What is the larger?", "options": ["15", "24", "25", "30"], "answer": 2, "why": "40 × 5/8 = 25." }
+      ]
+    },
+    "revision": ["Days 37–41: rebuild a mini to-do (add + delete with delegation + localStorage) in 30 minutes without notes."]
+  }
+]

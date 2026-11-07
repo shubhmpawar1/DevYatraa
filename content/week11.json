@@ -1,0 +1,403 @@
+[
+  {
+    "day": 61,
+    "module": "tailwind",
+    "title": "Tailwind CSS: utility-first styling",
+    "goal": "Set up Tailwind with Vite and style a page using utility classes instead of writing CSS files.",
+    "learn": {
+      "concepts": [
+        "Utility-first: small single-purpose classes (p-4, text-lg, flex) composed in HTML",
+        "Installing Tailwind v4 with the Vite plugin and @import \"tailwindcss\"",
+        "Spacing, sizing, colours, typography and borders scales",
+        "Flex and grid utilities: flex, items-center, gap-4, grid-cols-3",
+        "Why it's not 'inline styles': design scale, states, responsive variants",
+        "Reading the docs fast: search a CSS property to find its class"
+      ],
+      "resources": [
+        { "title": "Tailwind CSS: Installing with Vite", "url": "https://tailwindcss.com/docs/installation/using-vite" },
+        { "title": "Tailwind CSS: Styling with utility classes", "url": "https://tailwindcss.com/docs/styling-with-utility-classes" }
+      ]
+    },
+    "build": {
+      "task": "In jobready-journey, create day61 with Vite (vanilla) and install Tailwind using the official Vite guide. Rebuild your Day 11 BrightPath landing page using only Tailwind classes: no custom CSS except the @import line. Keep the same sections. Then write day61/compare.md: lines of CSS before vs after, three things that got easier, and one thing you found harder.",
+      "starterFiles": [],
+      "acceptance": [
+        "Tailwind installed via the Vite plugin; styles.css only contains @import \"tailwindcss\" (plus optional @theme)",
+        "All sections from Day 11 rebuilt with utility classes",
+        "Course cards use grid utilities; header uses flex utilities",
+        "No inline style attributes",
+        "compare.md written with real numbers"
+      ]
+    },
+    "hints": [
+      "Follow the Tailwind Vite install page exactly: npm install tailwindcss @tailwindcss/vite, add tailwindcss() to vite.config.js plugins, and put @import \"tailwindcss\"; in your CSS.",
+      "Install the 'Tailwind CSS IntelliSense' VS Code extension for autocomplete and hover previews of what each class does.",
+      "Card: class=\"rounded-xl border border-slate-200 bg-white p-6 shadow-sm\". Grid: class=\"grid gap-6 sm:grid-cols-2 lg:grid-cols-3\"."
+    ],
+    "proof": "Commit with day61/ (no node_modules) and compare.md.",
+    "explainBack": [
+      { "q": "Some people say Tailwind is just inline styles. Using your page, explain why it isn't.", "lookFor": ["consistent design scale (spacing/colours)", "responsive variants (md:)", "state variants (hover:, focus:)", "unused classes removed in build"] },
+      { "q": "How does Tailwind keep the final CSS file small?", "lookFor": ["scans your files for class names", "only generates used classes", "build output tiny"] }
+    ],
+    "lastHintExplanation": "Inline styles can't do hover, focus, media queries or dark mode, and they don't follow a design scale. Tailwind classes are a fixed scale (p-4 is always 1rem) with variants like md:, hover: and dark:. Tailwind scans your source files and generates CSS only for the classes you actually use, so the final file stays small.",
+    "predict": [
+      { "q": "You build your app string dynamically: class = 'text-' + color + '-500'. Will Tailwind generate text-red-500?", "options": ["Yes, always", "Not unless the full class name appears somewhere in your source", "Only in dev", "Only with JIT off"], "answer": 1, "why": "Tailwind scans for complete class names; it can't run your code to build strings." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Sliding window",
+      "note": "New pattern. Track the lowest price so far as you move right.",
+      "problems": [
+        { "title": "LeetCode 121: Best Time to Buy and Sell Stock", "url": "https://leetcode.com/problems/best-time-to-buy-and-sell-stock/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Probability: cards and dice",
+      "questions": [
+        { "q": "What is the probability of drawing a red card from a standard deck?", "options": ["1/4", "1/2", "1/13", "1/26"], "answer": 1, "why": "26 of the 52 cards are red." },
+        { "q": "What is the probability of two heads in two tosses?", "options": ["1/2", "1/4", "3/4", "1/3"], "answer": 1, "why": "1/2 × 1/2." },
+        { "q": "What is the probability that two dice add up to 12?", "options": ["1/36", "1/18", "1/12", "1/6"], "answer": 0, "why": "Only (6, 6)." },
+        { "q": "What is the probability of drawing a face card (J, Q, K)?", "options": ["3/13", "1/13", "4/13", "1/4"], "answer": 0, "why": "12/52." },
+        { "q": "What is the probability of a double (both dice the same) with two dice?", "options": ["1/6", "1/36", "1/12", "1/3"], "answer": 0, "why": "6/36." }
+      ]
+    },
+    "revision": ["Day 60: name 3 ways people silence TypeScript and why each is risky."]
+  },
+  {
+    "day": 62,
+    "module": "tailwind",
+    "title": "Tailwind: responsive, states, dark mode and reusable patterns",
+    "goal": "Build responsive, interactive and themed UI with Tailwind variants, and keep markup maintainable.",
+    "learn": {
+      "concepts": [
+        "Responsive prefixes sm: md: lg: (mobile-first, min-width)",
+        "State variants: hover:, focus-visible:, active:, disabled:, group-hover:",
+        "Dark mode with dark: (media or class strategy)",
+        "Theme customisation with @theme (brand colours, fonts)",
+        "Avoiding repetition: extract components (in JS/Angular), not @apply everywhere",
+        "Accessibility with Tailwind: focus rings, sr-only"
+      ],
+      "resources": [
+        { "title": "Tailwind CSS: Responsive design", "url": "https://tailwindcss.com/docs/responsive-design" },
+        { "title": "Tailwind CSS: Hover, focus, and other states", "url": "https://tailwindcss.com/docs/hover-focus-and-other-states" },
+        { "title": "Tailwind CSS: Dark mode", "url": "https://tailwindcss.com/docs/dark-mode" }
+      ]
+    },
+    "build": {
+      "task": "In day62/ (Vite + Tailwind), build a 'pricing and FAQ' page: a pricing section with 3 plan cards (the middle one highlighted, stacked on phones, side by side from md:), a monthly/yearly toggle (small JS) that changes prices, an FAQ accordion using <details>/<summary> styled with Tailwind (open: variant), and a sign-up form with focus, invalid and disabled states. Add a brand colour via @theme. Support dark mode with a toggle button (class strategy) that's remembered in localStorage.",
+      "starterFiles": [],
+      "acceptance": [
+        "Plan cards stack on phones and sit in a row from md:",
+        "Monthly/yearly toggle updates all prices",
+        "FAQ uses <details>/<summary>, styled with the open: variant",
+        "Inputs show visible focus-visible rings and styled invalid/disabled states",
+        "Brand colour defined once with @theme and used as bg-brand-600 etc.",
+        "Dark mode toggle works and is remembered"
+      ]
+    },
+    "hints": [
+      "@theme { --color-brand-600: #4f46e5; } in your CSS creates bg-brand-600, text-brand-600 and so on.",
+      "Class-based dark mode in v4: add @custom-variant dark (&:where(.dark, .dark *)); then toggle the dark class on <html>.",
+      "Invalid styling: invalid:border-red-500 applies when the browser marks the field invalid (e.g. required and empty, type=email with bad text). Combine with user-invalid: so it doesn't show before the user types."
+    ],
+    "proof": "Commit with day62/ files.",
+    "explainBack": [
+      { "q": "Explain what md:grid-cols-3 means and why Tailwind is mobile-first.", "lookFor": ["applies from the md breakpoint up (min-width)", "unprefixed classes apply to all sizes", "prefixes add changes for bigger screens"] },
+      { "q": "How does your dark mode toggle work end to end?", "lookFor": ["button toggles dark class on html", "dark: variants apply under .dark", "choice saved to localStorage and read on load"] }
+    ],
+    "lastHintExplanation": "Unprefixed Tailwind classes apply at every size; md:grid-cols-3 adds three columns only from the md breakpoint up (a min-width media query), which makes Tailwind mobile-first like your Week 2 CSS. With the class strategy, dark: variants apply when an ancestor has the dark class, so the toggle just adds or removes that class on <html> and saves the choice.",
+    "predict": [
+      { "q": "<div class=\"hidden md:block\">. On a 400px phone, is it visible?", "options": ["Yes", "No", "Only in dark mode", "Only on hover"], "answer": 1, "why": "hidden applies everywhere; md:block only overrides it from the md breakpoint up." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Sliding window: fixed size",
+      "note": "Add the new element, remove the one leaving the window.",
+      "problems": [
+        { "title": "LeetCode 643: Maximum Average Subarray I", "url": "https://leetcode.com/problems/maximum-average-subarray-i/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Probability: without replacement",
+      "questions": [
+        { "q": "A bag has 4 red and 6 blue balls. Two are drawn. What is the probability both are red?", "options": ["2/15", "4/25", "1/5", "6/25"], "answer": 0, "why": "4C2 / 10C2 = 6/45." },
+        { "q": "What is the probability of not rolling a 6 on a die?", "options": ["1/6", "5/6", "1/2", "2/3"], "answer": 1, "why": "1 − 1/6." },
+        { "q": "3 coins are tossed. What is the probability of exactly 2 heads?", "options": ["1/8", "3/8", "1/2", "1/4"], "answer": 1, "why": "HHT, HTH and THH: 3 of 8 outcomes." },
+        { "q": "What is the probability that a leap year has 53 Sundays?", "options": ["1/7", "2/7", "3/7", "53/366"], "answer": 1, "why": "A leap year has 2 extra days, and 2 of the 7 possible pairs include a Sunday." },
+        { "q": "Two cards are drawn without replacement. What is the probability both are aces?", "options": ["1/221", "1/169", "1/26", "4/221"], "answer": 0, "why": "4/52 × 3/51." }
+      ]
+    },
+    "revision": ["Day 61: rebuild one card from memory with Tailwind classes."]
+  },
+  {
+    "day": 63,
+    "module": "angular-basics",
+    "title": "Angular: CLI, project structure and your first component",
+    "goal": "Create an Angular app with the CLI, understand its files, and build your first standalone components.",
+    "learn": {
+      "concepts": [
+        "What Angular is: a full framework (components, routing, forms, HTTP, DI)",
+        "Installing the CLI: npm i -g @angular/cli; ng new; ng serve",
+        "Project structure: src/main.ts, app.config.ts, app component, angular.json",
+        "Components: @Component with selector, template/templateUrl, styles; standalone imports",
+        "ng generate component and nesting components",
+        "Adding Tailwind to Angular"
+      ],
+      "resources": [
+        { "title": "Angular: Installation", "url": "https://angular.dev/installation" },
+        { "title": "Angular: Components overview", "url": "https://angular.dev/guide/components" },
+        { "title": "Angular: Using Tailwind CSS with Angular", "url": "https://angular.dev/guide/tailwind" }
+      ]
+    },
+    "build": {
+      "task": "Create a NEW repo angular-playground with ng new angular-playground (CSS, no SSR). Add Tailwind using the Angular guide. Generate components header, profile-card and footer, and build a 'developer profile' page from them: the app component composes the three; profile-card shows your name, role, photo and skills (hard-coded in the component class for now). Write docs/structure.md explaining, in your own words, what main.ts, app.config.ts, app.ts, angular.json and package.json each do.",
+      "starterFiles": [],
+      "acceptance": [
+        "ng serve runs with no errors; Tailwind classes work",
+        "3 generated components used in the root component's template",
+        "Data shown in profile-card comes from component class properties, not hard-coded in HTML",
+        "docs/structure.md explains the 5 files in your own words",
+        "Repo pushed with a README saying how to run it"
+      ]
+    },
+    "hints": [
+      "ng new angular-playground --style=css --ssr=false. Then cd in and ng serve -o.",
+      "ng g c header (short for ng generate component header) creates a folder with .ts, .html, .css and .spec.ts files. To use it, add it to the imports array of the parent component and put <app-header /> in the template.",
+      "Show class data with interpolation: name = 'Asha'; in the class, then {{ name }} in the template."
+    ],
+    "proof": "Link to your angular-playground repo.",
+    "explainBack": [
+      { "q": "Explain how your app goes from main.ts to the profile card appearing on screen.", "lookFor": ["main.ts bootstraps the root component with app config", "root component template includes child selectors", "each child is imported in the parent's imports", "Angular renders templates"] },
+      { "q": "Why does a parent component need to list a child in its imports array?", "lookFor": ["standalone components declare their own dependencies", "Angular needs to know which component a selector refers to", "otherwise unknown element error"] }
+    ],
+    "lastHintExplanation": "main.ts calls bootstrapApplication(App, appConfig), which renders the root component into <app-root> in index.html. Every component is standalone, so it must list the components it uses in its imports array; that's how Angular knows what <app-profile-card> means. Templates read component class properties with {{ }} interpolation.",
+    "predict": [
+      { "q": "You put <app-footer /> in the root template but forgot to add Footer to imports. What happens?", "options": ["Renders anyway", "Error: 'app-footer' is not a known element", "Renders blank silently", "Footer renders twice"], "answer": 1, "why": "Standalone components must import what they use." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Sliding window: variable size",
+      "note": "Expand right; shrink left while the window has a repeat. Use a Map of last seen index.",
+      "problems": [
+        { "title": "LeetCode 3: Longest Substring Without Repeating Characters", "url": "https://leetcode.com/problems/longest-substring-without-repeating-characters/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Logical reasoning: blood relations",
+      "questions": [
+        { "q": "A is B's brother. C is A's mother. D is C's father. What is B to D?", "options": ["Son", "Grandchild", "Nephew", "Brother"], "answer": 1, "why": "D is the maternal grandfather of A and B." },
+        { "q": "Pointing to a man, Riya says: 'His mother is the only daughter of my mother.' Who is the man to Riya?", "options": ["Brother", "Son", "Nephew", "Father"], "answer": 1, "why": "The only daughter of Riya's mother is Riya herself, so the man is her son." },
+        { "q": "P is Q's sister and Q is R's son. What is P to R?", "options": ["Daughter", "Sister", "Niece", "Mother"], "answer": 0, "why": "P is a sibling of R's son and is female, so P is R's daughter." },
+        { "q": "B is the brother of A's mother. What is B to A?", "options": ["Maternal uncle", "Grandfather", "Cousin", "Brother"], "answer": 0, "why": "Mother's brother = maternal uncle." },
+        { "q": "M is N's father, N is O's father, and O is P's sister. What is M to P?", "options": ["Father", "Grandfather", "Uncle", "Great-grandfather"], "answer": 1, "why": "N is P's father, so M is P's grandfather." }
+      ]
+    },
+    "revision": ["Day 62: explain mobile-first in Tailwind using md:."]
+  },
+  {
+    "day": 64,
+    "module": "angular-basics",
+    "title": "Angular templates: binding and control flow",
+    "goal": "Display data, react to events and render lists and conditions in Angular templates.",
+    "learn": {
+      "concepts": [
+        "Interpolation {{ }} and property binding [src]=\"url\"",
+        "Event binding (click)=\"handler()\" and $event",
+        "Class and style bindings: [class.active]=\"isActive\"",
+        "@if / @else, @for with track, @empty, @switch",
+        "Template reference variables #input",
+        "Calling methods vs reading properties in templates (keep templates simple)"
+      ],
+      "resources": [
+        { "title": "Angular: Binding dynamic text, properties and attributes", "url": "https://angular.dev/guide/templates/binding" },
+        { "title": "Angular: Control flow in templates", "url": "https://angular.dev/guide/templates/control-flow" },
+        { "title": "Angular: Adding event listeners", "url": "https://angular.dev/guide/templates/event-listeners" }
+      ]
+    },
+    "build": {
+      "task": "In angular-playground, generate a course-list component. Store an array of 8 courses in the class. In the template: render cards with @for (track by id) and show an @empty message; show a 'Free' badge with @if when price is 0; use @switch on level to show different coloured chips; add a search input that filters by title (use a template reference variable or (input) event and a property); add a button per card that toggles 'saved' and changes its style with [class.*] binding; and show 'X saved' at the top.",
+      "starterFiles": [],
+      "acceptance": [
+        "@for uses track course.id and has an @empty block",
+        "@if and @switch used correctly",
+        "Search filters as you type",
+        "Saved toggle changes the card style via class binding and updates the count",
+        "No direct DOM manipulation (no document.querySelector) in the component"
+      ]
+    },
+    "hints": [
+      "(input)=\"query = $any($event.target).value\" works, but a cleaner way is a method: onSearch(e: Event) { this.query = (e.target as HTMLInputElement).value; }.",
+      "Filtered list: a getter get filtered() { return this.courses.filter(...) } works today. Tomorrow you'll replace it with a computed signal.",
+      "[class.ring-2]=\"course.saved\" adds the ring-2 class only when saved is true."
+    ],
+    "proof": "Commit with the course-list component.",
+    "explainBack": [
+      { "q": "What does track do in @for and why does Angular require it?", "lookFor": ["identifies each item", "Angular reuses DOM for items with the same id", "better performance and keeps input state"] },
+      { "q": "Explain the difference between [src]=\"url\" and src=\"{{ url }}\" and (click).", "lookFor": ["property binding sets a DOM property from an expression", "interpolation in attributes also binds but is string-only", "(click) listens to events"] }
+    ],
+    "lastHintExplanation": "track tells Angular how to identify each item, so when the list changes it can keep and move existing DOM elements instead of recreating everything. That's faster, and it preserves focus and input state. [prop]=\"expr\" binds a DOM property to an expression, (event)=\"handler()\" listens to events, and {{ }} inserts text.",
+    "predict": [
+      { "q": "@for (c of courses; track c.id) { … } @empty { <p>None</p> }. courses = []. What renders?", "options": ["Nothing", "<p>None</p>", "Error", "One empty card"], "answer": 1, "why": "@empty renders when the collection has no items." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Sliding window: variable size",
+      "note": "Grow until the sum reaches the target, then shrink to find the minimum length.",
+      "problems": [
+        { "title": "LeetCode 209: Minimum Size Subarray Sum", "url": "https://leetcode.com/problems/minimum-size-subarray-sum/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Logical reasoning: directions",
+      "questions": [
+        { "q": "You walk 5 km north, turn right and walk 3 km, then turn right and walk 5 km. How far are you from the start?", "options": ["3 km", "5 km", "8 km", "13 km"], "answer": 0, "why": "You end 3 km east of the start." },
+        { "q": "Facing north, you turn 90° clockwise twice, then 90° anticlockwise once. Which way are you facing?", "options": ["North", "East", "South", "West"], "answer": 1, "why": "N → E → S → E." },
+        { "q": "You walk 3 km east, then 4 km north. How far are you from the start?", "options": ["5 km", "7 km", "1 km", "6 km"], "answer": 0, "why": "Pythagoras: √(9 + 16) = 5." },
+        { "q": "In the morning, a man faces the sun. Which direction is he facing?", "options": ["East", "West", "North", "South"], "answer": 0, "why": "The sun rises in the east." },
+        { "q": "You walk 10 m south, 10 m west, then 10 m north. Where are you relative to the start?", "options": ["10 m west", "10 m east", "10 m south", "At the start"], "answer": 0, "why": "The south and north moves cancel out." }
+      ]
+    },
+    "revision": ["Day 63: explain how main.ts bootstraps your app."]
+  },
+  {
+    "day": 65,
+    "module": "angular-basics",
+    "title": "Signals: signal, computed and effect",
+    "goal": "Manage component state with signals so the UI updates automatically and efficiently.",
+    "learn": {
+      "concepts": [
+        "signal(initial): read with count(), write with set() and update()",
+        "Never mutate a signal's object/array in place; create a new one",
+        "computed(() => ...) for derived values (cached, recalculated when dependencies change)",
+        "effect(() => ...) for side effects like saving to localStorage",
+        "Why signals: Angular knows exactly what changed",
+        "Reading signals in templates: {{ total() }}"
+      ],
+      "resources": [
+        { "title": "Angular: Signals overview", "url": "https://angular.dev/guide/signals" },
+        { "title": "Angular: Signals tutorial (interactive)", "url": "https://angular.dev/tutorials/signals" }
+      ]
+    },
+    "build": {
+      "task": "Refactor course-list to signals: courses = signal<Course[]>(...), query = signal(''), and levelFilter = signal<'all' | Level>('all'). Make filtered and savedCount computed signals. Toggle saved with courses.update(list => list.map(...)) (no mutation). Add an effect that saves saved course ids to localStorage, and load them in the initial signal value. Then build a separate cart component: items signal, computed subtotal, GST (18%) and total, quantity +/− buttons, and remove; all updates immutable.",
+      "starterFiles": [],
+      "acceptance": [
+        "State in signals; filtered and savedCount are computed",
+        "No in-place mutation of signal values (no push, no item.saved = ... on existing objects)",
+        "effect persists saved ids; they survive a reload",
+        "Cart totals always correct after +, − and remove; quantity can't go below 1",
+        "Templates call signals as functions: {{ total() }}"
+      ]
+    },
+    "hints": [
+      "Toggle: this.courses.update(list => list.map(c => c.id === id ? { ...c, saved: !c.saved } : c)).",
+      "computed reads other signals: filtered = computed(() => this.courses().filter(c => c.title.toLowerCase().includes(this.query().toLowerCase()))).",
+      "effect must be created in an injection context. Declaring it as a class field (persist = effect(() => ...)) or in the constructor works."
+    ],
+    "proof": "Commit with the signal-based components.",
+    "explainBack": [
+      { "q": "Why must you create a new array/object instead of mutating inside a signal?", "lookFor": ["signals notify when set to a new value", "same reference means no change detected", "computed won't recalculate"] },
+      { "q": "When does your computed total recalculate, and when doesn't it?", "lookFor": ["when a signal it reads changes", "cached otherwise", "only reads dependencies it used"] },
+      { "q": "What's the difference between computed and effect?", "lookFor": ["computed returns a derived value", "effect runs side effects", "don't set signals in effect normally"] }
+    ],
+    "lastHintExplanation": "A signal notifies its readers when you set() or update() it to a new value. If you mutate the existing array, the reference doesn't change, so computed values and the template aren't told anything changed. computed derives a cached value and recalculates only when a signal it read changes. effect runs side effects (like saving) whenever its signals change.",
+    "predict": [
+      { "q": "items = signal([1, 2]); total = computed(() => items().length); items().push(3); console.log(total())", "options": ["3", "2 (stale, no notification)", "Error", "undefined"], "answer": 1, "why": "push mutates without notifying, so the cached computed isn't recalculated." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Sliding window: with counts",
+      "note": "Window is valid if (length − most frequent count) ≤ k. Medium.",
+      "problems": [
+        { "title": "LeetCode 424: Longest Repeating Character Replacement", "url": "https://leetcode.com/problems/longest-repeating-character-replacement/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Logical reasoning: coding and decoding",
+      "questions": [
+        { "q": "If CAT is coded as DBU, how is DOG coded?", "options": ["EPH", "CNF", "EOH", "DPH"], "answer": 0, "why": "Each letter moves +1." },
+        { "q": "If APPLE = 50 (the sum of letter positions), what is BALL?", "options": ["25", "26", "27", "28"], "answer": 2, "why": "2 + 1 + 12 + 12 = 27." },
+        { "q": "If SUN is coded as NUS, how is MOON coded?", "options": ["NOOM", "MOON", "ONOM", "NOMO"], "answer": 0, "why": "The word is reversed." },
+        { "q": "If RED is coded as SFE, how is BLUE coded?", "options": ["CMVF", "AKTD", "CLVF", "CMUF"], "answer": 0, "why": "Each letter moves +1." },
+        { "q": "TEACHER is coded as VGCEJGT. How is STUDENT coded?", "options": ["UVWFGPV", "UVWEGPV", "TUVFGPV", "UVXFGPV"], "answer": 0, "why": "Each letter moves +2." }
+      ]
+    },
+    "revision": ["Day 64: write an @for with track and @empty from memory."]
+  },
+  {
+    "day": 66,
+    "module": "angular-basics",
+    "title": "Debug lab: the broken cart component, and week review",
+    "goal": "Fix the most common Angular template and signal mistakes.",
+    "learn": {
+      "concepts": [
+        "Forgetting () when reading a signal in a template",
+        "(click)=\"handler\" vs (click)=\"handler()\"",
+        "Mutating signal values in place",
+        "Reading Angular errors in the browser console and terminal",
+        "Angular DevTools browser extension"
+      ],
+      "resources": [
+        { "title": "Angular DevTools", "url": "https://angular.dev/tools/devtools" },
+        { "title": "Angular: Signals overview (updating signals)", "url": "https://angular.dev/guide/signals#writable-signals" }
+      ]
+    },
+    "build": {
+      "task": "In angular-playground, generate a component called debug-cart and replace its .ts file with the starter (it uses an inline template). Show it on the page. Expected: header 'Cart (2)', Total ₹260; clicking + on Pen gives 'Cart (3)' and Total ₹270; Clear empties the cart and shows 'Cart (0)' and Total ₹0. It has 4 bugs. Fix each in its own commit. Then write docs/week11-notes.md: one confident and one weak topic for each of Days 61–65.",
+      "starterFiles": [
+        { "name": "src/app/debug-cart/debug-cart.ts", "content": "import { Component, computed, signal } from '@angular/core';\n\ninterface Item { id: number; name: string; price: number; qty: number; }\n\n@Component({\n  selector: 'app-debug-cart',\n  template: `\n    <section class=\"rounded-xl border p-4\">\n      <h2 class=\"font-semibold\">Cart ({{ count }})</h2>\n      @for (item of items(); track item.id) {\n        <div class=\"flex items-center gap-2\">\n          <span>{{ item.name }} × {{ item.qty }}</span>\n          <button class=\"rounded border px-2\" (click)=\"increment(item.id)\">+</button>\n        </div>\n      } @empty {\n        <p>Your cart is empty.</p>\n      }\n      <p>Total: ₹{{ total() }}</p>\n      <button class=\"rounded bg-slate-900 px-3 py-1 text-white\" (click)=\"clear\">Clear</button>\n    </section>\n  `,\n})\nexport class DebugCart {\n  items = signal<Item[]>([\n    { id: 1, name: 'Pen', price: 10, qty: 1 },\n    { id: 2, name: 'Book', price: 250, qty: 1 },\n  ]);\n\n  count = computed(() => this.items().reduce((n, i) => n + i.qty, 0));\n  total = computed(() => this.items().reduce((sum, i) => sum + i.price + i.qty, 0));\n\n  increment(id: number) {\n    const item = this.items().find((i) => i.id === id);\n    if (item) item.qty++;\n  }\n\n  clear() {\n    this.items.set([]);\n  }\n}\n" }
+      ],
+      "acceptance": [
+        "Header shows the number, e.g. 'Cart (2)', not function text",
+        "Totals correct: ₹260 initially, ₹270 after one + on Pen",
+        "+ updates count and total immediately (immutable update)",
+        "Clear empties the cart and shows the @empty message",
+        "4 separate fix commits; week11-notes.md written"
+      ]
+    },
+    "hints": [
+      "The header shows strange text: how do you read a signal's value?",
+      "Clear does nothing and there's no error. Compare (click)=\"clear\" with the + button's binding.",
+      "The total starts wrong (₹262, not ₹260): read the reduce formula. And after +, the count doesn't change: is a new array given to the signal, or is an object mutated?"
+    ],
+    "proof": "Link to your final fix commit.",
+    "explainBack": [
+      { "q": "List the 4 bugs and fixes.", "lookFor": ["{{ count }} should be {{ count() }}", "(click)=\"clear\" should call clear()", "total adds price + qty instead of price × qty", "increment mutates; use items.update with map and a new object"] },
+      { "q": "Why did mutating item.qty fail to update the count?", "lookFor": ["signal not notified (same array reference)", "computed cached", "must set a new array"] }
+    ],
+    "lastHintExplanation": "1) In a template a signal is a function, so {{ count }} prints the function; use {{ count() }}. 2) (click)=\"clear\" just names the method; it must be called: clear(). 3) The total adds price + qty instead of multiplying. 4) item.qty++ mutates an object inside the same array, so the signal never notifies; use this.items.update(list => list.map(i => i.id === id ? { ...i, qty: i.qty + 1 } : i)).",
+    "predict": [
+      { "q": "Template: <button (click)=\"save\">. What happens when clicked?", "options": ["save() runs", "Nothing; the expression just reads the method", "Compile error always", "save runs twice"], "answer": 1, "why": "Event bindings run the expression; without (), the method is only referenced, not called." }
+    ],
+    "debugLab": {
+      "title": "The broken cart component",
+      "symptoms": [
+        "The header shows function text instead of 'Cart (2)'",
+        "The total is ₹262 instead of ₹260",
+        "Clicking + doesn't change the count or total",
+        "Clear does nothing"
+      ],
+      "files": ["src/app/debug-cart/debug-cart.ts"],
+      "bugCount": 4
+    },
+    "dsa": {
+      "pattern": "Sliding window: fixed-size counts",
+      "note": "Compare character counts of a window the size of s1 as it slides over s2.",
+      "problems": [
+        { "title": "LeetCode 567: Permutation in String", "url": "https://leetcode.com/problems/permutation-in-string/" },
+        { "title": "LeetCode 121: Best Time to Buy and Sell Stock (re-solve)", "url": "https://leetcode.com/problems/best-time-to-buy-and-sell-stock/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Timed mixed: probability and reasoning",
+      "questions": [
+        { "q": "What is the probability of 2 heads in 2 tosses?", "options": ["1/2", "1/4", "1/3", "3/4"], "answer": 1, "why": "1/2 × 1/2." },
+        { "q": "In how many ways can 3 people stand in a row?", "options": ["3", "6", "9", "27"], "answer": 1, "why": "3! = 6." },
+        { "q": "You walk 6 km north, then 8 km east. How far are you from the start?", "options": ["14 km", "10 km", "12 km", "2 km"], "answer": 1, "why": "√(36 + 64) = 10." },
+        { "q": "If ABC is coded as ZYX, how is DEF coded?", "options": ["WVU", "UVW", "XWV", "CBA"], "answer": 0, "why": "Each letter is replaced by its mirror in the alphabet (A↔Z, B↔Y …)." },
+        { "q": "What is the probability of drawing an ace or a king?", "options": ["1/13", "2/13", "1/26", "4/13"], "answer": 1, "why": "8/52." }
+      ]
+    },
+    "revision": ["Days 61–65: build a tiny counter with signal, computed and an effect from memory in 10 minutes."]
+  }
+]

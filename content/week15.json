@@ -1,0 +1,410 @@
+[
+  {
+    "day": 85,
+    "module": "node-basics",
+    "title": "Node.js: JavaScript outside the browser",
+    "goal": "Understand what Node is, run scripts with arguments, and build your first command-line tool.",
+    "learn": {
+      "concepts": [
+        "Node = V8 engine + system APIs (files, network, processes); no DOM",
+        "The global process: argv, env, exit codes, cwd()",
+        "ES modules in Node (\"type\": \"module\") and built-in modules with the node: prefix",
+        "Reading user input with readline/promises",
+        "stdout, stderr and exit codes (0 = success)",
+        "Node's event loop is the same idea as the browser's"
+      ],
+      "resources": [
+        { "title": "Node.js: Introduction to Node.js", "url": "https://nodejs.org/en/learn/getting-started/introduction-to-nodejs" },
+        { "title": "Node.js: How to read environment variables", "url": "https://nodejs.org/en/learn/command-line/how-to-read-environment-variables-from-nodejs" },
+        { "title": "Node.js docs: process.argv", "url": "https://nodejs.org/api/process.html#processargv" }
+      ]
+    },
+    "build": {
+      "task": "Create a NEW repo node-playground with \"type\": \"module\" in package.json. Build tip.js, a CLI tip calculator: node tip.js 1250 --tip 15 --split 3 prints the tip, total and per-person amount in ₹. Validate arguments (print usage to stderr and exit with code 1 on bad input). If no arguments are given, ask interactively with readline/promises. Then write sysinfo.js that prints Node version, OS platform, CPU count, free memory in MB and the current folder, using node:os and process.",
+      "starterFiles": [],
+      "acceptance": [
+        "tip.js works with arguments and interactively",
+        "Bad input prints a usage message to stderr and exits with code 1 (check with echo $? or $LASTEXITCODE)",
+        "Money formatted with Intl.NumberFormat('en-IN')",
+        "sysinfo.js prints all 5 facts using node:os and process",
+        "README explains how to run both"
+      ]
+    },
+    "hints": [
+      "process.argv is ['path/to/node', 'path/to/tip.js', ...yourArgs], so use process.argv.slice(2). Node's built-in util.parseArgs can parse --tip and --split for you.",
+      "Exit with an error: console.error('Usage: node tip.js <amount> [--tip 10] [--split 1]'); process.exit(1);",
+      "Interactive: import * as readline from 'node:readline/promises'; const rl = readline.createInterface({ input: process.stdin, output: process.stdout }); const a = await rl.question('Bill amount: '); rl.close();"
+    ],
+    "proof": "Link to your node-playground repo.",
+    "explainBack": [
+      { "q": "What's the difference between JavaScript in the browser and in Node?", "lookFor": ["same language/engine", "browser has DOM/window", "Node has file system, process, network servers", "different globals"] },
+      { "q": "Why print errors to stderr and exit with code 1?", "lookFor": ["scripts and CI check exit codes", "0 means success", "stderr separates errors from normal output"] }
+    ],
+    "lastHintExplanation": "Node runs the same JavaScript engine as Chrome (V8) but gives it system access (files, network, processes) instead of the DOM. Exit code 0 means success and non-zero means failure; other programs, shell scripts and CI pipelines check it. Writing errors to stderr keeps them separate from normal output that might be piped elsewhere.",
+    "predict": [
+      { "q": "node app.js hello world. What is process.argv.slice(2)?", "options": ["['hello world']", "['hello', 'world']", "['app.js', 'hello', 'world']", "'hello world'"], "answer": 1, "why": "Arguments are split on spaces; the first two entries are node and the script path." },
+      { "q": "In Node, console.log(typeof window)", "options": ["'object'", "'undefined'", "ReferenceError", "'function'"], "answer": 1, "why": "Node has no window; typeof on an undeclared name returns 'undefined'." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Binary search",
+      "note": "New pattern. Write the loop with lo, hi and mid; check lo <= hi carefully. Solve in TypeScript.",
+      "problems": [
+        { "title": "LeetCode 704: Binary Search", "url": "https://leetcode.com/problems/binary-search/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Data interpretation: tables",
+      "questions": [
+        { "q": "Students by course — 2022: Web 120, Data 80, Design 50; 2023: Web 150, Data 100, Design 50; 2024: Web 180, Data 140, Design 80. How many students were there in total in 2023?", "options": ["280", "300", "320", "250"], "answer": 1, "why": "150 + 100 + 50." },
+        { "q": "Same table: what was the percentage increase in Web from 2022 to 2024?", "options": ["40%", "50%", "60%", "33.3%"], "answer": 1, "why": "60/120 = 50%." },
+        { "q": "Same table: what was Design's share of all students in 2024?", "options": ["16%", "20%", "25%", "18%"], "answer": 1, "why": "80/400." },
+        { "q": "Same table: what is the average number of Data students per year?", "options": ["106.67", "100", "110", "120"], "answer": 0, "why": "320/3." },
+        { "q": "Same table: what was the ratio of Web to Data students in 2024?", "options": ["9:7", "7:9", "3:2", "4:3"], "answer": 0, "why": "180:140 = 9:7." }
+      ]
+    },
+    "revision": ["Phase 3: re-read your phase3-review.md and spend 20 minutes on your weakest topic."]
+  },
+  {
+    "day": 86,
+    "module": "node-basics",
+    "title": "Files and paths: fs/promises and path",
+    "goal": "Read and write files safely in Node and build a file-backed notes CLI.",
+    "learn": {
+      "concepts": [
+        "node:fs/promises: readFile, writeFile, appendFile, mkdir({ recursive }), readdir, stat",
+        "node:path: join, resolve, basename, extname, dirname",
+        "import.meta.dirname for the current file's folder",
+        "Handling ENOENT (file not found) errors",
+        "JSON files as a tiny database (and its limits)",
+        "Atomic-ish writes: write a temp file, then rename"
+      ],
+      "resources": [
+        { "title": "Node.js: Reading files", "url": "https://nodejs.org/en/learn/manipulating-files/reading-files-with-nodejs" },
+        { "title": "Node.js: Writing files", "url": "https://nodejs.org/en/learn/manipulating-files/writing-files-with-nodejs" },
+        { "title": "Node.js docs: path", "url": "https://nodejs.org/api/path.html" }
+      ]
+    },
+    "build": {
+      "task": "In node-playground, build notes.js, a CLI storing notes in data/notes.json: node notes.js add \"Buy milk\" --tag home; list (optionally --tag home); done <id>; remove <id>; search <text>; stats (total, done, per tag). Create the data folder and file if missing. Handle a corrupted JSON file by backing it up to notes.corrupt-<timestamp>.json and starting fresh. Write the file atomically (temp file + rename). Also write folder-report.js: given a folder path, print the number of files, total size and the 5 biggest files, recursively.",
+      "starterFiles": [],
+      "acceptance": [
+        "All 6 notes commands work, with clear output and usage help",
+        "Missing data folder/file is created automatically",
+        "Corrupted JSON is backed up and the CLI keeps working",
+        "Writes go to a temp file then rename",
+        "folder-report.js walks folders recursively and lists the 5 biggest files",
+        "Paths built with path.join, not string concatenation"
+      ]
+    },
+    "hints": [
+      "Load: try { return JSON.parse(await readFile(file, 'utf8')); } catch (e) { if (e.code === 'ENOENT') return []; /* else corrupted: back up */ }",
+      "Atomic write: await writeFile(file + '.tmp', JSON.stringify(data, null, 2)); await rename(file + '.tmp', file);",
+      "Recursive listing: await readdir(dir, { withFileTypes: true, recursive: true }), then stat each file for its size."
+    ],
+    "proof": "Commit with notes.js and folder-report.js.",
+    "explainBack": [
+      { "q": "Why write to a temp file and rename instead of writing directly?", "lookFor": ["crash mid-write would corrupt the real file", "rename is atomic on the same disk", "old file stays intact until the new one is complete"] },
+      { "q": "Why use path.join instead of 'data/' + name?", "lookFor": ["handles separators across OSes (Windows backslashes)", "normalises extra slashes and ..", "safer"] },
+      { "q": "What are the limits of a JSON file as a database?", "lookFor": ["whole file read/written each time", "no concurrent writes safety", "slow for large data", "no queries/indexes"] }
+    ],
+    "lastHintExplanation": "If the process crashes halfway through writing, the file is left corrupted. Writing to a temp file and then renaming (an atomic operation on the same disk) means the real file is either fully old or fully new. path.join handles OS separators and normalises paths. A JSON file must be rewritten in full on every change and can't handle concurrent writers, which is why we'll use PostgreSQL.",
+    "predict": [
+      { "q": "path.join('data', '../notes', 'a.json')", "options": ["data/../notes/a.json", "notes/a.json", "data/notes/a.json", "/notes/a.json"], "answer": 1, "why": "join normalises '..', which removes 'data'." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Binary search: insert position",
+      "note": "When the target isn't found, lo ends at the insert position. Prove it to yourself on [1,3,5,6], target 2.",
+      "problems": [
+        { "title": "LeetCode 35: Search Insert Position", "url": "https://leetcode.com/problems/search-insert-position/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Data interpretation: pie charts",
+      "questions": [
+        { "q": "A monthly budget of ₹40,000 is split: Rent 30%, Food 25%, Transport 10%, Savings 20%, Others 15%. How much is rent?", "options": ["₹10,000", "₹12,000", "₹14,000", "₹8,000"], "answer": 1, "why": "30% of 40,000." },
+        { "q": "Same budget: how much is Food + Transport?", "options": ["₹14,000", "₹12,000", "₹16,000", "₹10,000"], "answer": 0, "why": "35% of 40,000." },
+        { "q": "Same budget: how much more is Savings than Others?", "options": ["₹1,000", "₹2,000", "₹4,000", "₹6,000"], "answer": 1, "why": "5% of 40,000." },
+        { "q": "Same budget: what angle does Food take in the pie chart?", "options": ["60°", "72°", "90°", "108°"], "answer": 2, "why": "25% of 360°." },
+        { "q": "Same budget: income rises 10% and the savings percentage stays the same. What are the new savings?", "options": ["₹8,000", "₹8,800", "₹9,000", "₹8,400"], "answer": 1, "why": "20% of 44,000." }
+      ]
+    },
+    "revision": ["Day 85: explain exit codes and stderr in two sentences."]
+  },
+  {
+    "day": 87,
+    "module": "node-basics",
+    "title": "Environment variables, npm scripts and TypeScript in Node",
+    "goal": "Configure Node apps with environment variables and run TypeScript with a fast dev loop.",
+    "learn": {
+      "concepts": [
+        "Why config lives in environment variables (12-factor app)",
+        ".env files with node --env-file=.env (or dotenv); never commit secrets",
+        ".env.example to document required variables",
+        "Validating config at startup (fail fast with a clear message)",
+        "TypeScript in Node: tsx watch for dev, tsc for build",
+        "npm scripts: dev, build, start, check"
+      ],
+      "resources": [
+        { "title": "The Twelve-Factor App: Config", "url": "https://12factor.net/config" },
+        { "title": "Node.js docs: --env-file", "url": "https://nodejs.org/api/cli.html#--env-fileconfig" },
+        { "title": "tsx: TypeScript Execute", "url": "https://tsx.is/" }
+      ]
+    },
+    "build": {
+      "task": "Create a NEW repo api-starter: a Node + TypeScript project (npm i -D typescript tsx @types/node; strict tsconfig, outDir dist). Write src/config.ts that reads PORT, NODE_ENV, APP_NAME and LOG_LEVEL from process.env, validates them with zod (PORT a number 1–65535, NODE_ENV one of development/test/production) and exits with a readable error listing every problem. Add .env (gitignored) and .env.example. Scripts: dev (tsx watch with --env-file), build (tsc), start (node dist/index.js), check (tsc --noEmit). src/index.ts prints the loaded config, hiding any value whose name contains SECRET or KEY.",
+      "starterFiles": [
+        { "name": ".env.example", "content": "PORT=4000\nNODE_ENV=development\nAPP_NAME=api-starter\nLOG_LEVEL=info\n# Never commit the real .env file\n" }
+      ],
+      "acceptance": [
+        ".env is gitignored; .env.example committed",
+        "Invalid or missing config prints every problem clearly and exits with code 1",
+        "npm run dev reloads on file changes; npm run build and npm start work",
+        "Config is typed (z.infer) and imported from one module",
+        "Secret-looking values are masked in logs"
+      ]
+    },
+    "hints": [
+      "Dev script: \"dev\": \"tsx watch --env-file=.env src/index.ts\". Start: \"start\": \"node --env-file=.env dist/index.js\" (or set real environment variables in production).",
+      "Env values are always strings. z.coerce.number().int().min(1).max(65535) turns '4000' into 4000.",
+      "On failure: const r = schema.safeParse(process.env); if (!r.success) { console.error(r.error.issues.map(i => `${i.path.join('.')}: ${i.message}`).join('\\n')); process.exit(1); }"
+    ],
+    "proof": "Link to your api-starter repo.",
+    "explainBack": [
+      { "q": "Why keep config in environment variables instead of in code?", "lookFor": ["different values per environment (dev/prod)", "secrets stay out of git", "change config without changing code"] },
+      { "q": "Why validate config at startup instead of when it's first used?", "lookFor": ["fail fast with a clear message", "avoid surprises later in production", "all problems reported at once"] }
+    ],
+    "lastHintExplanation": "Environment variables let the same code run with different settings in dev, test and production, and keep secrets out of git. Every env value is a string, so validate and coerce it at startup. Failing immediately with a list of what's wrong beats crashing an hour later on the first request that touches a missing setting.",
+    "predict": [
+      { "q": "PORT=4000 in .env. In Node, typeof process.env.PORT is:", "options": ["'number'", "'string'", "'undefined'", "'object'"], "answer": 1, "why": "Environment variables are always strings." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Binary search: first true",
+      "note": "Find the first position where a condition becomes true. This template solves many problems.",
+      "problems": [
+        { "title": "LeetCode 278: First Bad Version", "url": "https://leetcode.com/problems/first-bad-version/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Data interpretation: bar charts",
+      "questions": [
+        { "q": "Company profit (₹ lakh): 2020: 40, 2021: 50, 2022: 45, 2023: 60, 2024: 75. Which year had the highest percentage growth?", "options": ["2021", "2023", "2024", "2022"], "answer": 1, "why": "2023 grew 15 on 45 = 33.3%, the largest." },
+        { "q": "Same data: what is the average profit?", "options": ["52", "54", "56", "50"], "answer": 1, "why": "270 / 5." },
+        { "q": "Same data: by what percent is 2024's profit higher than 2020's?", "options": ["75%", "87.5%", "35%", "100%"], "answer": 1, "why": "35/40." },
+        { "q": "Same data: in how many years did profit fall?", "options": ["0", "1", "2", "3"], "answer": 1, "why": "Only 2022." },
+        { "q": "Same data: what is the ratio of 2020's profit to 2024's?", "options": ["8:15", "15:8", "2:3", "4:5"], "answer": 0, "why": "40:75." }
+      ]
+    },
+    "revision": ["Day 86: explain atomic writes."]
+  },
+  {
+    "day": 88,
+    "module": "node-basics",
+    "title": "HTTP from scratch with node:http",
+    "goal": "Build a tiny web server without a framework so you understand what Express does for you.",
+    "learn": {
+      "concepts": [
+        "http.createServer((req, res) => ...) and server.listen(port)",
+        "req.method, req.url, req.headers; parsing the URL with new URL()",
+        "Writing responses: res.statusCode, res.setHeader, res.end",
+        "Reading a request body from a stream (chunks)",
+        "Manual routing: if method and path match",
+        "Testing with curl, the browser, or a REST client"
+      ],
+      "resources": [
+        { "title": "Node.js: Anatomy of an HTTP transaction", "url": "https://nodejs.org/en/learn/modules/anatomy-of-an-http-transaction" },
+        { "title": "MDN: HTTP request methods", "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods" },
+        { "title": "curl tutorial", "url": "https://curl.se/docs/tutorial.html" }
+      ]
+    },
+    "build": {
+      "task": "In api-starter, write src/raw-server.ts using only node:http: GET /health → { status: 'ok', uptime }; GET /quotes → list of quotes (in memory), supporting ?author= filter; GET /quotes/:id; POST /quotes with a JSON body (validate text and author, 400 on bad input or invalid JSON); anything else → 404 JSON. Set Content-Type: application/json on every response. Log each request as 'METHOD /path → status (ms)'. Test every route with curl and save the commands and outputs in docs/raw-server.md.",
+      "starterFiles": [],
+      "acceptance": [
+        "All routes work, with correct status codes (200, 201, 400, 404)",
+        "?author= filter works (case-insensitive)",
+        "Invalid JSON body returns 400, not a crash",
+        "Every response is JSON with the right Content-Type",
+        "Request log shows method, path, status and duration",
+        "docs/raw-server.md has curl commands and real outputs"
+      ]
+    },
+    "hints": [
+      "URL parsing: const url = new URL(req.url ?? '/', `http://${req.headers.host}`); then url.pathname and url.searchParams.get('author').",
+      "Body: let raw = ''; for await (const chunk of req) raw += chunk; then try { JSON.parse(raw) } catch { send 400 }.",
+      "Timing: const start = performance.now(); res.on('finish', () => console.log(`${req.method} ${url.pathname} → ${res.statusCode} (${Math.round(performance.now() - start)}ms)`));"
+    ],
+    "proof": "Commit with src/raw-server.ts and docs/raw-server.md.",
+    "explainBack": [
+      { "q": "Why does reading the request body need a loop or events instead of req.body?", "lookFor": ["body arrives as a stream of chunks", "not parsed automatically", "must collect then parse"] },
+      { "q": "List three things you had to do by hand that you expect Express to do for you.", "lookFor": ["routing with params", "body parsing", "setting JSON headers/serialising", "404 handling", "logging middleware"] }
+    ],
+    "lastHintExplanation": "HTTP bodies arrive over the network in chunks, so Node exposes the request as a stream; you collect the chunks, then parse them. Writing routing, body parsing, JSON responses and 404 handling yourself shows exactly what Express provides: a router with :params, middleware like express.json(), res.json() and more.",
+    "predict": [
+      { "q": "A raw Node handler forgets to call res.end(). What does the client see?", "options": ["An empty 200", "The request hangs until it times out", "A 500 error", "A 404"], "answer": 1, "why": "The response is never finished, so the client keeps waiting." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Binary search on the answer",
+      "note": "Search for the largest x with x*x <= n. Watch for overflow (not an issue in JS for this size) and off-by-one errors.",
+      "problems": [
+        { "title": "LeetCode 69: Sqrt(x)", "url": "https://leetcode.com/problems/sqrtx/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Verbal ability: synonyms and antonyms",
+      "questions": [
+        { "q": "Which word means the same as 'Abundant'?", "options": ["Scarce", "Plentiful", "Tiny", "Rare"], "answer": 1, "why": "Abundant means existing in large quantities." },
+        { "q": "Which word means the opposite of 'Transparent'?", "options": ["Clear", "Opaque", "Visible", "Bright"], "answer": 1, "why": "Opaque means not see-through." },
+        { "q": "Which word means the same as 'Meticulous'?", "options": ["Careless", "Careful", "Quick", "Lazy"], "answer": 1, "why": "Meticulous means very careful about details." },
+        { "q": "Which word means the opposite of 'Expand'?", "options": ["Extend", "Contract", "Grow", "Spread"], "answer": 1, "why": "Contract means to become smaller." },
+        { "q": "Which word means the same as 'Concise'?", "options": ["Lengthy", "Brief", "Vague", "Complex"], "answer": 1, "why": "Concise means short and clear." }
+      ]
+    },
+    "revision": ["Day 87: explain why config is validated at startup."]
+  },
+  {
+    "day": 89,
+    "module": "node-basics",
+    "title": "Express: your first real API server",
+    "goal": "Rebuild yesterday's server with Express and see how routing, JSON and middleware get simpler.",
+    "learn": {
+      "concepts": [
+        "express(), app.get/post/put/patch/delete, app.listen",
+        "Route params (req.params), query (req.query) and body (req.body)",
+        "express.json() middleware to parse JSON bodies",
+        "res.json(), res.status(), res.sendStatus()",
+        "Middleware: (req, res, next) and order of registration",
+        "A 404 handler and an error handler (4 arguments) at the end"
+      ],
+      "resources": [
+        { "title": "Express: Hello world", "url": "https://expressjs.com/en/starter/hello-world.html" },
+        { "title": "Express: Routing", "url": "https://expressjs.com/en/guide/routing.html" },
+        { "title": "Express: Writing middleware", "url": "https://expressjs.com/en/guide/writing-middleware.html" }
+      ]
+    },
+    "build": {
+      "task": "In api-starter (TypeScript), npm i express and npm i -D @types/express. Rebuild the quotes API in src/app.ts with Express: same routes as Day 88, plus PATCH /quotes/:id and DELETE /quotes/:id (204). Write a request-logger middleware, a 404 handler for unknown routes and an error-handling middleware that returns { error } JSON (and hides stack traces in production). Separate app creation (app.ts exports createApp()) from listening (index.ts). Compare line counts with raw-server.ts in docs/express-vs-raw.md.",
+      "starterFiles": [],
+      "acceptance": [
+        "All quote routes work with correct status codes, including 201 for POST and 204 for DELETE",
+        "express.json() used; invalid JSON returns a clean 400 from the error handler",
+        "Logger, 404 and error middleware registered in the right order",
+        "createApp() in app.ts; index.ts only listens",
+        "docs/express-vs-raw.md compares the two versions"
+      ]
+    },
+    "hints": [
+      "Order: app.use(logger); app.use(express.json()); routes...; app.use(notFound); app.use(errorHandler). Express checks them top to bottom.",
+      "An error handler has 4 parameters: (err, req, res, next) => { ... }. Express only treats it as an error handler if it has all 4.",
+      "Invalid JSON: express.json() throws a SyntaxError with status 400. In the error handler, use err.status ?? 500."
+    ],
+    "proof": "Commit with src/app.ts, src/index.ts and docs.",
+    "explainBack": [
+      { "q": "What is middleware? Explain using your logger.", "lookFor": ["function with req, res, next", "runs before route handlers", "calls next() to continue", "registered in order"] },
+      { "q": "Why separate createApp() from app.listen()?", "lookFor": ["tests can import the app without starting a server", "supertest uses the app directly", "cleaner structure"] }
+    ],
+    "lastHintExplanation": "Middleware are functions (req, res, next) that run in the order you register them. Each can read or modify the request, send a response, or call next() to pass control on. The 404 handler goes after all routes, and the 4-argument error handler goes last. Exporting createApp() without listening lets tests use the app directly.",
+    "predict": [
+      { "q": "app.use(express.json()) is registered AFTER app.post('/quotes', ...). What is req.body in that route?", "options": ["The parsed object", "undefined", "A string", "An error"], "answer": 1, "why": "Middleware only runs for routes registered after it." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Binary search: boundaries",
+      "note": "Run binary search twice: once biased left for the first index, once biased right for the last.",
+      "problems": [
+        { "title": "LeetCode 34: Find First and Last Position of Element in Sorted Array", "url": "https://leetcode.com/problems/find-first-and-last-position-of-element-in-sorted-array/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Verbal ability: sentence correction",
+      "questions": [
+        { "q": "Which sentence is correct?", "options": ["She don't likes coffee.", "She doesn't like coffee.", "She doesn't likes coffee.", "She not like coffee."], "answer": 1, "why": "Use 'doesn't' plus the base verb with he/she/it." },
+        { "q": "Which sentence is correct?", "options": ["Each of the students have a laptop.", "Each of the students has a laptop.", "Each of the student has a laptop.", "Each students have a laptop."], "answer": 1, "why": "'Each' is singular." },
+        { "q": "'I have been working here ___ three years.'", "options": ["since", "for", "from", "during"], "answer": 1, "why": "Use 'for' with a length of time and 'since' with a starting point." },
+        { "q": "'Neither the manager nor the employees ___ present.'", "options": ["was", "were", "is", "has been"], "answer": 1, "why": "With neither/nor, the verb agrees with the nearer subject (employees)." },
+        { "q": "'He is senior ___ me.'", "options": ["than", "to", "from", "over"], "answer": 1, "why": "Senior, junior, superior and inferior take 'to'." }
+      ]
+    },
+    "revision": ["Day 88: name the steps to read a JSON body with raw node:http."]
+  },
+  {
+    "day": 90,
+    "module": "node-basics",
+    "title": "Debug lab: the broken Express server, and week review",
+    "goal": "Fix the most common Express mistakes using logs, curl and careful reading of error messages.",
+    "learn": {
+      "concepts": [
+        "req.params values are always strings",
+        "'Cannot set headers after they are sent': respond once, then return",
+        "Missing express.json() makes req.body undefined",
+        "Correct status codes for create (201)",
+        "Debugging a server: logs, curl -i to see status and headers"
+      ],
+      "resources": [
+        { "title": "Express: Error handling", "url": "https://expressjs.com/en/guide/error-handling.html" },
+        { "title": "MDN: 201 Created", "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/201" }
+      ]
+    },
+    "build": {
+      "task": "Copy the starter files into day90-debug/ in node-playground, run npm install, then npm start. Expected with curl -i: GET /books/1 → 200 with Clean Code; GET /books/99 → 404 { error } and NO error in the server log; POST /books with JSON {\"title\":\"Refactoring\",\"author\":\"Martin Fowler\"} → 201 with the new book; POST with {} → 400. There are 4 bugs. Fix each in its own commit and save the final curl -i outputs in day90-debug/RESULTS.md. Write week15-notes.md (Days 85–89).",
+      "starterFiles": [
+        { "name": "day90-debug/package.json", "content": "{\n  \"name\": \"day90-debug\",\n  \"type\": \"module\",\n  \"scripts\": { \"start\": \"node server.js\" },\n  \"dependencies\": { \"express\": \"^5.1.0\" }\n}\n" },
+        { "name": "day90-debug/server.js", "content": "import express from 'express';\n\nconst app = express();\nconst books = [\n  { id: 1, title: 'Clean Code', author: 'Robert C. Martin' },\n  { id: 2, title: 'Eloquent JavaScript', author: 'Marijn Haverbeke' },\n];\n\napp.get('/books', (req, res) => {\n  res.json(books);\n});\n\napp.get('/books/:id', (req, res) => {\n  const book = books.find((b) => b.id === req.params.id);\n  if (!book) res.status(404).json({ error: 'Book not found' });\n  res.json(book);\n});\n\napp.post('/books', (req, res) => {\n  const { title, author } = req.body;\n  if (!title || !author) return res.status(400).json({ error: 'title and author are required' });\n  const book = { id: books.length + 1, title, author };\n  books.push(book);\n  res.json(book);\n});\n\napp.listen(3000, () => console.log('Listening on http://localhost:3000'));\n" }
+      ],
+      "acceptance": [
+        "GET /books/1 returns 200 with the book",
+        "GET /books/99 returns 404 and the server logs no 'headers already sent' error",
+        "POST with a valid body returns 201 with the new book; POST {} returns 400",
+        "4 fix commits; RESULTS.md has the curl -i outputs",
+        "week15-notes.md written"
+      ]
+    },
+    "hints": [
+      "GET /books/1 says not found. Log typeof req.params.id and typeof books[0].id.",
+      "For /books/99, the server log shows ERR_HTTP_HEADERS_SENT. After sending the 404, the code keeps going to the next res.json.",
+      "POST crashes with 'Cannot destructure property title of req.body as it is undefined'. What middleware parses JSON? And which status code means 'created'?"
+    ],
+    "proof": "Link to your last fix commit.",
+    "explainBack": [
+      { "q": "List the 4 bugs and fixes.", "lookFor": ["params are strings → Number(req.params.id)", "missing return after 404 → headers sent twice", "no express.json() → req.body undefined", "status 201 for created"] },
+      { "q": "What does 'Cannot set headers after they are sent' really mean?", "lookFor": ["a response was already sent", "code tried to send a second one", "need return after responding"] }
+    ],
+    "lastHintExplanation": "1) Route params are strings, so '1' === 1 is false; convert with Number(). 2) After res.status(404).json(...), execution continues to res.json(book) and tries to answer twice; return after responding. 3) Without app.use(express.json()), req.body is undefined. 4) A successful create should return 201 Created.",
+    "predict": [
+      { "q": "Route /users/:id is requested as /users/007. What is req.params.id?", "options": ["7", "'007'", "'7'", "undefined"], "answer": 1, "why": "Params are raw strings from the URL." }
+    ],
+    "debugLab": {
+      "title": "The broken Express server",
+      "symptoms": [
+        "GET /books/1 returns 'Book not found'",
+        "GET /books/99 logs an ERR_HTTP_HEADERS_SENT error",
+        "POST /books crashes with req.body undefined",
+        "Creating a book returns 200 instead of 201"
+      ],
+      "files": ["day90-debug/package.json", "day90-debug/server.js"],
+      "bugCount": 4
+    },
+    "dsa": {
+      "pattern": "Binary search: 2D",
+      "note": "Treat the matrix as one sorted array: row = Math.floor(mid / cols), col = mid % cols. Then re-solve Binary Search from a blank file.",
+      "problems": [
+        { "title": "LeetCode 74: Search a 2D Matrix", "url": "https://leetcode.com/problems/search-a-2d-matrix/" },
+        { "title": "LeetCode 704: Binary Search (re-solve)", "url": "https://leetcode.com/problems/binary-search/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Verbal ability: reading comprehension",
+      "questions": [
+        { "q": "Passage: 'Remote work has grown rapidly since 2020. Companies report lower office costs, while many employees value saved commuting time. However, some managers worry about collaboration and mentoring, especially for new hires who learn by observing experienced colleagues.' What is the main idea?", "options": ["Remote work should be banned", "Remote work has benefits and some concerns", "Commuting is enjoyable", "Offices are cheaper than ever"], "answer": 1, "why": "The passage gives both advantages and worries." },
+        { "q": "Same passage: who values the saved commuting time?", "options": ["Managers", "Employees", "Landlords", "New hires only"], "answer": 1, "why": "'Many employees value saved commuting time.'" },
+        { "q": "Same passage: what do managers worry about?", "options": ["Office costs", "Collaboration and mentoring", "Salaries", "Internet speed"], "answer": 1, "why": "Stated directly." },
+        { "q": "Same passage: why are new hires mentioned?", "options": ["They prefer offices", "They learn by observing experienced colleagues", "They cost more", "They commute more"], "answer": 1, "why": "Stated directly." },
+        { "q": "Same passage: what is the author's tone?", "options": ["Angry", "Balanced", "Humorous", "Sarcastic"], "answer": 1, "why": "It presents both sides without taking one." }
+      ]
+    },
+    "revision": ["Days 85–89: draw the Express middleware pipeline for your quotes API from memory."]
+  }
+]

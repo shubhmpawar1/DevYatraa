@@ -1,0 +1,401 @@
+[
+  {
+    "day": 127,
+    "module": "capstone-1",
+    "title": "Frontend tests: components and services",
+    "goal": "Test the Angular side of ApplyTrack: stores, services, guards and key components.",
+    "learn": {
+      "concepts": [
+        "Angular testing with TestBed (Vitest or Karma/Jasmine, whichever your CLI set up)",
+        "Testing services with provideHttpClientTesting and HttpTestingController",
+        "Testing stores: computed values and state after actions",
+        "Testing guards and interceptors as plain functions",
+        "Component tests: render, interact, assert on the DOM (Angular Testing Library is optional)",
+        "What not to test: framework internals and styling details"
+      ],
+      "resources": [
+        { "title": "Angular: Testing overview", "url": "https://angular.dev/guide/testing" },
+        { "title": "Angular: Testing HTTP requests", "url": "https://angular.dev/guide/http/testing" },
+        { "title": "Angular Testing Library", "url": "https://testing-library.com/docs/angular-testing-library/intro/" }
+      ]
+    },
+    "build": {
+      "task": "In applytrack/web, write 20+ tests: ApplicationsApi (correct URLs, query params and bodies via HttpTestingController); ApplicationsStore (loading/error states, optimistic status change and rollback); AuthService (login stores token, logout clears it, restoreSession); authGuard (redirects with returnUrl); authInterceptor (adds the header only for /api); StatusBadge (right label and class per status); ApplicationForm (validation messages, submit disabled when invalid, edit mode pre-fills). Add the tests to the README and a root npm test that runs api and web tests.",
+      "starterFiles": [],
+      "acceptance": [
+        "20+ frontend tests pass",
+        "HTTP tested with HttpTestingController (no real network)",
+        "Optimistic update rollback has a test",
+        "Guard and interceptor tested",
+        "One root command runs all api and web tests"
+      ]
+    },
+    "hints": [
+      "TestBed.configureTestingModule({ providers: [provideHttpClient(), provideHttpClientTesting()] }); const http = TestBed.inject(HttpTestingController); ... const req = http.expectOne(r => r.url === '/api/applications'); req.flush({ data: [], meta: {...} });",
+      "Test guards with TestBed.runInInjectionContext(() => authGuard(route, state)).",
+      "For the rollback test, make the request fail with req.flush('x', { status: 500, statusText: 'Server Error' }) and assert the status went back."
+    ],
+    "proof": "Commit with the frontend tests.",
+    "explainBack": [
+      { "q": "What does HttpTestingController let you check?", "lookFor": ["which requests were made (URL, method, body)", "respond with fake data or errors", "no real network", "verify no unexpected requests"] },
+      { "q": "Which frontend test catches the most important bug, and why?", "lookFor": ["specific test", "real user impact", "reasoning"] }
+    ],
+    "lastHintExplanation": "HttpTestingController captures requests instead of sending them: you assert the URL, method and body, then answer with whatever data or error the test needs. That makes rollback and error paths, which are hard to trigger by hand, easy to test, and http.verify() fails the test if anything unexpected was requested.",
+    "predict": [],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Dynamic programming: basics",
+      "note": "New pattern. Ways(n) = ways(n−1) + ways(n−2). Write the recursion first, add memoisation, then a loop with two variables.",
+      "problems": [
+        { "title": "LeetCode 70: Climbing Stairs", "url": "https://leetcode.com/problems/climbing-stairs/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Timed mixed test 13 (10 minutes)",
+      "questions": [
+        { "q": "A sells to B at a 20% profit and B sells to C at a 10% profit. C pays ₹1,320. What did A pay?", "options": ["₹1,000", "₹1,100", "₹1,050", "₹900"], "answer": 0, "why": "1,320 / (1.2 × 1.1) = 1,000." },
+        { "q": "12 men finish a job in 15 days. How many men are needed to finish it in 10 days?", "options": ["16", "18", "20", "14"], "answer": 1, "why": "180 man-days / 10." },
+        { "q": "What is the probability that the sum of two dice is 7?", "options": ["1/6", "1/12", "5/36", "7/36"], "answer": 0, "why": "6/36." },
+        { "q": "Odd one out: Pune, Mumbai, Nagpur, Jaipur", "options": ["Pune", "Mumbai", "Nagpur", "Jaipur"], "answer": 3, "why": "Jaipur is not in Maharashtra." },
+        { "q": "Which word means the same as 'Obsolete'?", "options": ["Modern", "Outdated", "Rare", "Useful"], "answer": 1, "why": "Obsolete means no longer in use." }
+      ]
+    },
+    "revision": ["Day 126: describe the three parts of a good bug report."]
+  },
+  {
+    "day": 128,
+    "module": "capstone-1",
+    "title": "End-to-end tests with Playwright",
+    "goal": "Automate the most important user journeys in a real browser.",
+    "learn": {
+      "concepts": [
+        "End-to-end tests: the whole stack, through the browser",
+        "Playwright: test, page, locators by role and label, expect with auto-waiting",
+        "Starting the API and web app for tests (webServer config)",
+        "Seeding and cleaning test data through the API",
+        "Keep E2E tests few and focused on critical journeys",
+        "Trace viewer for debugging failures"
+      ],
+      "resources": [
+        { "title": "Playwright: Getting started", "url": "https://playwright.dev/docs/intro" },
+        { "title": "Playwright: Locators", "url": "https://playwright.dev/docs/locators" },
+        { "title": "Playwright: Web server", "url": "https://playwright.dev/docs/test-webserver" }
+      ]
+    },
+    "build": {
+      "task": "In applytrack: add Playwright (e2e/ folder) with webServer starting the API (against the test database) and the web app. Write 5 journeys: (1) register → land on the dashboard; (2) add an application → it appears in the list; (3) change its status on the board using the keyboard 'Move to…' menu → dashboard counts update; (4) edit and delete with the confirmation dialog; (5) logged-out user visiting /applications is redirected to login and returns after logging in. Use getByRole and getByLabel locators only. Each test creates its own user. Record a trace on failure and add an npm run e2e script.",
+      "starterFiles": [],
+      "acceptance": [
+        "5 E2E journeys pass headless",
+        "Only role/label/text locators (no CSS class selectors)",
+        "Tests are independent (each creates its own user)",
+        "One command starts the servers and runs the tests",
+        "Trace is recorded on failure"
+      ]
+    },
+    "hints": [
+      "Create a unique user per test: const email = `e2e+${Date.now()}@example.com`; register through the UI in the first test and through the API (request fixture) in the others to save time.",
+      "Locators: page.getByRole('button', { name: 'Add application' }), page.getByLabel('Company'). If a locator is hard to write, your markup probably lacks a label, which is an accessibility bug too.",
+      "playwright.config.ts: use: { trace: 'retain-on-failure' }; open it with npx playwright show-trace."
+    ],
+    "proof": "Commit with the e2e folder and config.",
+    "explainBack": [
+      { "q": "Why use getByRole and getByLabel instead of CSS selectors?", "lookFor": ["matches how users find elements", "survives style refactors", "doubles as an accessibility check"] },
+      { "q": "Why keep E2E tests few?", "lookFor": ["slow", "more flaky", "expensive to maintain", "unit/API tests cover details"] }
+    ],
+    "lastHintExplanation": "Role and label locators find elements the way users (and screen readers) do, so tests survive class-name changes and fail when accessibility breaks. E2E tests are slow and more brittle, so keep them for the journeys that must never break and let unit and API tests cover the details.",
+    "predict": [],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "DP: min cost",
+      "note": "cost[i] + min of the previous two steps. Same shape as Climbing Stairs.",
+      "problems": [
+        { "title": "LeetCode 746: Min Cost Climbing Stairs", "url": "https://leetcode.com/problems/min-cost-climbing-stairs/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Timed mixed test 14 (10 minutes)",
+      "questions": [
+        { "q": "The population of a town is 50,000 and grows 10% per year. What will it be after 2 years?", "options": ["60,000", "60,500", "61,000", "55,000"], "answer": 1, "why": "50,000 × 1.21." },
+        { "q": "A runs 100 m in 20 seconds. What is the speed in km/h?", "options": ["18", "20", "15", "25"], "answer": 0, "why": "5 m/s × 18/5." },
+        { "q": "The sum of three consecutive even numbers is 78. What is the largest?", "options": ["26", "28", "24", "30"], "answer": 1, "why": "24 + 26 + 28." },
+        { "q": "In a row, Meena is 8th from the left and 13th from the right. How many people are in the row?", "options": ["21", "20", "19", "22"], "answer": 1, "why": "8 + 13 − 1." },
+        { "q": "'The news ___ good.'", "options": ["are", "is", "were", "have"], "answer": 1, "why": "'News' is uncountable and singular." }
+      ]
+    },
+    "revision": ["Day 127: explain what HttpTestingController does."]
+  },
+  {
+    "day": 129,
+    "module": "capstone-1",
+    "title": "Documentation: README, architecture and decisions",
+    "goal": "Write documentation that lets a recruiter understand ApplyTrack in 60 seconds and a developer run it in 10 minutes.",
+    "learn": {
+      "concepts": [
+        "A portfolio README: hook, screenshot/GIF, live link, features, tech stack, architecture, setup, tests",
+        "Architecture diagram (Mermaid or Excalidraw)",
+        "Architecture Decision Records (ADRs): context, decision, consequences",
+        ".env.example with every variable explained",
+        "Writing for two readers: recruiters skim, engineers dig"
+      ],
+      "resources": [
+        { "title": "Make a README", "url": "https://www.makeareadme.com/" },
+        { "title": "Michael Nygard: Documenting architecture decisions", "url": "https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions" },
+        { "title": "Mermaid: Flowcharts", "url": "https://mermaid.js.org/syntax/flowchart.html" }
+      ]
+    },
+    "build": {
+      "task": "In applytrack: rewrite the root README: a one-line pitch, a GIF of the board and dashboard, a 'Live demo' link (placeholder until Day 131) with demo credentials, features, tech stack with why each was chosen, a Mermaid architecture diagram (browser → Angular → API → PostgreSQL, plus auth flow), setup steps for local development, how to run each kind of test, and project structure. Add docs/adr/ with 3 ADRs (e.g. JWT in localStorage vs cookies, PostgreSQL over MongoDB, monorepo). Make api/.env.example and web environment docs complete. Ask someone to follow the setup steps on a clean machine (or a fresh clone) and fix what confuses them.",
+      "starterFiles": [],
+      "acceptance": [
+        "README has pitch, GIF, features, stack, diagram, setup and testing sections",
+        "Mermaid diagram renders on GitHub",
+        "3 ADRs with context, decision and consequences",
+        ".env.example documents every variable",
+        "Setup steps tested from a fresh clone"
+      ]
+    },
+    "hints": [
+      "Record a GIF with ScreenToGif (Windows), Kap (macOS) or Peek (Linux). Keep it under 10 seconds and 5 MB.",
+      "ADR format: # 2. Store JWT in localStorage\\n## Context\\n## Decision\\n## Consequences (good and bad)",
+      "Put the most impressive thing (the GIF) above the fold. Recruiters often look for under a minute."
+    ],
+    "proof": "Link to the README on GitHub.",
+    "explainBack": [
+      { "q": "Summarise one of your ADRs: what did you decide, and what did you give up?", "lookFor": ["clear decision", "alternatives considered", "honest trade-offs"] },
+      { "q": "What does a recruiter see in the first 10 seconds of your README?", "lookFor": ["pitch", "visual", "live link", "stack"] }
+    ],
+    "lastHintExplanation": "ADRs show interviewers that you make deliberate choices and understand their costs, which is exactly what they probe in project discussions. A README that leads with a pitch, a GIF and a live link respects a recruiter's 30 seconds, while the setup and architecture sections serve engineers who dig deeper.",
+    "predict": [],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "DP: house robber",
+      "note": "best(i) = max(best(i−1), best(i−2) + nums[i]).",
+      "problems": [
+        { "title": "LeetCode 198: House Robber", "url": "https://leetcode.com/problems/house-robber/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Timed mixed test 15 (10 minutes)",
+      "questions": [
+        { "q": "What is 0.25 × 0.4?", "options": ["0.1", "1", "0.01", "0.65"], "answer": 0, "why": "1/4 × 2/5 = 1/10." },
+        { "q": "A laptop's price fell from ₹60,000 to ₹51,000. What is the percentage decrease?", "options": ["15%", "12%", "18%", "9%"], "answer": 0, "why": "9,000/60,000." },
+        { "q": "A and B start a business with ₹30,000 and ₹50,000. The profit is ₹16,000. What is B's share?", "options": ["₹10,000", "₹6,000", "₹8,000", "₹9,000"], "answer": 0, "why": "16,000 × 5/8." },
+        { "q": "Today is Monday. What day is it 61 days from now?", "options": ["Friday", "Saturday", "Thursday", "Sunday"], "answer": 1, "why": "61 = 8 weeks + 5 days; Monday + 5 = Saturday." },
+        { "q": "What is a person who is new to a field called?", "options": ["Veteran", "Novice", "Expert", "Mentor"], "answer": 1, "why": "Novice means beginner." }
+      ]
+    },
+    "revision": ["Day 128: explain why role-based locators are better."]
+  },
+  {
+    "day": 130,
+    "module": "capstone-1",
+    "title": "Docker: containerising the API and web app",
+    "goal": "Package ApplyTrack into containers so it runs the same everywhere.",
+    "learn": {
+      "concepts": [
+        "Images vs containers; layers and caching",
+        "Multi-stage builds: build with dev dependencies, run with production ones only",
+        ".dockerignore (node_modules, .env, dist, .git)",
+        "Serving the Angular build with Nginx (with SPA fallback to index.html)",
+        "docker compose: api + web + postgres with a volume and healthchecks",
+        "Binding to 0.0.0.0 inside containers; non-root user"
+      ],
+      "resources": [
+        { "title": "Docker: Get started", "url": "https://docs.docker.com/get-started/" },
+        { "title": "Docker: Multi-stage builds", "url": "https://docs.docker.com/build/building/multi-stage/" },
+        { "title": "Docker Compose: Quickstart", "url": "https://docs.docker.com/compose/gettingstarted/" }
+      ]
+    },
+    "build": {
+      "task": "In applytrack: write api/Dockerfile (multi-stage: build TypeScript, then a slim runtime with npm ci --omit=dev, non-root user, CMD node dist/index.js), web/Dockerfile (build Angular, serve with nginx:alpine using an nginx.conf with try_files $uri /index.html and /api proxied to the api service), .dockerignore files, and docker-compose.yml with postgres (named volume, healthcheck), api (depends_on postgres healthy, runs migrations on start) and web. docker compose up should give a working app at http://localhost:8080. Record image sizes before and after the multi-stage build in docs/docker.md.",
+      "starterFiles": [],
+      "acceptance": [
+        "docker compose up starts all three services; the app works at localhost:8080",
+        "Multi-stage builds; runtime images contain no dev dependencies or source TypeScript",
+        ".dockerignore excludes node_modules, .env, dist and .git",
+        "Deep-link reloads work through Nginx",
+        "Data survives docker compose down and up (named volume)",
+        "docs/docker.md records image sizes and explains each Dockerfile line"
+      ]
+    },
+    "hints": [
+      "Copy package*.json and run npm ci BEFORE copying the source: Docker caches that layer, so rebuilds after code changes skip reinstalling.",
+      "nginx.conf: location /api/ { proxy_pass http://api:4000; } location / { try_files $uri $uri/ /index.html; }. Inside compose, services reach each other by service name.",
+      "Healthcheck for postgres: test: [\"CMD-SHELL\", \"pg_isready -U postgres\"], and in api: depends_on: postgres: condition: service_healthy."
+    ],
+    "proof": "Commit with Dockerfiles, compose file and docs/docker.md.",
+    "explainBack": [
+      { "q": "Why copy package.json and install before copying the rest of the source?", "lookFor": ["layer caching", "dependencies change rarely", "faster rebuilds"] },
+      { "q": "What does a multi-stage build give you?", "lookFor": ["smaller image", "no build tools/dev deps in production", "smaller attack surface"] }
+    ],
+    "lastHintExplanation": "Docker caches each layer and reuses it until its inputs change. Installing dependencies from package*.json before copying your source means code changes don't trigger a full reinstall. Multi-stage builds compile in a full image, then copy only the output into a slim runtime image, which is smaller, faster to deploy and has fewer tools for an attacker.",
+    "predict": [
+      { "q": "Inside a container, the API listens on 127.0.0.1:4000 and you run docker run -p 4000:4000. Can your browser reach it?", "options": ["Yes", "No: it only accepts connections from inside the container", "Only with HTTPS", "Only on Linux"], "answer": 1, "why": "127.0.0.1 inside the container is the container itself; bind to 0.0.0.0." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "DP: counting paths",
+      "note": "paths[r][c] = paths[r−1][c] + paths[r][c−1]; the first row and column are all 1.",
+      "problems": [
+        { "title": "LeetCode 62: Unique Paths", "url": "https://leetcode.com/problems/unique-paths/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Timed mixed test 16 (10 minutes)",
+      "questions": [
+        { "q": "A mobile costs ₹15,000 plus 18% GST. What is the total price?", "options": ["₹17,500", "₹17,700", "₹18,000", "₹17,000"], "answer": 1, "why": "15,000 × 1.18." },
+        { "q": "In what time will ₹8,000 earn ₹1,920 at 8% simple interest?", "options": ["2 years", "3 years", "4 years", "2.5 years"], "answer": 1, "why": "1,920 / 640." },
+        { "q": "A square's side is increased by 20%. By what percentage does its area increase?", "options": ["20%", "40%", "44%", "21%"], "answer": 2, "why": "1.2² = 1.44." },
+        { "q": "If ROSE is coded as TQUG, how is LILY coded?", "options": ["NKNA", "NKMA", "MJMZ", "NJNA"], "answer": 0, "why": "Each letter moves +2; Y + 2 wraps to A." },
+        { "q": "What does 'under the weather' mean?", "options": ["Outdoors", "Slightly ill", "Very happy", "In danger"], "answer": 1, "why": "It's an idiom for feeling unwell." }
+      ]
+    },
+    "revision": ["Day 129: explain what an ADR is and why it helps in interviews."]
+  },
+  {
+    "day": 131,
+    "module": "capstone-1",
+    "title": "Deploying on Coolify",
+    "goal": "Put ApplyTrack on the internet with HTTPS, a real database and automatic deploys.",
+    "learn": {
+      "concepts": [
+        "Coolify: a self-hosted, open-source platform (a free alternative to Heroku/Render) running on a VPS",
+        "Deploying from a GitHub repo with Docker Compose or Dockerfiles",
+        "Managed PostgreSQL in Coolify; backups",
+        "Environment variables and secrets in the platform, not in git",
+        "Domains, DNS records and automatic HTTPS (Let's Encrypt)",
+        "Deploy on push (webhooks) and reading deployment logs"
+      ],
+      "resources": [
+        { "title": "Coolify documentation", "url": "https://coolify.io/docs/" },
+        { "title": "Coolify: Docker Compose deployments", "url": "https://coolify.io/docs/knowledge-base/docker/compose" },
+        { "title": "Let's Encrypt: How it works", "url": "https://letsencrypt.org/how-it-works/" }
+      ]
+    },
+    "build": {
+      "task": "Deploy ApplyTrack. Options: Coolify on a cheap VPS (Hetzner, DigitalOcean, or an Oracle Cloud free-tier VM), or if you can't use a VPS, a free tier of Render/Railway/Fly for the API plus Neon or Supabase for PostgreSQL and any static host for the web app. Configure all environment variables in the platform (a new strong JWT_SECRET, CORS_ORIGINS set to your real domain, NODE_ENV=production), run migrations, seed a demo account (demo@applytrack.dev / a password shown in the README), enable HTTPS, set trust proxy, and turn on deploy-on-push. Write docs/deployment.md with every step and the problems you hit.",
+      "starterFiles": [],
+      "acceptance": [
+        "App is live over HTTPS on a public URL",
+        "Demo account works and is listed in the README",
+        "No secrets in git; production uses its own JWT_SECRET",
+        "Pushing to main triggers a redeploy",
+        "/health and /ready work in production",
+        "docs/deployment.md is a complete, repeatable guide"
+      ]
+    },
+    "hints": [
+      "Most first deploys fail on environment variables. Read the deployment logs first; your config validation should tell you exactly what's missing.",
+      "CORS in production: if the web app and API share a domain via the Nginx proxy (/api), you may not need CORS at all. That's simpler and safer.",
+      "Behind Coolify's proxy, app.set('trust proxy', 1) is needed for correct client IPs in rate limiting and logs."
+    ],
+    "proof": "The live URL of ApplyTrack.",
+    "explainBack": [
+      { "q": "Walk through what happens between git push and the new version being live.", "lookFor": ["webhook triggers build", "Docker images built", "containers replaced", "health checks", "proxy routes traffic with HTTPS"] },
+      { "q": "What was the hardest deployment problem and how did you debug it?", "lookFor": ["specific problem", "logs used", "root cause", "fix"] }
+    ],
+    "lastHintExplanation": "On push, a webhook tells the platform to pull the commit, build the images, start the new containers, check their health and switch traffic to them, while the reverse proxy terminates HTTPS with a Let's Encrypt certificate. When it fails, the build and runtime logs, plus your startup config validation, are where the answer is.",
+    "predict": [],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "DP: coin change",
+      "note": "dp[amount] = min over coins of dp[amount − coin] + 1. Initialise with Infinity; dp[0] = 0.",
+      "problems": [
+        { "title": "LeetCode 322: Coin Change", "url": "https://leetcode.com/problems/coin-change/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Timed mixed test 17 (10 minutes)",
+      "questions": [
+        { "q": "A bus travels at 45 km/h. How far does it go in 2 hours 20 minutes?", "options": ["100 km", "105 km", "110 km", "95 km"], "answer": 1, "why": "45 × 7/3." },
+        { "q": "The average of 6 numbers is 15. If each is multiplied by 2, what is the new average?", "options": ["15", "30", "17", "45"], "answer": 1, "why": "Multiplying every value by 2 doubles the average." },
+        { "q": "What is the probability of a leap year having 53 Sundays?", "options": ["1/7", "2/7", "3/7", "1/2"], "answer": 1, "why": "366 days = 52 weeks + 2 extra days, and 2 of the 7 possible pairs include a Sunday." },
+        { "q": "What is 1/3 of 3/4 of 480?", "options": ["120", "160", "90", "100"], "answer": 0, "why": "480 × 1/4." },
+        { "q": "Choose the correctly punctuated sentence.", "options": ["Its a good day.", "It's a good day.", "Its' a good day.", "It,s a good day."], "answer": 1, "why": "It's = it is." }
+      ]
+    },
+    "revision": ["Day 130: explain why the API must bind to 0.0.0.0 in a container."]
+  },
+  {
+    "day": 132,
+    "module": "capstone-1",
+    "title": "Debug lab: the container that won't answer, and production checks",
+    "goal": "Fix common Docker mistakes, then run a production checklist on your live app.",
+    "learn": {
+      "concepts": [
+        "Binding to localhost inside a container",
+        "Ignoring PORT from the environment",
+        "Running dev servers and dev dependencies in production images",
+        "Leaking .env and local node_modules into images without .dockerignore",
+        "A production checklist: HTTPS, headers, errors, logs, backups, monitoring"
+      ],
+      "resources": [
+        { "title": "Docker: .dockerignore files", "url": "https://docs.docker.com/build/concepts/context/#dockerignore-files" },
+        { "title": "Node.js Docker best practices", "url": "https://github.com/nodejs/docker-node/blob/main/docs/BestPractices.md" },
+        { "title": "Mozilla Observatory (HTTP header check)", "url": "https://developer.mozilla.org/en-US/observatory" }
+      ]
+    },
+    "build": {
+      "task": "Part 1: copy the starter into day132-debug/ in node-playground, run npm install once (to create package-lock.json), then docker compose up --build. Expected: curl http://localhost:8080/health returns { status: 'ok', env: 'production' }; the log says 'listening on 4000'; docker compose exec api ls -a shows no .env file; the container runs node server.js (not nodemon) and has no devDependencies installed. There are 4 bugs; fix each in its own commit. Part 2: on your live ApplyTrack, run Mozilla Observatory and Lighthouse, test a 500 error (no stack trace leaks), check logs are visible in the platform, set up a daily database backup and a free uptime monitor (e.g. UptimeRobot) on /health. Record everything in docs/production-checklist.md. Write week22-notes.md.",
+      "starterFiles": [
+        { "name": "day132-debug/package.json", "content": "{\n  \"name\": \"day132-debug\",\n  \"type\": \"module\",\n  \"scripts\": {\n    \"start\": \"node server.js\",\n    \"dev\": \"nodemon server.js\"\n  },\n  \"dependencies\": { \"express\": \"^5.1.0\" },\n  \"devDependencies\": { \"nodemon\": \"^3.1.0\" }\n}\n" },
+        { "name": "day132-debug/server.js", "content": "import express from 'express';\n\nconst app = express();\n\napp.get('/health', (req, res) => {\n  res.json({ status: 'ok', env: process.env.NODE_ENV });\n});\n\nconst port = 3000;\napp.listen(port, '127.0.0.1', () => console.log(`listening on ${port}`));\n" },
+        { "name": "day132-debug/Dockerfile", "content": "FROM node:22-alpine\nWORKDIR /app\nCOPY . .\nRUN npm install\nEXPOSE 4000\nCMD [\"npm\", \"run\", \"dev\"]\n" },
+        { "name": "day132-debug/docker-compose.yml", "content": "services:\n  api:\n    build: .\n    ports:\n      - \"8080:4000\"\n    environment:\n      PORT: \"4000\"\n      NODE_ENV: production\n" },
+        { "name": "day132-debug/.env", "content": "# A local secret that must never end up inside an image\nSTRIPE_SECRET=sk_test_do_not_ship_me\n" }
+      ],
+      "acceptance": [
+        "curl localhost:8080/health returns ok with env production",
+        "Server reads PORT from the environment (log says 4000)",
+        "No .env or local node_modules in the image (.dockerignore added)",
+        "Image runs node server.js with production dependencies only (npm ci --omit=dev)",
+        "4 fix commits; docs/production-checklist.md and week22-notes.md written"
+      ]
+    },
+    "hints": [
+      "curl gets 'connection reset' or 'empty reply'. Inside the container, run docker compose exec api wget -qO- http://127.0.0.1:3000/health: it works there. Which address is the server listening on, and which port?",
+      "Run docker compose exec api ls -a. Why are .env and node_modules from your laptop in there? What file tells Docker what not to send in the build context?",
+      "docker compose exec api ps shows nodemon. Production images should install with npm ci --omit=dev and start with node server.js."
+    ],
+    "proof": "Link to your last fix commit and your production checklist.",
+    "explainBack": [
+      { "q": "List the 4 bugs and fixes.", "lookFor": ["listen on 127.0.0.1 → 0.0.0.0 (or omit host)", "hard-coded 3000 → process.env.PORT", "missing .dockerignore leaks .env and node_modules", "CMD dev + dev deps → npm ci --omit=dev and node server.js"] },
+      { "q": "Why is a .env file inside an image a security problem even if you never publish the image?", "lookFor": ["images get pushed to registries/shared", "anyone with the image can read the secret", "layers keep files even if deleted later"] }
+    ],
+    "lastHintExplanation": "1) Listening on 127.0.0.1 only accepts connections from inside the container; bind to 0.0.0.0. 2) The port is hard-coded to 3000, but compose maps 8080 to 4000; use process.env.PORT. 3) With no .dockerignore, COPY . . puts your .env and macOS node_modules into the image; add .dockerignore and copy package files first. 4) npm run dev runs nodemon with dev dependencies; use npm ci --omit=dev and CMD [\"node\", \"server.js\"].",
+    "predict": [
+      { "q": "A Dockerfile copies .env, then a later layer runs RUN rm .env. Is the secret gone from the image?", "options": ["Yes", "No, it's still in the earlier layer", "Only on Windows", "Only if the image is pushed"], "answer": 1, "why": "Layers are additive; the file remains in the layer that added it." }
+    ],
+    "debugLab": {
+      "title": "The container that won't answer",
+      "symptoms": [
+        "curl localhost:8080/health gets an empty reply",
+        "The log says 'listening on 3000' even though PORT is 4000",
+        "The image contains .env and your laptop's node_modules",
+        "The container runs nodemon and has devDependencies installed"
+      ],
+      "files": ["day132-debug/package.json", "day132-debug/server.js", "day132-debug/Dockerfile", "day132-debug/docker-compose.yml", "day132-debug/.env"],
+      "bugCount": 4
+    },
+    "dsa": {
+      "pattern": "DP: review",
+      "note": "Decode Ways: dp[i] depends on one-digit and two-digit decodings. Then re-solve House Robber.",
+      "problems": [
+        { "title": "LeetCode 91: Decode Ways", "url": "https://leetcode.com/problems/decode-ways/" },
+        { "title": "LeetCode 198: House Robber (re-solve)", "url": "https://leetcode.com/problems/house-robber/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Timed mixed test 18 (10 minutes)",
+      "questions": [
+        { "q": "A water tank is 2/5 full. After adding 60 litres it is 4/5 full. What is its capacity?", "options": ["120 L", "150 L", "180 L", "200 L"], "answer": 1, "why": "2/5 of the capacity = 60." },
+        { "q": "The selling price of 12 pens equals the cost price of 15 pens. What is the profit percentage?", "options": ["20%", "25%", "15%", "30%"], "answer": 1, "why": "Profit on 12 pens is the cost of 3 pens: 3/12." },
+        { "q": "In how many ways can 3 books be chosen from 7?", "options": ["21", "35", "42", "210"], "answer": 1, "why": "7C3." },
+        { "q": "Next in the series: 5, 10, 20, 40, ?", "options": ["60", "80", "70", "100"], "answer": 1, "why": "Each term doubles." },
+        { "q": "Which word means the opposite of 'Hostile'?", "options": ["Angry", "Friendly", "Brave", "Proud"], "answer": 1, "why": "Hostile means unfriendly." }
+      ]
+    },
+    "revision": ["Days 127–131: explain the testing pyramid for ApplyTrack and how a push becomes a deploy."]
+  }
+]

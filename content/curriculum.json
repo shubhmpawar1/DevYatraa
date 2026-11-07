@@ -1,0 +1,54 @@
+{
+  "totalWeeks": 26,
+  "daysPerWeek": 6,
+  "phases": [
+    {
+      "phase": 1,
+      "title": "Foundations",
+      "weeks": [1, 4],
+      "build": ["How the web works", "HTML", "CSS", "Flexbox and Grid", "Responsive design", "Git and GitHub"],
+      "dsa": ["JavaScript basics for problem solving", "Loops and simple arrays"],
+      "aptitude": ["Number system", "Percentages", "Ratio", "Averages", "Profit and loss", "Series"]
+    },
+    {
+      "phase": 2,
+      "title": "JavaScript core",
+      "weeks": [5, 9],
+      "build": ["JS fundamentals", "Functions and scope", "Arrays and objects", "DOM and events", "Async, promises and fetch", "ES modules"],
+      "dsa": ["Arrays and hashing", "Strings"],
+      "aptitude": ["Time and work", "Speed and distance", "Simple and compound interest"]
+    },
+    {
+      "phase": 3,
+      "title": "TypeScript, Tailwind and Angular",
+      "weeks": [10, 14],
+      "build": ["TypeScript", "Tailwind CSS", "Angular components and signals", "Routing and forms", "HTTP client"],
+      "dsa": ["Two pointers", "Sliding window", "Stack"],
+      "aptitude": ["Permutations and combinations", "Probability", "Logical puzzles"]
+    },
+    {
+      "phase": 4,
+      "title": "Backend: Node, Express, PostgreSQL",
+      "weeks": [15, 19],
+      "build": ["Node.js", "Express REST APIs", "PostgreSQL and SQL", "JWT auth", "Testing APIs"],
+      "dsa": ["Binary search", "Linked lists", "Trees"],
+      "aptitude": ["Data interpretation", "Verbal ability"]
+    },
+    {
+      "phase": 5,
+      "title": "Capstone 1 and deployment",
+      "weeks": [20, 23],
+      "build": ["Capstone 1: Angular + Tailwind + Express + PostgreSQL + JWT", "Tests, README, architecture diagram", "Deploy on Coolify", "Demo video"],
+      "dsa": ["Graphs", "Heaps", "Dynamic programming basics"],
+      "aptitude": ["Timed mixed tests"]
+    },
+    {
+      "phase": 6,
+      "title": "Capstone 2 and interview prep",
+      "weeks": [24, 26],
+      "build": ["Capstone 2: real-time app with Firebase + Express", "CI, role-based access", "Forgejo mirror (bonus)", "Interview prep and mock interviews"],
+      "dsa": ["Dynamic programming", "Backtracking", "Revision by pattern"],
+      "aptitude": ["Company-style timed tests"]
+    }
+  ]
+}

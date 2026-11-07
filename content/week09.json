@@ -1,0 +1,394 @@
+[
+  {
+    "day": 49,
+    "module": "js-modules",
+    "title": "ES modules: splitting code into files",
+    "goal": "Organise JavaScript into modules with import and export, in the browser and in Node.",
+    "learn": {
+      "concepts": [
+        "Why modules: each file has its own scope, explicit dependencies",
+        "Named exports vs default export, and import { a as b }",
+        "<script type=\"module\"> in the browser (deferred automatically, needs a server)",
+        "ES modules in Node: \"type\": \"module\" in package.json or .mjs files",
+        "Module structure: data, logic (pure functions), and UI/DOM in separate files",
+        "CommonJS (require/module.exports) vs ES modules"
+      ],
+      "resources": [
+        { "title": "javascript.info: Modules, introduction", "url": "https://javascript.info/modules-intro" },
+        { "title": "javascript.info: Export and import", "url": "https://javascript.info/import-export" },
+        { "title": "MDN: JavaScript modules", "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules" }
+      ]
+    },
+    "build": {
+      "task": "Refactor your Day 41 to-do app into modules in day49/: storage.js (load/save with try/catch), todos.js (pure functions: addTodo(list, text) returns a new list, toggleTodo, editTodo, deleteTodo, filterTodos, countActive), ui.js (render and DOM helpers only), and main.js (wires events to state and render). Use named exports. Then create day49/test-todos.mjs that imports todos.js in Node and runs at least 10 checks on the pure functions. Serve the page with VS Code Live Server or npx serve (modules don't work from file://).",
+      "starterFiles": [],
+      "acceptance": [
+        "4 modules with clear responsibilities; todos.js has no DOM or localStorage code",
+        "todos.js functions are pure and return new arrays",
+        "main.js is the only file that knows about both state and the DOM",
+        "test-todos.mjs runs with node and passes 10+ checks",
+        "App works exactly as before when served over http"
+      ]
+    },
+    "hints": [
+      "If the browser console says 'CORS' or 'Failed to load module script' you opened the file directly. Use Live Server or run npx serve day49 and open the printed URL.",
+      "Import paths need the file extension in the browser: import { addTodo } from './todos.js'.",
+      "To import todos.js in Node, it must be an ES module. Name the test file .mjs, and either add a package.json with \"type\": \"module\" in day49/ or rename todos.js to todos.mjs."
+    ],
+    "proof": "Commit with day49/ files and the test output.",
+    "explainBack": [
+      { "q": "Why did you keep todos.js free of DOM and localStorage code? What did that let you do?", "lookFor": ["pure logic is testable in Node", "reusable", "separation of concerns", "UI can change without touching logic"] },
+      { "q": "What's the difference between a named export and a default export?", "lookFor": ["named: imported with braces by exact name", "default: one per module, any import name", "named exports make refactoring/autocomplete clearer"] }
+    ],
+    "lastHintExplanation": "Keeping todos.js pure (no DOM, no storage) means you can import and test it in Node without a browser, and change the UI freely. Named exports are imported in braces by their exact names, and a file can have many. A default export is one per file and can be imported under any name.",
+    "predict": [
+      { "q": "a.js: export let count = 1; export function inc() { count++ }. main.js: import { count, inc } from './a.js'; inc(); console.log(count)", "options": ["1", "2", "Error: count is read-only", "undefined"], "answer": 1, "why": "ES module imports are live bindings: they reflect the exporter's current value." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Hashing: frequencies",
+      "note": "Count, then check or sort by the counts.",
+      "problems": [
+        { "title": "LeetCode 1207: Unique Number of Occurrences", "url": "https://leetcode.com/problems/unique-number-of-occurrences/" },
+        { "title": "LeetCode 451: Sort Characters By Frequency", "url": "https://leetcode.com/problems/sort-characters-by-frequency/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Revision: percentages and interest",
+      "questions": [
+        { "q": "An item sells for ₹1200 after a 20% discount. What is the marked price?", "options": ["₹1440", "₹1500", "₹1400", "₹1560"], "answer": 1, "why": "1200 / 0.8 = 1500." },
+        { "q": "A population of 50,000 falls 10% a year. What is it after 2 years?", "options": ["40,000", "40,500", "41,000", "39,500"], "answer": 1, "why": "50,000 × 0.9² = 40,500." },
+        { "q": "What is the simple interest on ₹5000 at 10% a year for 18 months?", "options": ["₹500", "₹750", "₹900", "₹1500"], "answer": 1, "why": "5000 × 0.1 × 1.5 = 750." },
+        { "q": "20% of x equals 30% of y. What is x:y?", "options": ["2:3", "3:2", "1:1", "3:5"], "answer": 1, "why": "x/y = 30/20." },
+        { "q": "80 is increased by 25% and then decreased by 20%. What is the result?", "options": ["76", "80", "84", "72"], "answer": 1, "why": "80 × 1.25 × 0.8 = 80." }
+      ]
+    },
+    "revision": ["Day 48: explain why await inside forEach doesn't work."]
+  },
+  {
+    "day": 50,
+    "module": "js-modules",
+    "title": "npm, package.json and Vite",
+    "goal": "Set up a modern JavaScript project with npm and Vite, install a package, and build for production.",
+    "learn": {
+      "concepts": [
+        "npm: the package registry and the CLI",
+        "package.json: name, scripts, dependencies vs devDependencies",
+        "node_modules and package-lock.json (commit the lock file, ignore node_modules)",
+        "Semantic versioning: ^1.2.3 means compatible updates",
+        "Vite: dev server with hot reload, and npm run build to make dist/",
+        "Importing an npm package in browser code"
+      ],
+      "resources": [
+        { "title": "npm Docs: About packages and modules", "url": "https://docs.npmjs.com/about-packages-and-modules" },
+        { "title": "Vite: Getting started", "url": "https://vite.dev/guide/" },
+        { "title": "npm Docs: About semantic versioning", "url": "https://docs.npmjs.com/about-semantic-versioning" }
+      ]
+    },
+    "build": {
+      "task": "In jobready-journey, run npm create vite@latest day50 -- --template vanilla, then cd day50 && npm install && npm run dev. Move your Day 49 to-do modules into src/ and make them work under Vite. Install date-fns (npm install date-fns) and show each todo's age ('created 3 minutes ago') with formatDistanceToNow. Add a .gitignore that ignores node_modules and dist. Run npm run build and npm run preview. Write day50/NOTES.md explaining each script in package.json and the difference between dependencies and devDependencies in your own words.",
+      "starterFiles": [],
+      "acceptance": [
+        "Vite project in day50/ runs with npm run dev and shows your to-do app",
+        "date-fns installed as a dependency and used for 'created … ago'",
+        "node_modules and dist are NOT committed; package-lock.json IS committed",
+        "npm run build succeeds and npm run preview serves the built app",
+        "NOTES.md explains the scripts and dependency types in your own words"
+      ]
+    },
+    "hints": [
+      "Vite's starter has main.js and style.css in the project root or src/. Replace its content with your imports and keep index.html's <script type=\"module\" src=\"/src/main.js\">.",
+      "import { formatDistanceToNow } from 'date-fns'; then formatDistanceToNow(new Date(todo.createdAt), { addSuffix: true }).",
+      "Check git status before committing. If you see hundreds of files in node_modules, your .gitignore isn't in the right folder."
+    ],
+    "proof": "Commit with day50/ (without node_modules).",
+    "explainBack": [
+      { "q": "Why is node_modules ignored but package-lock.json committed?", "lookFor": ["node_modules is huge and can be rebuilt with npm install", "lock file records exact versions", "so everyone/servers install the same versions"] },
+      { "q": "What does npm run build produce, and why don't we deploy the src folder directly?", "lookFor": ["dist with bundled, minified files", "resolves npm imports for the browser", "faster to load, fewer requests"] }
+    ],
+    "lastHintExplanation": "node_modules can be recreated at any time with npm install, so it's not committed; package-lock.json records the exact versions installed so every machine gets the same tree. npm run build bundles your modules and npm packages into a few optimised files in dist/. Browsers can't resolve 'date-fns' on their own, and many small files load slowly.",
+    "predict": [
+      { "q": "package.json has \"date-fns\": \"^3.6.0\". Which version could npm install?", "options": ["2.30.0", "3.6.0 or a later 3.x", "4.0.0", "Only exactly 3.6.0"], "answer": 1, "why": "^ allows minor and patch updates within the same major version." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Hashing: counting",
+      "note": "Count characters and think about what's possible with pairs and one odd character.",
+      "problems": [
+        { "title": "LeetCode 409: Longest Palindrome", "url": "https://leetcode.com/problems/longest-palindrome/" },
+        { "title": "LeetCode 1657: Determine if Two Strings Are Close", "url": "https://leetcode.com/problems/determine-if-two-strings-are-close/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Revision: work and speed",
+      "questions": [
+        { "q": "10 men finish a job in 15 days. How long would 6 men take?", "options": ["20 days", "25 days", "30 days", "9 days"], "answer": 1, "why": "150 man-days / 6 = 25." },
+        { "q": "How far do you go at 45 km/h in 40 minutes?", "options": ["25 km", "30 km", "35 km", "40 km"], "answer": 1, "why": "45 × 2/3 = 30." },
+        { "q": "A, B and C take 10, 15 and 30 days alone. How long do they take together?", "options": ["4 days", "5 days", "6 days", "8 days"], "answer": 1, "why": "(3 + 2 + 1)/30 = 1/5." },
+        { "q": "A 400 m train at 72 km/h goes through a 600 m tunnel. How long does it take?", "options": ["30 s", "40 s", "50 s", "60 s"], "answer": 2, "why": "1000 m at 20 m/s = 50 s." },
+        { "q": "8 workers earn ₹4000 in 5 days. What would 5 workers earn in 8 days?", "options": ["₹3200", "₹4000", "₹5000", "₹2500"], "answer": 1, "why": "₹100 per worker-day, and 40 worker-days = ₹4000." }
+      ]
+    },
+    "revision": ["Day 49: list your 4 to-do modules and what each is responsible for."]
+  },
+  {
+    "day": 51,
+    "module": "js-modules",
+    "title": "Classes, prototypes and custom errors",
+    "goal": "Model things with classes when it helps, understand what's happening underneath, and throw meaningful errors.",
+    "learn": {
+      "concepts": [
+        "class syntax: constructor, methods, getters",
+        "Private fields with #name",
+        "Inheritance with extends and super()",
+        "Under the hood: prototypes and the prototype chain (just the idea)",
+        "Custom error classes: class ValidationError extends Error",
+        "When to use a class vs plain objects and functions"
+      ],
+      "resources": [
+        { "title": "javascript.info: Class basic syntax", "url": "https://javascript.info/class" },
+        { "title": "javascript.info: Private and protected properties", "url": "https://javascript.info/private-protected-properties-methods" },
+        { "title": "javascript.info: Custom errors", "url": "https://javascript.info/custom-errors" }
+      ]
+    },
+    "build": {
+      "task": "In day51/, write wallet.js: class Wallet with a private #balance and #transactions, methods deposit(amount, note), spend(amount, note, category), a getter balance, and history({ category }) returning a copy. Throw a custom ValidationError for invalid amounts (not a positive finite number) and InsufficientFundsError for overspending, each with a helpful message and extra fields. Create class SavingsWallet extends Wallet that refuses to go below a minimumBalance. Write 12+ checks, including checks that the right error class is thrown (use instanceof). Finish with a comment block: when would you NOT use a class?",
+      "starterFiles": [],
+      "acceptance": [
+        "#balance and #transactions can't be accessed from outside (prove it in a check or comment)",
+        "ValidationError and InsufficientFundsError extend Error and set name",
+        "SavingsWallet uses extends and super, and overrides spend correctly",
+        "history() returns a copy; changing it doesn't affect the wallet",
+        "12+ passing checks including instanceof error checks",
+        "Comment explaining when plain functions/objects are a better choice"
+      ]
+    },
+    "hints": [
+      "class InsufficientFundsError extends Error { constructor(needed, available) { super(`Need ₹${needed}, have ₹${available}`); this.name = 'InsufficientFundsError'; this.needed = needed; } }",
+      "Testing a throw: try { w.spend(1e9) ; check('throws', false, true) } catch (e) { check('right error', e instanceof InsufficientFundsError, true) }.",
+      "In SavingsWallet.spend, check the minimum first, then call super.spend(amount, note, category)."
+    ],
+    "proof": "Commit with day51/ files.",
+    "explainBack": [
+      { "q": "Why use #balance instead of this.balance?", "lookFor": ["truly private, can't be changed from outside", "all changes go through methods that validate", "protects invariants"] },
+      { "q": "Why create custom error classes instead of throwing plain strings?", "lookFor": ["can check type with instanceof", "carry extra data", "stack trace", "handle different errors differently"] }
+    ],
+    "lastHintExplanation": "#private fields can't be read or written outside the class, so every change goes through methods that validate it and the balance can never become invalid. Custom error classes let callers tell errors apart with instanceof and carry extra data (like the amount needed), and they keep a stack trace, which a thrown string doesn't.",
+    "predict": [
+      { "q": "class A { #x = 1 } const a = new A(); console.log(a.#x)", "options": ["1", "undefined", "SyntaxError", "null"], "answer": 2, "why": "Accessing a private field outside the class is a syntax error." },
+      { "q": "class E extends Error {} const e = new E('x'); console.log(e instanceof Error, e instanceof E)", "options": ["true true", "false true", "true false", "false false"], "answer": 0, "why": "E inherits from Error, so it's an instance of both." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Design with hashing",
+      "note": "Build your own HashSet and HashMap with a class: an array of buckets and a simple hash function.",
+      "problems": [
+        { "title": "LeetCode 705: Design HashSet", "url": "https://leetcode.com/problems/design-hashset/" },
+        { "title": "LeetCode 706: Design HashMap", "url": "https://leetcode.com/problems/design-hashmap/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Revision: ratio, averages and ages",
+      "questions": [
+        { "q": "The average of 6 numbers is 8. If each is multiplied by 3, what is the new average?", "options": ["8", "11", "24", "48"], "answer": 2, "why": "Multiplying every number by 3 multiplies the average by 3." },
+        { "q": "Two numbers are in the ratio 2:3. Adding 4 to each makes the ratio 5:7. What are the numbers?", "options": ["12 and 18", "16 and 24", "10 and 15", "20 and 30"], "answer": 1, "why": "(2x + 4)/(3x + 4) = 5/7 gives x = 8." },
+        { "q": "A son is 1/4 of his father's age, and the father is 40. How old will the son be in 8 years?", "options": ["16", "18", "20", "12"], "answer": 1, "why": "The son is 10 now, so he'll be 18." },
+        { "q": "10 numbers average 40, but one was entered as 57 instead of 75. What is the correct average?", "options": ["41.8", "41.2", "38.2", "42"], "answer": 0, "why": "The total rises by 18, so the average rises by 1.8." },
+        { "q": "Two numbers are in the ratio 4:7 and their LCM is 140. What is their sum?", "options": ["44", "55", "66", "77"], "answer": 1, "why": "LCM = 28k = 140, so k = 5. The numbers are 20 and 35." }
+      ]
+    },
+    "revision": ["Day 50: explain dependencies vs devDependencies and why package-lock.json is committed."]
+  },
+  {
+    "day": 52,
+    "module": "phase2-project",
+    "title": "Phase 2 project: expense tracker (part 1)",
+    "goal": "Plan and build the core of a modular expense tracker with Vite: add, list, filter and persist expenses.",
+    "learn": {
+      "concepts": [
+        "Planning features as user stories ('As a user I want… so that…')",
+        "Designing the data model before the UI",
+        "Module layout for a bigger app: model, storage, ui, main",
+        "Formatting money with Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' })",
+        "Input validation and helpful messages"
+      ],
+      "resources": [
+        { "title": "Atlassian: User stories with examples", "url": "https://www.atlassian.com/agile/project-management/user-stories" },
+        { "title": "MDN: Intl.NumberFormat", "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat" }
+      ]
+    },
+    "build": {
+      "task": "Create a NEW public repo expense-tracker with Vite (vanilla). Write docs/stories.md with at least 8 user stories. Today build: add an expense (amount, category from a fixed list, date defaulting to today, note), list expenses newest first grouped by date, edit and delete, filter by month and category, monthly total and per-category totals, all saved to localStorage. Keep pure logic in src/expenses.js with tests in tests/expenses.test.mjs (run with node). Use your Day 51 ValidationError for bad input.",
+      "starterFiles": [
+        { "name": "docs/stories.md", "content": "# User stories\n\n1. As a user I want to add an expense with amount, category, date and note so that I can track my spending.\n2. \n3. \n4. \n5. \n6. \n7. \n8. \n" }
+      ],
+      "acceptance": [
+        "New repo expense-tracker with docs/stories.md (8+ stories) committed first",
+        "Add, edit, delete, filter by month and category all work",
+        "Totals are correct and shown in ₹ format; amounts stored as numbers (paise or rupees, documented)",
+        "Data survives reload; corrupted storage handled",
+        "src/expenses.js is pure and has 10+ passing tests",
+        "Invalid amounts or missing category show a field-level error"
+      ]
+    },
+    "hints": [
+      "Money tip: store amounts as integer paise (₹12.50 → 1250) to avoid floating-point surprises like 0.1 + 0.2. Format only when displaying.",
+      "Group by date: expenses.reduce((acc, e) => { (acc[e.date] ??= []).push(e); return acc; }, {}), then sort the keys descending.",
+      "Month filter: compare e.date.slice(0, 7) with the value of an <input type=\"month\">."
+    ],
+    "proof": "Link to your expense-tracker repo.",
+    "explainBack": [
+      { "q": "Why might you store money in paise instead of rupees with decimals?", "lookFor": ["floating point errors like 0.1 + 0.2", "integers are exact", "format only for display"] },
+      { "q": "Walk through your module structure and what each file is allowed to know about.", "lookFor": ["expenses.js pure logic", "storage.js localStorage", "ui.js DOM", "main.js wires them", "names their real files"] }
+    ],
+    "lastHintExplanation": "Computers store decimals in binary, so 0.1 + 0.2 is 0.30000000000000004. Money in integer paise is exact, and you only format it as ₹ for display. Keeping pure logic, storage and UI in separate modules means each part can be tested and changed on its own.",
+    "predict": [
+      { "q": "console.log(0.1 + 0.2 === 0.3)", "options": ["true", "false", "Error", "undefined"], "answer": 1, "why": "Binary floating point can't represent 0.1 and 0.2 exactly; the sum is 0.30000000000000004." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Prefix sum + hashing",
+      "note": "Store how many times each prefix sum has appeared. Medium problem; trace [1,1,1], k=2 by hand.",
+      "problems": [
+        { "title": "LeetCode 560: Subarray Sum Equals K", "url": "https://leetcode.com/problems/subarray-sum-equals-k/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Revision: profit, loss and discount",
+      "questions": [
+        { "q": "The cost price is ₹400 and the profit is 15%. What is the selling price?", "options": ["₹440", "₹450", "₹460", "₹475"], "answer": 2, "why": "400 × 1.15 = 460." },
+        { "q": "Two successive 10% discounts equal a single discount of:", "options": ["20%", "19%", "18%", "21%"], "answer": 1, "why": "0.9 × 0.9 = 0.81, so 19% off." },
+        { "q": "An item sold for ₹640 makes a 20% loss. What is the cost price?", "options": ["₹768", "₹800", "₹780", "₹820"], "answer": 1, "why": "640 / 0.8 = 800." },
+        { "q": "A trader buys 3 items for ₹10 and sells 2 for ₹10. What is the profit %?", "options": ["33.3%", "50%", "25%", "66.7%"], "answer": 1, "why": "Each costs 10/3 and sells for 5, so profit = (5 − 10/3)/(10/3) = 50%." },
+        { "q": "The selling price is ₹720 with a 20% profit on cost. What is the cost price?", "options": ["₹576", "₹600", "₹620", "₹640"], "answer": 1, "why": "720 / 1.2 = 600." }
+      ]
+    },
+    "revision": ["Day 51: write a custom error class from memory."]
+  },
+  {
+    "day": 53,
+    "module": "phase2-project",
+    "title": "Phase 2 project: charts, budgets, polish and deploy",
+    "goal": "Finish the expense tracker with charts and budgets, make it polished, and deploy it.",
+    "learn": {
+      "concepts": [
+        "Using a charting library from npm (Chart.js)",
+        "Updating a chart when data changes instead of creating a new one",
+        "Import/export JSON and CSV for user data",
+        "Vite base path for GitHub Pages deployments",
+        "Writing a good project README: what, why, features, tech, how to run, screenshots"
+      ],
+      "resources": [
+        { "title": "Chart.js: Getting started", "url": "https://www.chartjs.org/docs/latest/getting-started/" },
+        { "title": "Vite: Deploying a static site (GitHub Pages)", "url": "https://vite.dev/guide/static-deploy#github-pages" }
+      ]
+    },
+    "build": {
+      "task": "Finish expense-tracker: add a doughnut chart of spending by category and a bar chart of the last 6 months (Chart.js), monthly budgets per category with a progress bar that turns amber at 80% and red over 100%, export to CSV and JSON, and import from JSON (with validation). Polish: empty states, responsive layout, dark mode, keyboard accessible. Deploy to GitHub Pages using the Vite guide (set base). Write a README with a screenshot, live link, features, tech stack, and 'What I learned'.",
+      "starterFiles": [],
+      "acceptance": [
+        "Two charts that update when expenses change (no duplicate chart instances)",
+        "Budgets per category with progress bars and warning colours at 80%/100%",
+        "CSV export opens correctly in a spreadsheet; JSON import validates and reports bad rows",
+        "Live on GitHub Pages; all assets load (base path correct)",
+        "README with screenshot, live link, features, tech and 'What I learned'",
+        "Lighthouse Accessibility 90+"
+      ]
+    },
+    "hints": [
+      "Create each chart once and keep the instance. On change: chart.data.labels = ...; chart.data.datasets[0].data = ...; chart.update().",
+      "CSV: header row, then rows joined with commas. Wrap text fields in quotes and double any quotes inside: '\"' + note.replaceAll('\"', '\"\"') + '\"'.",
+      "GitHub Pages: in vite.config.js set base: '/expense-tracker/'. Then build and deploy dist/ (the Vite guide's GitHub Actions workflow is easiest)."
+    ],
+    "proof": "Live URL of your deployed expense tracker.",
+    "explainBack": [
+      { "q": "Why do you update an existing Chart.js instance instead of creating a new chart on each render?", "lookFor": ["creating new charts on same canvas causes errors/duplicates/memory leaks", "update animates smoothly", "keep a reference"] },
+      { "q": "What does Vite's base option do and why did GitHub Pages need it?", "lookFor": ["sets the URL prefix for assets", "site is served from /repo-name/, not /", "without it CSS/JS 404"] }
+    ],
+    "lastHintExplanation": "Chart.js attaches an instance to a canvas. Creating a new one on every render stacks charts, leaks memory and throws 'Canvas is already in use', so keep one instance and update its data. GitHub Pages serves a project at /repo-name/, but Vite builds asset links for / by default; base: '/expense-tracker/' prefixes every asset URL correctly.",
+    "predict": [
+      { "q": "A Vite app deployed to https://you.github.io/expense-tracker/ with the default base '/'. The HTML loads /assets/index.js. What happens?", "options": ["Loads fine", "404: it looks for https://you.github.io/assets/index.js", "Vite redirects", "GitHub fixes it"], "answer": 1, "why": "With base '/', asset URLs point at the domain root instead of the repo path." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Hashing",
+      "note": "Index one list in a Map, then scan the other.",
+      "problems": [
+        { "title": "LeetCode 599: Minimum Index Sum of Two Lists", "url": "https://leetcode.com/problems/minimum-index-sum-of-two-lists/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Revision: series and number system",
+      "questions": [
+        { "q": "3, 5, 9, 17, 33, ?", "options": ["64", "65", "66", "63"], "answer": 1, "why": "Each term is ×2 − 1: 33 × 2 − 1 = 65." },
+        { "q": "100, 96, 87, 71, ?", "options": ["46", "50", "45", "55"], "answer": 0, "why": "Subtract squares: −4, −9, −16, −25. 71 − 25 = 46." },
+        { "q": "What is the unit digit of 3⁶⁵?", "options": ["1", "3", "7", "9"], "answer": 1, "why": "Powers of 3 cycle 3, 9, 7, 1. 65 mod 4 = 1, so the digit is 3." },
+        { "q": "What is the HCF of 54 and 81?", "options": ["9", "18", "27", "54"], "answer": 2, "why": "54 = 2·3³ and 81 = 3⁴, so the HCF is 3³ = 27." },
+        { "q": "J, M, P, S, ?", "options": ["U", "V", "W", "T"], "answer": 1, "why": "+3 each time." }
+      ]
+    },
+    "revision": ["Day 52: write 3 of your user stories from memory."]
+  },
+  {
+    "day": 54,
+    "module": "phase2-project",
+    "title": "Phase 2 review: JavaScript without notes",
+    "goal": "Prove the JavaScript core stuck: build a small app from scratch without notes, then plan your weak spots.",
+    "learn": {
+      "concepts": [
+        "Phase 2 summary: types, functions, closures, arrays/objects, DOM, events, async, fetch, modules, classes",
+        "Recall under time pressure (like a machine-coding interview round)",
+        "Honest self-assessment and a revision plan"
+      ],
+      "resources": [
+        { "title": "javascript.info: The JavaScript language (contents)", "url": "https://javascript.info/js" }
+      ]
+    },
+    "build": {
+      "task": "Machine-coding practice (90 minutes, no notes for the first 60): in jobready-journey/day54/, build a 'Quiz app' with plain JS modules. Fetch 10 questions from https://opentdb.com/api.php?amount=10&type=multiple (decode HTML entities safely, e.g. via a <textarea> or DOMParser), shuffle answers, show one question at a time with a 15-second timer per question, score, and a results screen with what you got wrong and a 'Play again' button. Handle loading and errors. Commit 'checkpoint: no notes' at 60 minutes, then finish. Write day54/phase2-review.md: what you built unaided, what you looked up, and your top 3 weak topics.",
+      "starterFiles": [],
+      "acceptance": [
+        "'checkpoint: no notes' commit within 60 minutes",
+        "Questions load from the API with loading and error states",
+        "Answers shuffled; timer auto-advances; score correct",
+        "Results screen lists wrong answers; Play again refetches",
+        "No innerHTML with API text (entities decoded safely)",
+        "phase2-review.md is honest and specific"
+      ]
+    },
+    "hints": [
+      "Plan states first: 'loading' → 'question' → 'results'. One render() that switches on state.",
+      "Decoding entities like &quot; safely: const doc = new DOMParser().parseFromString(text, 'text/html'); return doc.documentElement.textContent;",
+      "Timer: clear the previous interval every time you show a new question, or timers will stack up."
+    ],
+    "proof": "Links to the checkpoint commit and the final commit.",
+    "explainBack": [
+      { "q": "What did you look up after the checkpoint and why didn't it stick?", "lookFor": ["specific topics", "honest", "plan to revise"] },
+      { "q": "How did you make sure the timer of the previous question didn't keep running?", "lookFor": ["store interval id", "clearInterval before starting a new one / on answer", "one timer at a time"] }
+    ],
+    "lastHintExplanation": "The quiz is a small state machine: loading, question and results, with one render() that draws the current state. Each question starts a new interval, so you must clearInterval the old one first, or intervals stack and the clock speeds up. Decode HTML entities with DOMParser and insert the result with textContent so API text can't inject markup.",
+    "predict": [
+      { "q": "setInterval(tick, 1000) is called twice without clearing the first. How often does tick run?", "options": ["Once per second", "Twice per second", "Once, then stops", "Never"], "answer": 1, "why": "Two independent intervals both call tick every second." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Phase 2 review",
+      "note": "Re-solve both from a blank file under 25 minutes each, then compare with your earlier solutions.",
+      "problems": [
+        { "title": "LeetCode 347: Top K Frequent Elements (re-solve)", "url": "https://leetcode.com/problems/top-k-frequent-elements/" },
+        { "title": "LeetCode 238: Product of Array Except Self (re-solve)", "url": "https://leetcode.com/problems/product-of-array-except-self/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Timed test: Phase 2 topics",
+      "questions": [
+        { "q": "Two pipes fill a tank in 10 and 20 minutes. How long do they take together?", "options": ["6 min 40 s", "7 min", "6 min", "15 min"], "answer": 0, "why": "1/10 + 1/20 = 3/20, so 20/3 min = 6 min 40 s." },
+        { "q": "What is the compound interest on ₹3000 at 10% for 2 years?", "options": ["₹600", "₹630", "₹660", "₹330"], "answer": 1, "why": "3000 × 0.21 = 630." },
+        { "q": "What is 36 km/h in m/s?", "options": ["10", "12", "8", "15"], "answer": 0, "why": "36 × 5/18 = 10." },
+        { "q": "A and B together take 6 days and A alone takes 10. How long does B take alone?", "options": ["12 days", "15 days", "16 days", "20 days"], "answer": 1, "why": "1/6 − 1/10 = 1/15." },
+        { "q": "What is the simple interest on ₹2000 at 6% for 3 years?", "options": ["₹300", "₹360", "₹400", "₹320"], "answer": 1, "why": "2000 × 0.06 × 3 = 360." }
+      ]
+    },
+    "revision": ["Phase 2: rewrite debounce, retry and createCounter from memory. Add anything you couldn't do to your progress log."]
+  }
+]

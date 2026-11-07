@@ -1,0 +1,948 @@
+[
+  {
+    "day": 103,
+    "module": "auth-security",
+    "title": "Users and password hashing",
+    "goal": "Store users safely: never plain-text passwords, always a slow salted hash.",
+    "learn": {
+      "concepts": [
+        "Authentication (who are you?) vs authorisation (what may you do?)",
+        "Why plain-text or fast hashes (MD5, SHA-256) are wrong for passwords",
+        "bcrypt: salt + cost factor; hash on signup, compare on login",
+        "A users table: unique lower-cased email, password_hash, created_at",
+        "Never return password_hash from the API",
+        "Generic login errors ('Invalid email or password') to avoid user enumeration"
+      ],
+      "resources": [
+        {
+          "title": "OWASP: Password Storage Cheat Sheet",
+          "url": "https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html"
+        },
+        {
+          "title": "bcrypt on npm",
+          "url": "https://www.npmjs.com/package/bcrypt"
+        },
+        {
+          "title": "OWASP: Authentication Cheat Sheet",
+          "url": "https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html"
+        }
+      ]
+    },
+    "build": {
+      "task": "In api-starter, add migration 003_users.sql (users: id uuid, email text unique, name, password_hash, created_at) and add user_id to projects (FK, CASCADE). Build a users feature: POST /api/auth/register validates email, name and password (min 8 chars, at least one letter and one number), lower-cases and trims email, hashes with bcrypt (cost 12), returns 201 with { id, email, name } and never the hash. Duplicate email returns 409. Add a script scripts/hash-timing.ts that times bcrypt at cost 10, 12 and 14 and records the results in docs/passwords.md with your explanation of why slow is good.",
+      "starterFiles": [],
+      "acceptance": [
+        "Passwords stored only as bcrypt hashes (check in psql)",
+        "Email normalised; duplicate (even with different case) returns 409",
+        "Password rules enforced by zod with clear messages",
+        "Response and logs never contain password or hash",
+        "docs/passwords.md has the timing results and explanation"
+      ]
+    },
+    "hints": [
+      "import bcrypt from 'bcrypt'; const hash = await bcrypt.hash(password, 12); later: const ok = await bcrypt.compare(password, user.password_hash);",
+      "Catch the unique violation: if (e.code === '23505') throw new ConflictError('Email already registered'). Or check first, but the constraint is what really prevents races.",
+      "Select only safe columns in your repo: RETURNING id, email, name, created_at."
+    ],
+    "proof": "Commit with the migration, auth register route and docs/passwords.md.",
+    "explainBack": [
+      {
+        "q": "Why is bcrypt better than SHA-256 for passwords?",
+        "lookFor": [
+          "deliberately slow (cost factor)",
+          "built-in salt",
+          "makes brute-force/rainbow tables expensive",
+          "SHA-256 is designed to be fast"
+        ]
+      },
+      {
+        "q": "What is a salt and what attack does it stop?",
+        "lookFor": [
+          "random value per password",
+          "same password gives different hashes",
+          "stops precomputed rainbow tables",
+          "stops cracking many users at once"
+        ]
+      }
+    ],
+    "lastHintExplanation": "Fast hashes like SHA-256 let an attacker with a stolen database try billions of guesses per second. bcrypt is deliberately slow, and its cost factor lets you make it slower as hardware improves. Each hash includes a random salt, so two users with the same password get different hashes and precomputed rainbow tables are useless.",
+    "predict": [
+      {
+        "q": "bcrypt.hash('secret123', 12) is called twice. Are the two hashes equal?",
+        "options": [
+          "Yes",
+          "No, each has a different random salt",
+          "Only on the same server",
+          "Only if cost is the same"
+        ],
+        "answer": 1,
+        "why": "A new salt is generated each time; compare() still verifies both."
+      }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Trees: traversal",
+      "note": "New pattern. Learn recursion on trees: the depth is 1 + max(depth(left), depth(right)).",
+      "problems": [
+        {
+          "title": "LeetCode 104: Maximum Depth of Binary Tree",
+          "url": "https://leetcode.com/problems/maximum-depth-of-binary-tree/"
+        }
+      ]
+    },
+    "aptitude": {
+      "topic": "Data interpretation: two-year comparison",
+      "questions": [
+        {
+          "q": "Units sold — 2023: Phones 400, Laptops 250, Tablets 150; 2024: Phones 500, Laptops 300, Tablets 120. What was total growth from 2023 to 2024?",
+          "options": [
+            "10%",
+            "15%",
+            "12.5%",
+            "20%"
+          ],
+          "answer": 2,
+          "why": "800 → 920 is +120, and 120/800 = 15%."
+        },
+        {
+          "q": "Same data: what was the percentage change in Tablets?",
+          "options": [
+            "−20%",
+            "−25%",
+            "+20%",
+            "−30%"
+          ],
+          "answer": 0,
+          "why": "−30/150."
+        },
+        {
+          "q": "Same data: what share of 2024 units were Phones (approximately)?",
+          "options": [
+            "50%",
+            "54.3%",
+            "60%",
+            "45%"
+          ],
+          "answer": 1,
+          "why": "500/920 ≈ 54.3%."
+        },
+        {
+          "q": "Same data: what was the ratio of Laptops in 2023 to Laptops in 2024?",
+          "options": [
+            "5:6",
+            "6:5",
+            "4:5",
+            "3:4"
+          ],
+          "answer": 0,
+          "why": "250:300."
+        },
+        {
+          "q": "Same data: which product grew the most in percentage terms?",
+          "options": [
+            "Phones",
+            "Laptops",
+            "Tablets",
+            "Equal"
+          ],
+          "answer": 0,
+          "why": "Phones +25%, Laptops +20%."
+        }
+      ]
+    },
+    "revision": [
+      "Day 102: explain how $1 parameters prevent SQL injection."
+    ]
+  },
+  {
+    "day": 104,
+    "module": "auth-security",
+    "title": "Login with JWT",
+    "goal": "Issue a signed JSON Web Token on login and understand exactly what's inside it.",
+    "learn": {
+      "concepts": [
+        "Sessions (server stores state) vs tokens (client holds a signed token)",
+        "JWT structure: header.payload.signature (base64url, NOT encrypted)",
+        "Signing with a secret (HS256); verifying detects tampering",
+        "Claims: sub (user id), iat, exp; keep the payload small and non-secret",
+        "Short-lived access tokens; the trade-offs of refresh tokens",
+        "Where to store tokens on the client: memory/localStorage vs httpOnly cookies"
+      ],
+      "resources": [
+        {
+          "title": "jwt.io: Introduction to JSON Web Tokens",
+          "url": "https://jwt.io/introduction"
+        },
+        {
+          "title": "jsonwebtoken on npm",
+          "url": "https://www.npmjs.com/package/jsonwebtoken"
+        },
+        {
+          "title": "OWASP: JSON Web Token Cheat Sheet",
+          "url": "https://cheatsheetseries.owasp.org/cheatsheets/JSON_Web_Token_for_Java_Cheat_Sheet.html"
+        }
+      ]
+    },
+    "build": {
+      "task": "In api-starter: npm i jsonwebtoken (and -D @types/jsonwebtoken). Add JWT_SECRET (min 32 chars, validated) and JWT_EXPIRES_IN (default '1h') to config. POST /api/auth/login: find the user by lower-cased email, bcrypt.compare, and on success return { token, user: { id, email, name } }; on any failure return 401 'Invalid email or password' (same message and similar timing for unknown email and wrong password). Paste a real token into jwt.io and write docs/jwt.md explaining each part, why anyone can read the payload, and what happens if you change one character of the payload.",
+      "starterFiles": [],
+      "acceptance": [
+        "Login returns a signed token with sub and exp claims",
+        "JWT_SECRET is validated at startup and never committed",
+        "Unknown email and wrong password give the same 401 response",
+        "No sensitive data (password, hash, email if you can avoid it) in the token payload",
+        "docs/jwt.md decodes a real token and explains tampering"
+      ]
+    },
+    "hints": [
+      "jwt.sign({ sub: user.id }, config.JWT_SECRET, { expiresIn: config.JWT_EXPIRES_IN }) returns the token string.",
+      "Same timing: if the user isn't found, still run bcrypt.compare against a fixed dummy hash so both paths take about as long.",
+      "Generate a strong secret: node -e \"console.log(require('crypto').randomBytes(48).toString('base64'))\""
+    ],
+    "proof": "Commit with the login route and docs/jwt.md.",
+    "explainBack": [
+      {
+        "q": "Anyone can decode a JWT payload. So what stops a user from changing sub to someone else's id?",
+        "lookFor": [
+          "signature computed with the server secret",
+          "changing payload invalidates signature",
+          "server verifies on every request",
+          "attacker doesn't know the secret"
+        ]
+      },
+      {
+        "q": "Why return the same error for 'unknown email' and 'wrong password'?",
+        "lookFor": [
+          "prevents user enumeration",
+          "attacker can't learn which emails are registered"
+        ]
+      }
+    ],
+    "lastHintExplanation": "A JWT is signed, not encrypted: anyone can base64-decode the payload, but the signature is an HMAC of header and payload made with the server's secret. Change one character and verification fails, and without the secret nobody can forge a new valid signature. Identical errors for unknown emails and wrong passwords stop attackers discovering which emails have accounts.",
+    "predict": [
+      {
+        "q": "A JWT has exp set to one hour after issue. The server restarts after 10 minutes with the same secret. Is the token still valid?",
+        "options": [
+          "No, sessions were lost",
+          "Yes, the server holds no state; it just verifies the signature and exp",
+          "Only if cached",
+          "Only for GET"
+        ],
+        "answer": 1,
+        "why": "JWTs are stateless; verification needs only the secret and the clock."
+      }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Trees: recursion",
+      "note": "Swap left and right at every node, recursively.",
+      "problems": [
+        {
+          "title": "LeetCode 226: Invert Binary Tree",
+          "url": "https://leetcode.com/problems/invert-binary-tree/"
+        }
+      ]
+    },
+    "aptitude": {
+      "topic": "Verbal ability: analogies",
+      "questions": [
+        {
+          "q": "Doctor : Hospital :: Teacher : ?",
+          "options": [
+            "Student",
+            "School",
+            "Book",
+            "Class test"
+          ],
+          "answer": 1,
+          "why": "Where each person works."
+        },
+        {
+          "q": "Pen : Write :: Knife : ?",
+          "options": [
+            "Sharp",
+            "Cut",
+            "Kitchen",
+            "Steel"
+          ],
+          "answer": 1,
+          "why": "Tool : what it does."
+        },
+        {
+          "q": "Bird : Flock :: Fish : ?",
+          "options": [
+            "Pack",
+            "School",
+            "Herd",
+            "Swarm"
+          ],
+          "answer": 1,
+          "why": "Group names: a flock of birds, a school of fish."
+        },
+        {
+          "q": "Hot : Cold :: Ancient : ?",
+          "options": [
+            "Old",
+            "Modern",
+            "Historic",
+            "Past"
+          ],
+          "answer": 1,
+          "why": "Opposites."
+        },
+        {
+          "q": "Author : Novel :: Composer : ?",
+          "options": [
+            "Painting",
+            "Symphony",
+            "Piano",
+            "Orchestra"
+          ],
+          "answer": 1,
+          "why": "Creator : what they create."
+        }
+      ]
+    },
+    "revision": [
+      "Day 103: explain salt and cost factor in bcrypt."
+    ]
+  },
+  {
+    "day": 105,
+    "module": "auth-security",
+    "title": "Protecting routes and per-user data",
+    "goal": "Require a valid token on private routes and make sure users can only see and change their own data.",
+    "learn": {
+      "concepts": [
+        "Authorization: Bearer <token> header",
+        "requireAuth middleware: verify, attach req.user (or res.locals.user), 401 on failure",
+        "401 (not logged in) vs 403 (logged in but not allowed) vs 404 (hide existence)",
+        "Scoping every query by user_id: WHERE id = $1 AND user_id = $2",
+        "IDOR (Insecure Direct Object Reference): the most common API security bug",
+        "GET /api/auth/me for the current user"
+      ],
+      "resources": [
+        {
+          "title": "OWASP API Security Top 10: Broken Object Level Authorization",
+          "url": "https://owasp.org/API-Security/editions/2023/en/0xa1-broken-object-level-authorization/"
+        },
+        {
+          "title": "MDN: Authorization header",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Authorization"
+        }
+      ]
+    },
+    "build": {
+      "task": "In api-starter: write requireAuth middleware (reads Bearer token, jwt.verify, sets res.locals.userId, returns 401 with your error format for missing, invalid or expired tokens). Protect all /api/projects and /api/tasks routes and add GET /api/auth/me. Update every repo method to take userId and scope its SQL by it (projects by user_id; tasks via their project's user_id). Create two users, A and B, and prove in docs/authz-tests.md (curl commands + outputs) that B cannot list, read, update or delete A's projects or tasks, and that such attempts return 404.",
+      "starterFiles": [],
+      "acceptance": [
+        "Requests without or with a bad/expired token return 401",
+        "Every project and task query is scoped by the current user",
+        "User B gets 404 for every operation on user A's data (documented)",
+        "GET /api/auth/me returns the current user without the hash",
+        "No route trusts a user id sent in the body or query"
+      ]
+    },
+    "hints": [
+      "const header = req.get('authorization'); if (!header?.startsWith('Bearer ')) return next(new UnauthorizedError()); try { const p = jwt.verify(header.slice(7), config.JWT_SECRET); res.locals.userId = p.sub; next(); } catch { next(new UnauthorizedError()); }",
+      "Tasks belong to users through projects: UPDATE tasks t SET ... FROM projects p WHERE t.id = $1 AND t.project_id = p.id AND p.user_id = $2 RETURNING t.*",
+      "Returning 404 rather than 403 for other users' objects avoids revealing that the id exists."
+    ],
+    "proof": "Commit with requireAuth, scoped repos and docs/authz-tests.md.",
+    "explainBack": [
+      {
+        "q": "What is IDOR? Show how your API would have been vulnerable without user_id scoping.",
+        "lookFor": [
+          "changing an id in the URL accesses another user's data",
+          "token proves identity but not ownership",
+          "fixed by WHERE user_id = current user"
+        ]
+      },
+      {
+        "q": "When do you return 401 vs 403 vs 404?",
+        "lookFor": [
+          "401: no/invalid credentials",
+          "403: authenticated but not permitted",
+          "404: to hide existence of others' resources"
+        ]
+      }
+    ],
+    "lastHintExplanation": "A valid token proves who the user is, not that they own the object in the URL. Without scoping, user B could change /tasks/<id> to one of A's ids and read or delete it. That's IDOR, the most common API vulnerability. Putting AND user_id = $2 in every query makes ownership part of the lookup, so other users' rows simply aren't found (404).",
+    "predict": [
+      {
+        "q": "requireAuth is applied with app.use('/api/projects', requireAuth, projectsRouter). Is /api/auth/login protected?",
+        "options": [
+          "Yes",
+          "No, it's a different path",
+          "Only for POST",
+          "Depends on the token"
+        ],
+        "answer": 1,
+        "why": "The middleware only runs for paths under /api/projects."
+      }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Trees: comparing",
+      "note": "Two trees are the same if the roots match and both subtrees are the same.",
+      "problems": [
+        {
+          "title": "LeetCode 100: Same Tree",
+          "url": "https://leetcode.com/problems/same-tree/"
+        }
+      ]
+    },
+    "aptitude": {
+      "topic": "Verbal ability: fill in the blanks",
+      "questions": [
+        {
+          "q": "'Despite the rain, the match ___ as planned.'",
+          "options": [
+            "cancelled",
+            "went ahead",
+            "stopped",
+            "delayed"
+          ],
+          "answer": 1,
+          "why": "'Despite' sets up a contrast: it still happened."
+        },
+        {
+          "q": "'The new policy will ___ effect from Monday.'",
+          "options": [
+            "take",
+            "make",
+            "give",
+            "do"
+          ],
+          "answer": 0,
+          "why": "The phrase is 'take effect'."
+        },
+        {
+          "q": "'She is ___ to the idea of working remotely.'",
+          "options": [
+            "open",
+            "opened",
+            "opening",
+            "opens"
+          ],
+          "answer": 0,
+          "why": "'Open to' means willing to consider."
+        },
+        {
+          "q": "'The report was ___ by the manager before it was sent.'",
+          "options": [
+            "reviewing",
+            "reviewed",
+            "review",
+            "reviews"
+          ],
+          "answer": 1,
+          "why": "Passive voice: was + past participle."
+        },
+        {
+          "q": "'If I ___ you, I would accept the offer.'",
+          "options": [
+            "am",
+            "was",
+            "were",
+            "be"
+          ],
+          "answer": 2,
+          "why": "Hypothetical conditionals use 'were'."
+        }
+      ]
+    },
+    "revision": [
+      "Day 104: draw a JWT's three parts and say what each contains."
+    ]
+  },
+  {
+    "day": 106,
+    "module": "auth-security",
+    "title": "Auth in Angular: login, interceptor and guards",
+    "goal": "Add sign-up, login and logout to your Angular app, with the token attached automatically and private pages guarded.",
+    "learn": {
+      "concepts": [
+        "An AuthService holding the token and current user in signals",
+        "Persisting the token (localStorage) and restoring it on startup with /auth/me",
+        "An auth interceptor adding Authorization: Bearer ...",
+        "Handling 401 globally: log out and redirect to /login?returnUrl=...",
+        "A canActivate guard for private routes",
+        "XSS risk with localStorage tokens, and httpOnly cookies as the alternative"
+      ],
+      "resources": [
+        {
+          "title": "Angular: Route guards",
+          "url": "https://angular.dev/guide/routing/route-guards"
+        },
+        {
+          "title": "Angular: Interceptors",
+          "url": "https://angular.dev/guide/http/interceptors"
+        },
+        {
+          "title": "OWASP: HTML5 Security (local storage)",
+          "url": "https://cheatsheetseries.owasp.org/cheatsheets/HTML5_Security_Cheat_Sheet.html#local-storage"
+        }
+      ]
+    },
+    "build": {
+      "task": "In your task-manager Angular app: add /register and /login pages (reactive forms with server error messages shown), an AuthService (token and user signals, login, register, logout, restoreSession calling /api/auth/me on startup), an authInterceptor adding the Bearer header to /api requests, an error interceptor that on 401 logs out and navigates to /login?returnUrl=<current>, and an authGuard on all project pages. Show the user's name and a logout button in the header. After login, return to returnUrl. Write docs/token-storage.md comparing localStorage and httpOnly cookies.",
+      "starterFiles": [],
+      "acceptance": [
+        "Register, login and logout all work against your API",
+        "Reloading the page keeps you logged in (session restored via /auth/me)",
+        "Private pages redirect to login when logged out, then return to the original page",
+        "An expired or invalid token logs you out cleanly on the next request",
+        "docs/token-storage.md explains the XSS and CSRF trade-offs"
+      ]
+    },
+    "hints": [
+      "Guard: export const authGuard: CanActivateFn = (route, state) => inject(AuthService).isLoggedIn() ? true : inject(Router).createUrlTree(['/login'], { queryParams: { returnUrl: state.url } });",
+      "Don't add the token to requests to other domains: only if req.url.startsWith('/api') or your API base URL.",
+      "Test expiry quickly by setting JWT_EXPIRES_IN=30s on the server."
+    ],
+    "proof": "Commit with auth pages, service, interceptors and guard.",
+    "explainBack": [
+      {
+        "q": "Is the Angular guard a security measure? Explain.",
+        "lookFor": [
+          "no, it's UX only",
+          "users can bypass client code",
+          "real protection is the API's requireAuth and scoping"
+        ]
+      },
+      {
+        "q": "What's the main risk of storing a JWT in localStorage, and what's the trade-off with cookies?",
+        "lookFor": [
+          "any XSS script can read localStorage",
+          "httpOnly cookies can't be read by JS",
+          "cookies need CSRF protection (SameSite)"
+        ]
+      }
+    ],
+    "lastHintExplanation": "Route guards only control what the Angular app shows. Anyone can call the API directly, so real security lives on the server (requireAuth plus user scoping). A token in localStorage can be stolen by any injected script (XSS). An httpOnly cookie can't be read by JavaScript, but browsers send it automatically, so you then need CSRF protection such as SameSite cookies.",
+    "predict": [
+      {
+        "q": "The interceptor adds the token to every request, including https://openlibrary.org. What's the problem?",
+        "options": [
+          "None",
+          "Your token is leaked to a third party",
+          "It's slower",
+          "CORS will fix it"
+        ],
+        "answer": 1,
+        "why": "Only attach credentials to your own API."
+      }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Trees: symmetric",
+      "note": "Compare left.left with right.right and left.right with right.left.",
+      "problems": [
+        {
+          "title": "LeetCode 101: Symmetric Tree",
+          "url": "https://leetcode.com/problems/symmetric-tree/"
+        }
+      ]
+    },
+    "aptitude": {
+      "topic": "Data interpretation: revenue and cost",
+      "questions": [
+        {
+          "q": "Revenue and cost (₹ lakh) — Q1: 50, 40; Q2: 60, 45; Q3: 55, 50; Q4: 75, 55. Which quarter had the highest profit?",
+          "options": [
+            "Q1",
+            "Q2",
+            "Q3",
+            "Q4"
+          ],
+          "answer": 3,
+          "why": "Profits are 10, 15, 5 and 20."
+        },
+        {
+          "q": "Same data: what was the total profit for the year (₹ lakh)?",
+          "options": [
+            "45",
+            "50",
+            "55",
+            "40"
+          ],
+          "answer": 1,
+          "why": "10 + 15 + 5 + 20."
+        },
+        {
+          "q": "Same data: what was the profit margin in Q2 (profit/revenue)?",
+          "options": [
+            "25%",
+            "33.3%",
+            "20%",
+            "15%"
+          ],
+          "answer": 0,
+          "why": "15/60."
+        },
+        {
+          "q": "Same data: by what percentage did revenue grow from Q3 to Q4?",
+          "options": [
+            "30%",
+            "36.4%",
+            "40%",
+            "25%"
+          ],
+          "answer": 1,
+          "why": "20/55 ≈ 36.4%."
+        },
+        {
+          "q": "Same data: what is the average quarterly cost (₹ lakh)?",
+          "options": [
+            "45",
+            "47.5",
+            "50",
+            "48"
+          ],
+          "answer": 1,
+          "why": "190/4."
+        }
+      ]
+    },
+    "revision": [
+      "Day 105: explain IDOR with an example URL."
+    ]
+  },
+  {
+    "day": 107,
+    "module": "auth-security",
+    "title": "Hardening the API",
+    "goal": "Apply the standard security basics every production Express API should have.",
+    "learn": {
+      "concepts": [
+        "helmet: secure HTTP headers",
+        "Rate limiting login and register to slow brute force",
+        "Body size limits (express.json({ limit: '100kb' }))",
+        "Secrets only in env; rotating a leaked secret",
+        "Logging without sensitive data (passwords, tokens)",
+        "npm audit and keeping dependencies updated",
+        "OWASP Top 10 at a glance"
+      ],
+      "resources": [
+        {
+          "title": "Express: Production best practices — security",
+          "url": "https://expressjs.com/en/advanced/best-practice-security.html"
+        },
+        {
+          "title": "helmet on npm",
+          "url": "https://www.npmjs.com/package/helmet"
+        },
+        {
+          "title": "express-rate-limit on npm",
+          "url": "https://www.npmjs.com/package/express-rate-limit"
+        },
+        {
+          "title": "OWASP Top 10",
+          "url": "https://owasp.org/www-project-top-ten/"
+        }
+      ]
+    },
+    "build": {
+      "task": "In api-starter: add helmet, a 100 kb JSON body limit, and express-rate-limit on /api/auth/* (e.g. 10 requests per 15 minutes per IP, returning your error format with 429). Make the logger redact authorization headers and any password fields. Disable the X-Powered-By header (helmet does this). Run npm audit and fix what you can. Write docs/security-checklist.md going through each OWASP API Top 10 item: does it apply, and what you did (or would do) about it. Prove the rate limit with a loop of 12 curl login attempts and paste the output.",
+      "starterFiles": [],
+      "acceptance": [
+        "helmet headers visible in curl -i output",
+        "11th auth request within the window gets 429 in your error format",
+        "Bodies over 100 kb get 413",
+        "Logs never contain tokens or passwords (show a sample)",
+        "npm audit has no high or critical issues (or each is explained)",
+        "docs/security-checklist.md covers all 10 OWASP API items"
+      ]
+    },
+    "hints": [
+      "import rateLimit from 'express-rate-limit'; const authLimiter = rateLimit({ windowMs: 15 * 60_000, limit: 10, standardHeaders: 'draft-7', legacyHeaders: false, handler: (req, res) => res.status(429).json({ error: { code: 'RATE_LIMITED', message: 'Too many attempts, try again later' } }) });",
+      "Behind a proxy like Coolify or Nginx, set app.set('trust proxy', 1) so the limiter sees real client IPs instead of the proxy's.",
+      "Curl loop (bash): for i in $(seq 1 12); do curl -s -o /dev/null -w '%{http_code}\\n' -X POST localhost:4000/api/auth/login -H 'content-type: application/json' -d '{\"email\":\"a@b.c\",\"password\":\"wrongpass1\"}'; done"
+    ],
+    "proof": "Commit with the hardening changes and docs/security-checklist.md.",
+    "explainBack": [
+      {
+        "q": "What does rate limiting the login route protect against, and what are its limits?",
+        "lookFor": [
+          "brute-force/credential stuffing",
+          "slows guesses per IP",
+          "attackers can use many IPs",
+          "combine with strong passwords/lockout/monitoring"
+        ]
+      },
+      {
+        "q": "A teammate accidentally commits JWT_SECRET to GitHub. What do you do?",
+        "lookFor": [
+          "rotate the secret immediately",
+          "all old tokens become invalid",
+          "removing from git history isn't enough",
+          "check for misuse"
+        ]
+      }
+    ],
+    "lastHintExplanation": "Rate limiting makes brute-forcing passwords from one IP impractically slow, but attackers with many IPs can still spread attempts, so it's one layer among several. A leaked secret must be rotated at once: deleting the commit doesn't help because clones, forks and caches may already have it. Rotating also logs everyone out, which is the point.",
+    "predict": [
+      {
+        "q": "The API runs behind a reverse proxy without trust proxy set. What does the rate limiter see as every client's IP?",
+        "options": [
+          "Their real IP",
+          "The proxy's IP, so everyone shares one limit",
+          "Nothing",
+          "Random IPs"
+        ],
+        "answer": 1,
+        "why": "Without trust proxy, req.ip is the proxy's address."
+      }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Trees: path sums",
+      "note": "Subtract each node's value from the target as you go down; check at the leaves.",
+      "problems": [
+        {
+          "title": "LeetCode 112: Path Sum",
+          "url": "https://leetcode.com/problems/path-sum/"
+        }
+      ]
+    },
+    "aptitude": {
+      "topic": "Verbal ability: active and passive voice",
+      "questions": [
+        {
+          "q": "Passive of 'The chef cooked the meal.'",
+          "options": [
+            "The meal was cooked by the chef.",
+            "The meal is cooked by the chef.",
+            "The chef was cooked by the meal.",
+            "The meal has cooked the chef."
+          ],
+          "answer": 0,
+          "why": "Past simple → was + past participle."
+        },
+        {
+          "q": "Passive of 'They are building a bridge.'",
+          "options": [
+            "A bridge is built by them.",
+            "A bridge is being built by them.",
+            "A bridge was being built.",
+            "A bridge has been built."
+          ],
+          "answer": 1,
+          "why": "Present continuous → is being + past participle."
+        },
+        {
+          "q": "Active of 'The letter was written by Priya.'",
+          "options": [
+            "Priya writes the letter.",
+            "Priya wrote the letter.",
+            "Priya has written the letter.",
+            "Priya was writing the letter."
+          ],
+          "answer": 1,
+          "why": "was written → wrote."
+        },
+        {
+          "q": "Passive of 'Someone has stolen my bike.'",
+          "options": [
+            "My bike was stolen.",
+            "My bike has been stolen.",
+            "My bike is stolen.",
+            "My bike had stolen."
+          ],
+          "answer": 1,
+          "why": "Present perfect → has been + past participle."
+        },
+        {
+          "q": "Passive of 'Will you finish the work?'",
+          "options": [
+            "Will the work be finished by you?",
+            "Is the work finished by you?",
+            "Will the work finished by you?",
+            "Would the work be finished?"
+          ],
+          "answer": 0,
+          "why": "will + be + past participle."
+        }
+      ]
+    },
+    "revision": [
+      "Day 106: explain why an Angular guard isn't real security."
+    ]
+  },
+  {
+    "day": 108,
+    "module": "auth-security",
+    "title": "Debug lab: the leaky auth middleware, and week review",
+    "goal": "Find authentication and authorisation bugs that would let users in, or see others' data.",
+    "learn": {
+      "concepts": [
+        "jwt.decode does NOT verify; always use jwt.verify",
+        "Leaking password hashes through SELECT *",
+        "Missing ownership checks (IDOR)",
+        "Wrong status codes for auth failures",
+        "Reading security code with an attacker's mindset"
+      ],
+      "resources": [
+        {
+          "title": "jsonwebtoken: verify vs decode",
+          "url": "https://github.com/auth0/node-jsonwebtoken#jwtdecodetoken--options"
+        },
+        {
+          "title": "OWASP API Security Top 10 (2023)",
+          "url": "https://owasp.org/API-Security/editions/2023/en/0x11-t10/"
+        }
+      ]
+    },
+    "build": {
+      "task": "Copy the starter into day108-debug/ in node-playground, npm install, npm start. Use curl: log in as asha@example.com / password123 and as ravi@example.com / password456. Expected: a token with a tampered payload (edit it on jwt.io without the secret) gets 401; GET /me never contains passwordHash; Ravi gets 404 for GET /notes/1 (Asha's note); no Authorization header gets 401 (not 500). There are 4 bugs. Write the attack that proves each bug before fixing it, and fix each in its own commit. Write week18-notes.md (Days 103–107).",
+      "starterFiles": [
+        {
+          "name": "day108-debug/package.json",
+          "content": "{\n  \"name\": \"day108-debug\",\n  \"type\": \"module\",\n  \"scripts\": { \"start\": \"node server.js\" },\n  \"dependencies\": { \"bcryptjs\": \"^3.0.2\", \"express\": \"^5.1.0\", \"jsonwebtoken\": \"^9.0.2\" }\n}\n"
+        },
+        {
+          "name": "day108-debug/server.js",
+          "content": "import express from 'express';\nimport bcrypt from 'bcryptjs';\nimport jwt from 'jsonwebtoken';\n\nconst SECRET = 'dev-only-secret-change-me-0123456789abcdef';\nconst app = express();\napp.use(express.json());\n\nconst users = [\n  { id: 1, email: 'asha@example.com', name: 'Asha', passwordHash: bcrypt.hashSync('password123', 10) },\n  { id: 2, email: 'ravi@example.com', name: 'Ravi', passwordHash: bcrypt.hashSync('password456', 10) },\n];\nconst notes = [\n  { id: 1, userId: 1, text: \"Asha's private note\" },\n  { id: 2, userId: 2, text: \"Ravi's private note\" },\n];\n\napp.post('/login', async (req, res) => {\n  const user = users.find((u) => u.email === req.body.email);\n  if (!user || !(await bcrypt.compare(req.body.password, user.passwordHash))) {\n    return res.status(401).json({ error: 'Invalid email or password' });\n  }\n  res.json({ token: jwt.sign({ sub: user.id }, SECRET, { expiresIn: '1h' }) });\n});\n\nfunction requireAuth(req, res, next) {\n  const token = req.headers.authorization.split(' ')[1];\n  const payload = jwt.decode(token);\n  if (!payload) return res.status(401).json({ error: 'Invalid token' });\n  req.userId = payload.sub;\n  next();\n}\n\napp.get('/me', requireAuth, (req, res) => {\n  res.json(users.find((u) => u.id === req.userId));\n});\n\napp.get('/notes/:id', requireAuth, (req, res) => {\n  const note = notes.find((n) => n.id === Number(req.params.id));\n  if (!note) return res.status(404).json({ error: 'Not found' });\n  res.json(note);\n});\n\napp.use((err, req, res, next) => {\n  console.error(err.message);\n  res.status(500).json({ error: 'Something went wrong' });\n});\n\napp.listen(3000, () => console.log('Auth demo on http://localhost:3000'));\n"
+        }
+      ],
+      "acceptance": [
+        "Tampered or forged tokens get 401 (jwt.verify used)",
+        "/me returns only id, email and name",
+        "Users get 404 for other users' notes",
+        "A missing or malformed Authorization header gets 401, not 500",
+        "4 fix commits, each with the attack written in the commit message; week18-notes.md written"
+      ]
+    },
+    "hints": [
+      "Take Ravi's token, change sub from 2 to 1 on jwt.io (the signature will be wrong), and call /me. Whose data comes back? Which function checks the signature, and which only reads the payload?",
+      "Look at everything /me returns. Should a client ever see that field?",
+      "Ravi asks for /notes/1. Nothing compares note.userId to req.userId. And with no header at all, req.headers.authorization is undefined, so .split crashes, which the error handler turns into a 500."
+    ],
+    "proof": "Link to your last fix commit.",
+    "explainBack": [
+      {
+        "q": "List the 4 bugs, the attack for each and the fix.",
+        "lookFor": [
+          "jwt.decode → jwt.verify (forged token impersonation)",
+          "/me leaks passwordHash → pick safe fields",
+          "no ownership check on notes → IDOR → filter by userId",
+          "missing header crashes → 401 check before split"
+        ]
+      },
+      {
+        "q": "Why is jwt.decode dangerous in auth middleware?",
+        "lookFor": [
+          "it doesn't check the signature",
+          "anyone can craft a payload",
+          "effectively no authentication"
+        ]
+      }
+    ],
+    "lastHintExplanation": "1) jwt.decode only base64-decodes the payload, so anyone can forge sub: 1 and become Asha; jwt.verify checks the signature. 2) /me returns the whole user object, including passwordHash; return only safe fields. 3) /notes/:id never checks ownership (IDOR); require note.userId === req.userId and return 404 otherwise. 4) A missing header makes .split throw, giving a 500; check for 'Bearer ' first and return 401.",
+    "predict": [
+      {
+        "q": "jwt.decode(token) is called on a token whose signature was changed. What does it return?",
+        "options": [
+          "null",
+          "The payload anyway",
+          "Throws",
+          "false"
+        ],
+        "answer": 1,
+        "why": "decode never checks the signature."
+      }
+    ],
+    "debugLab": {
+      "title": "The leaky auth middleware",
+      "symptoms": [
+        "A token edited without the secret is still accepted",
+        "/me returns the password hash",
+        "Ravi can read Asha's note",
+        "Requests without an Authorization header return 500"
+      ],
+      "files": [
+        "day108-debug/package.json",
+        "day108-debug/server.js"
+      ],
+      "bugCount": 4
+    },
+    "dsa": {
+      "pattern": "Trees: BFS by level",
+      "note": "Use a queue; process one level at a time by noting the queue length. Then re-solve Maximum Depth with BFS instead of recursion.",
+      "problems": [
+        {
+          "title": "LeetCode 102: Binary Tree Level Order Traversal",
+          "url": "https://leetcode.com/problems/binary-tree-level-order-traversal/"
+        },
+        {
+          "title": "LeetCode 104: Maximum Depth of Binary Tree (re-solve with BFS)",
+          "url": "https://leetcode.com/problems/maximum-depth-of-binary-tree/"
+        }
+      ]
+    },
+    "aptitude": {
+      "topic": "Mixed: DI and verbal",
+      "questions": [
+        {
+          "q": "Sales of 200, 250 and 300 over three months. What is the average monthly growth in units?",
+          "options": [
+            "25",
+            "50",
+            "75",
+            "100"
+          ],
+          "answer": 1,
+          "why": "(300 − 200)/2."
+        },
+        {
+          "q": "A pie chart sector is 54°. What percentage is it?",
+          "options": [
+            "12%",
+            "15%",
+            "18%",
+            "20%"
+          ],
+          "answer": 1,
+          "why": "54/360."
+        },
+        {
+          "q": "Which word means the same as 'Vulnerable'?",
+          "options": [
+            "Strong",
+            "Exposed",
+            "Safe",
+            "Hidden"
+          ],
+          "answer": 1,
+          "why": "Vulnerable means open to attack or harm."
+        },
+        {
+          "q": "'Every one of the candidates ___ been interviewed.'",
+          "options": [
+            "have",
+            "has",
+            "are",
+            "were"
+          ],
+          "answer": 1,
+          "why": "'Every one' is singular, so it takes 'has'."
+        },
+        {
+          "q": "Which word means the opposite of 'Authentic'?",
+          "options": [
+            "Genuine",
+            "Fake",
+            "Real",
+            "True"
+          ],
+          "answer": 1,
+          "why": "Authentic means genuine."
+        }
+      ]
+    },
+    "revision": [
+      "Days 103–107: from memory, write requireAuth with jwt.verify and a scoped UPDATE query."
+    ]
+  }
+]

@@ -1,0 +1,412 @@
+[
+  {
+    "day": 25,
+    "module": "js-fundamentals",
+    "title": "JavaScript properly: values, types and variables",
+    "goal": "Understand JavaScript's basic types and variables well enough to predict what simple code prints.",
+    "learn": {
+      "concepts": [
+        "Running JS: node file.js, the browser console, and <script src defer>",
+        "let vs const (and why to avoid var)",
+        "Primitive types: string, number, boolean, null, undefined (and bigint, symbol exist)",
+        "typeof and its quirks (typeof null is 'object')",
+        "Template literals: `Hello ${name}`",
+        "Type conversion: Number('42'), String(42), and surprises like '5' + 1"
+      ],
+      "resources": [
+        { "title": "javascript.info: Variables", "url": "https://javascript.info/variables" },
+        { "title": "javascript.info: Data types", "url": "https://javascript.info/types" },
+        { "title": "javascript.info: Type conversions", "url": "https://javascript.info/type-conversions" }
+      ]
+    },
+    "build": {
+      "task": "In day25/, write profile-card.js that runs with node. Store your name, age, city, isStudent and a skills count in well-named const/let variables. Print a formatted profile card using template literals (multi-line). Then write conversions.js that prints the result and typeof for at least 10 expressions you predicted first (e.g. '5' + 1, '5' - 1, Number(''), Number('abc'), true + 1, null + 1, undefined + 1). Write your prediction as a comment next to each line BEFORE running.",
+      "starterFiles": [
+        { "name": "day25/conversions.js", "content": "// Write your prediction in the comment BEFORE running. Then run: node day25/conversions.js\n// Mark wrong predictions with ❌ and explain why in one line.\n\nconsole.log('5' + 1, typeof ('5' + 1)); // prediction:\n" }
+      ],
+      "acceptance": [
+        "profile-card.js runs with node and prints a multi-line card using template literals",
+        "const is used for values that never change, let only where they do; no var",
+        "conversions.js has at least 10 expressions, each with a prediction comment written before running",
+        "Every wrong prediction has a one-line explanation"
+      ]
+    },
+    "hints": [
+      "Multi-line template literal: const card = `Name: ${name}\\nCity: ${city}`; or just press Enter inside the backticks.",
+      "+ with a string anywhere does string concatenation. -, *, / always try to convert to numbers.",
+      "Number('') is 0, Number('abc') is NaN, null becomes 0 in maths, undefined becomes NaN."
+    ],
+    "proof": "Commit with day25/profile-card.js and day25/conversions.js.",
+    "explainBack": [
+      { "q": "Pick one prediction you got wrong. Explain what JavaScript actually did.", "lookFor": ["names their actual expression", "explains the conversion rule involved", "e.g. + concatenates with strings, - converts to number"] },
+      { "q": "When do you use const and when let? Show an example from your code.", "lookFor": ["const can't be reassigned", "let for values that change", "const objects can still be mutated (bonus)", "example from their file"] }
+    ],
+    "lastHintExplanation": "The + operator concatenates if either side is a string, so '5' + 1 is '51'. Other arithmetic operators convert both sides to numbers, so '5' - 1 is 4. null converts to 0 and undefined to NaN. Use const by default and let only when the variable must be reassigned.",
+    "predict": [
+      { "q": "console.log('5' * '2')", "options": ["'52'", "10", "NaN", "'10'"], "answer": 1, "why": "* converts both strings to numbers." },
+      { "q": "console.log(typeof null)", "options": ["'null'", "'object'", "'undefined'", "Error"], "answer": 1, "why": "A historical bug in JavaScript: typeof null is 'object'." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Strings and arrays warm-up",
+      "note": "You now know more JS. Solve these with clear variable names and a comment explaining the idea.",
+      "problems": [
+        { "title": "LeetCode 1684: Count the Number of Consistent Strings", "url": "https://leetcode.com/problems/count-the-number-of-consistent-strings/" },
+        { "title": "LeetCode 1816: Truncate Sentence", "url": "https://leetcode.com/problems/truncate-sentence/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Time and work: basics",
+      "questions": [
+        { "q": "A can finish a job in 10 days and B in 15 days. How long do they take together?", "options": ["5 days", "6 days", "8 days", "12.5 days"], "answer": 1, "why": "1/10 + 1/15 = 1/6 of the job per day." },
+        { "q": "A alone takes 12 days. A and B together take 8 days. How long does B take alone?", "options": ["20 days", "24 days", "16 days", "30 days"], "answer": 1, "why": "1/8 − 1/12 = 1/24." },
+        { "q": "6 men finish a job in 10 days. How long would 15 men take?", "options": ["4 days", "5 days", "6 days", "25 days"], "answer": 0, "why": "The job is 60 man-days, and 60 / 15 = 4." },
+        { "q": "A works twice as fast as B. Together they finish in 12 days. How long would B take alone?", "options": ["18 days", "24 days", "36 days", "48 days"], "answer": 2, "why": "Rates are 2x + x = 3x = 1/12, so x = 1/36." },
+        { "q": "A does 1/3 of a job in 5 days. How long would the whole job take?", "options": ["10 days", "15 days", "20 days", "12 days"], "answer": 1, "why": "5 × 3 = 15." }
+      ]
+    },
+    "revision": ["Phase 1: open your live portfolio on your phone and fix one thing that bothers you."]
+  },
+  {
+    "day": 26,
+    "module": "js-fundamentals",
+    "title": "Operators, comparisons and conditions",
+    "goal": "Write branching logic correctly, including the traps of == vs === and truthy/falsy values.",
+    "learn": {
+      "concepts": [
+        "Arithmetic, assignment, increment, % (remainder)",
+        "Comparison: === and !== (use these), why == is risky",
+        "Truthy and falsy values: false, 0, '', null, undefined, NaN",
+        "Logical operators &&, ||, ! and short-circuiting",
+        "?? (nullish coalescing) vs ||",
+        "if / else if / else, ternary ?:, and switch"
+      ],
+      "resources": [
+        { "title": "javascript.info: Comparisons", "url": "https://javascript.info/comparison" },
+        { "title": "javascript.info: Logical operators", "url": "https://javascript.info/logical-operators" },
+        { "title": "javascript.info: Nullish coalescing operator", "url": "https://javascript.info/nullish-coalescing-operator" }
+      ]
+    },
+    "build": {
+      "task": "In day26/, write grades.js: a function-free script (functions come Day 28) that, for a hard-coded array of 6 students' marks, prints each student's grade (A ≥ 90, B ≥ 75, C ≥ 60, D ≥ 40, F below 40), whether they passed, and a special message using a switch for grade A and F. Then write shipping.js that calculates delivery cost from variables weightKg, isPrime, pincode and couponCode: free for Prime orders above 0.5 kg... design your own clear rules (at least 4) and write them as a comment at the top. Use ?? for a default couponCode.",
+      "starterFiles": [],
+      "acceptance": [
+        "Only === / !== used, never == or !=",
+        "Grade boundaries correct (test 90, 89, 75, 40, 39)",
+        "A switch handles at least two grade cases",
+        "shipping.js lists its rules in a comment and every rule is reachable",
+        "?? used for a default value and you can explain why || would differ"
+      ]
+    },
+    "hints": [
+      "Check the highest grade first: if (m >= 90) ... else if (m >= 75) .... Otherwise 95 would match '>= 40' first.",
+      "Test boundary values on purpose. Bugs live at 89/90, not at 50.",
+      "couponCode ?? 'NONE' replaces only null/undefined. couponCode || 'NONE' would also replace an empty string ''."
+    ],
+    "proof": "Commit with day26/grades.js and day26/shipping.js.",
+    "explainBack": [
+      { "q": "Why should you use === instead of ==? Give an example where == surprises you.", "lookFor": ["== converts types before comparing", "=== compares type and value", "example like 0 == '' is true or '1' == 1 is true"] },
+      { "q": "Explain the difference between ?? and || using your couponCode.", "lookFor": ["?? only for null/undefined", "|| for any falsy value (0, '', false)", "ties to their code"] },
+      { "q": "Why does the order of your if/else if conditions matter?", "lookFor": ["first true branch runs and the rest are skipped", "check highest threshold first", "otherwise wrong grade"] }
+    ],
+    "lastHintExplanation": "== converts types before comparing (0 == '' is true), which hides bugs; === requires the same type and value. || falls back on any falsy value (0, '', false, null, undefined, NaN) while ?? falls back only on null or undefined. In an if/else if chain the first true condition wins, so check the strictest threshold first.",
+    "predict": [
+      { "q": "console.log(0 || 'default', 0 ?? 'default')", "options": ["default default", "default 0", "0 0", "0 default"], "answer": 1, "why": "|| skips falsy 0; ?? keeps 0 because it's not null/undefined." },
+      { "q": "if ('0') { console.log('yes') } else { console.log('no') }", "options": ["yes", "no", "Error", "Nothing"], "answer": 0, "why": "'0' is a non-empty string, which is truthy." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Digits and math",
+      "note": "Extract digits with % 10 and Math.floor(n / 10). Trace on 234 by hand first.",
+      "problems": [
+        { "title": "LeetCode 1281: Subtract the Product and Sum of Digits of an Integer", "url": "https://leetcode.com/problems/subtract-the-product-and-sum-of-digits-of-an-integer/" },
+        { "title": "LeetCode 1323: Maximum 69 Number", "url": "https://leetcode.com/problems/maximum-69-number/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Pipes and cisterns",
+      "questions": [
+        { "q": "Pipe A fills a tank in 20 minutes and pipe B in 30 minutes. How long do both take together?", "options": ["10 min", "12 min", "15 min", "25 min"], "answer": 1, "why": "1/20 + 1/30 = 1/12." },
+        { "q": "A pipe fills a tank in 10 hours, but a leak empties it in 15 hours. How long does filling take with the leak?", "options": ["25 h", "30 h", "6 h", "20 h"], "answer": 1, "why": "1/10 − 1/15 = 1/30." },
+        { "q": "Pipe A fills a tank in 6 hours and pipe B empties it in 8 hours. If both are open, how long does filling take?", "options": ["24 h", "14 h", "12 h", "48 h"], "answer": 0, "why": "1/6 − 1/8 = 1/24." },
+        { "q": "Three pipes fill a tank in 10, 12 and 15 hours. How long do all three take together?", "options": ["3 h", "4 h", "5 h", "6 h"], "answer": 1, "why": "(6 + 5 + 4)/60 = 1/4." },
+        { "q": "A tap fills half a tank in 3 hours. How long does it take to fill the whole tank?", "options": ["3 h", "4.5 h", "6 h", "9 h"], "answer": 2, "why": "3 × 2 = 6 hours." }
+      ]
+    },
+    "revision": ["Day 25: predict '3' + 2 - 1 and '3' - 2 + 1 on paper, then check in the console."]
+  },
+  {
+    "day": 27,
+    "module": "js-fundamentals",
+    "title": "Loops in practice: a number guessing game",
+    "goal": "Use loops, break/continue and conditions together to build a small interactive game in the browser.",
+    "learn": {
+      "concepts": [
+        "for, while, do...while and when to use each",
+        "for...of over arrays and strings",
+        "break and continue",
+        "Math.random(), Math.floor() for random integers in a range",
+        "prompt(), alert() and console.log for quick browser interaction",
+        "Avoiding infinite loops"
+      ],
+      "resources": [
+        { "title": "javascript.info: Loops: while and for", "url": "https://javascript.info/while-for" },
+        { "title": "MDN: Math.random()", "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random" }
+      ]
+    },
+    "build": {
+      "task": "In day27/, build a number guessing game that runs in the browser (index.html loads game.js). The computer picks a random integer 1–100. The player has 7 tries using prompt(). After each guess say 'higher' or 'lower'; handle Cancel (null) by ending the game, and handle non-numbers by not counting the try. At the end, show the result and the list of guesses. Ask 'Play again?' with confirm(). Also write patterns.js (node) that prints a right-angle triangle and a multiplication table 1–10 using nested loops.",
+      "starterFiles": [],
+      "acceptance": [
+        "Random number is always an integer between 1 and 100 inclusive",
+        "At most 7 counted tries; invalid input doesn't use up a try",
+        "Pressing Cancel ends the game cleanly",
+        "Shows all guesses at the end and offers to play again",
+        "patterns.js prints a triangle and a 10×10 multiplication table with nested loops"
+      ]
+    },
+    "hints": [
+      "Random integer from 1 to 100: Math.floor(Math.random() * 100) + 1.",
+      "prompt returns a string, or null on Cancel. Check for null first, then convert with Number() and check Number.isNaN().",
+      "A while loop that counts tries: let tries = 0; while (tries < 7) { ... if (invalid) continue; tries++; ... if (correct) break; }."
+    ],
+    "proof": "Commit with day27/ files.",
+    "explainBack": [
+      { "q": "Show how your loop makes sure invalid input doesn't count as a try.", "lookFor": ["continue before incrementing tries", "or only increment on valid input", "references their code"] },
+      { "q": "Explain how Math.floor(Math.random() * 100) + 1 gives 1 to 100.", "lookFor": ["random gives 0 up to (not including) 1", "× 100 gives 0 to 99.999", "floor gives 0–99", "+1 shifts to 1–100"] }
+    ],
+    "lastHintExplanation": "Math.random() returns a number from 0 up to but not including 1. Multiplying by 100 gives 0–99.99…, Math.floor makes it 0–99, and +1 shifts the range to 1–100. Using continue before incrementing the counter skips invalid input without spending a try.",
+    "predict": [
+      { "q": "for (let i = 0; i < 5; i++) { if (i === 2) continue; if (i === 4) break; console.log(i) }", "options": ["0 1 2 3", "0 1 3", "0 1 3 4", "0 1"], "answer": 1, "why": "2 is skipped by continue; the loop stops at 4 before printing." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Math with arrays",
+      "note": "Look for a formula before writing a loop. Then check the formula with a loop.",
+      "problems": [
+        { "title": "LeetCode 1523: Count Odd Numbers in an Interval Range", "url": "https://leetcode.com/problems/count-odd-numbers-in-an-interval-range/" },
+        { "title": "LeetCode 1491: Average Salary Excluding the Minimum and Maximum Salary", "url": "https://leetcode.com/problems/average-salary-excluding-the-minimum-and-maximum-salary/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Time and work: men, days and wages",
+      "questions": [
+        { "q": "A finishes a job in 6 days and B in 12 days. Together they earn ₹1800. What is A's share?", "options": ["₹900", "₹1200", "₹600", "₹1000"], "answer": 1, "why": "Their rates are 2:1, so A gets 1800 × 2/3 = 1200." },
+        { "q": "12 men can finish a job in 18 days. After 6 days, 4 men leave. How many more days are needed?", "options": ["12", "15", "18", "24"], "answer": 2, "why": "The job is 216 man-days. 72 are done, leaving 144 for 8 men: 18 days." },
+        { "q": "A takes 20 days and B takes 30 days. A works 5 days and leaves. How long does B take to finish?", "options": ["20 days", "22.5 days", "25 days", "15 days"], "answer": 1, "why": "A does 1/4 of the job, leaving 3/4 × 30 = 22.5 days for B." },
+        { "q": "5 men or 8 women can do a job in 20 days. How long would 10 men and 4 women take?", "options": ["8 days", "10 days", "12 days", "6 days"], "answer": 0, "why": "10 men equal 16 women, so the team is 20 women. The job is 160 woman-days: 160/20 = 8." },
+        { "q": "A, B and C take 8, 12 and 24 days alone. How long do they take together?", "options": ["3 days", "4 days", "5 days", "6 days"], "answer": 1, "why": "(3 + 2 + 1)/24 = 1/4." }
+      ]
+    },
+    "revision": ["Day 26: write a grade calculator's if/else chain on paper from memory, then test 89 and 90."]
+  },
+  {
+    "day": 28,
+    "module": "js-functions",
+    "title": "Functions: parameters, return values and arrow functions",
+    "goal": "Break a program into small, well-named functions that take inputs and return outputs.",
+    "learn": {
+      "concepts": [
+        "Function declarations vs function expressions vs arrow functions",
+        "Parameters, arguments, default parameters",
+        "return: a function without return gives undefined",
+        "Pure functions: same input, same output, no side effects",
+        "Functions as values: passing a function to another function (callbacks)",
+        "Naming: verbs for functions (calculateTotal, isValidEmail)"
+      ],
+      "resources": [
+        { "title": "javascript.info: Functions", "url": "https://javascript.info/function-basics" },
+        { "title": "javascript.info: Arrow functions, the basics", "url": "https://javascript.info/arrow-functions-basics" },
+        { "title": "MDN: Functions guide", "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Functions" }
+      ]
+    },
+    "build": {
+      "task": "In day28/, refactor your Day 26 grades.js into functions: getGrade(marks), hasPassed(marks, passMark = 40), describeStudent(student), and average(numbers). Write a tiny test helper check(label, actual, expected) that prints ✅ or ❌, and write at least 12 checks covering boundaries. Then write utils.js with 5 pure functions of your choice (e.g. capitalize, isValidEmail, clamp, randomInt, countVowels), each with 2+ checks.",
+      "starterFiles": [
+        { "name": "day28/check.js", "content": "// Tiny test helper. Use it in your files: check('getGrade 90', getGrade(90), 'A');\nfunction check(label, actual, expected) {\n  const ok = actual === expected;\n  console.log(`${ok ? '✅' : '❌'} ${label}: got ${JSON.stringify(actual)}, expected ${JSON.stringify(expected)}`);\n}\n" }
+      ],
+      "acceptance": [
+        "getGrade, hasPassed, describeStudent and average exist and return values (no console.log inside them)",
+        "hasPassed uses a default parameter",
+        "At least 12 checks for grades.js, all ✅, including boundaries 39/40/59/60/74/75/89/90",
+        "utils.js has 5 pure functions with 2+ checks each",
+        "At least one arrow function and one function passed as an argument"
+      ]
+    },
+    "hints": [
+      "Copy check() into each file for now (modules come on Day 49).",
+      "A function that only console.logs is hard to test. Return the value, and print it outside.",
+      "Passing a function: const results = marks.map(getGrade) is the simplest example, or write applyToAll(arr, fn) yourself with a loop."
+    ],
+    "proof": "Commit with day28/ files. Paste the check output into the commit message or a results.txt.",
+    "explainBack": [
+      { "q": "What's the difference between a function that returns a value and one that prints it? Why did you return?", "lookFor": ["return gives the value back to the caller", "printing is a side effect", "returned values can be tested and reused"] },
+      { "q": "Explain what makes one of your utils functions pure.", "lookFor": ["same input always gives same output", "doesn't change outside variables", "no I/O", "names their function (randomInt is not pure)"] }
+    ],
+    "lastHintExplanation": "A function that returns a value hands it back to its caller, who can test it, store it or pass it on. One that only prints has a side effect and returns undefined. A pure function always gives the same output for the same input and changes nothing outside itself, which makes it easy to test. randomInt is not pure because its output varies.",
+    "predict": [
+      { "q": "function add(a, b) { a + b } console.log(add(2, 3))", "options": ["5", "undefined", "Error", "'23'"], "answer": 1, "why": "No return statement, so the function returns undefined." },
+      { "q": "const greet = (name = 'friend') => `Hi ${name}`; console.log(greet(undefined), greet(null))", "options": ["Hi friend Hi friend", "Hi friend Hi null", "Hi undefined Hi null", "Error"], "answer": 1, "why": "Defaults apply only for undefined, not null." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Hashing intro: Set",
+      "note": "A Set remembers what you've seen in O(1). Solve each one twice: with nested loops, then with a Set. Compare speed on big input.",
+      "problems": [
+        { "title": "LeetCode 217: Contains Duplicate", "url": "https://leetcode.com/problems/contains-duplicate/" },
+        { "title": "LeetCode 136: Single Number", "url": "https://leetcode.com/problems/single-number/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Simple interest",
+      "questions": [
+        { "q": "What is the simple interest on ₹5000 at 8% a year for 3 years?", "options": ["₹1000", "₹1200", "₹1500", "₹1800"], "answer": 1, "why": "5000 × 8 × 3 / 100 = 1200." },
+        { "q": "A sum doubles in 10 years at simple interest. What is the rate?", "options": ["5%", "8%", "10%", "12%"], "answer": 2, "why": "Interest = principal in 10 years, so 100%/10 = 10%." },
+        { "q": "₹4000 grows to ₹4800 in 2 years at simple interest. What is the rate?", "options": ["8%", "10%", "12%", "15%"], "answer": 1, "why": "800 = 4000 × r × 2/100, so r = 10." },
+        { "q": "What principal earns ₹900 simple interest at 6% a year in 5 years?", "options": ["₹2500", "₹3000", "₹3600", "₹4500"], "answer": 1, "why": "900 / (0.06 × 5) = 3000." },
+        { "q": "At what rate does a sum triple in 20 years at simple interest?", "options": ["10%", "15%", "20%", "5%"], "answer": 0, "why": "Interest is 200% over 20 years: 10% a year." }
+      ]
+    },
+    "revision": ["Day 27: write the random integer formula for a range min–max from memory and test it."]
+  },
+  {
+    "day": 29,
+    "module": "js-functions",
+    "title": "Scope, hoisting and closures",
+    "goal": "Predict which variables a function can see, and use closures to keep private state.",
+    "learn": {
+      "concepts": [
+        "Global, function and block scope (let/const are block-scoped)",
+        "The scope chain: inner functions see outer variables",
+        "Hoisting: function declarations vs let/const (temporal dead zone)",
+        "Closures: a function remembers the variables where it was created",
+        "Using closures for private state: counters, once(), simple caches",
+        "The classic var-in-a-loop bug"
+      ],
+      "resources": [
+        { "title": "javascript.info: Variable scope, closure", "url": "https://javascript.info/closure" },
+        { "title": "MDN: Closures", "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Closures" }
+      ]
+    },
+    "build": {
+      "task": "In day29/, write closures.js with: (1) createCounter(start = 0) returning { increment, decrement, reset, value } where the count can't be changed from outside; (2) once(fn) that lets fn run only the first time; (3) makeMultiplier(n) returning a function; (4) createBankAccount(owner) with deposit, withdraw (refuse if not enough balance) and getHistory. Use your check() helper for at least 12 checks. Finally write scope-puzzles.js: 5 short snippets about scope/hoisting with your prediction comment, then the actual output.",
+      "starterFiles": [],
+      "acceptance": [
+        "counter's count can't be read or changed except via its functions (no property holding it)",
+        "once(fn) returns the first result on later calls without running fn again",
+        "Bank account refuses to overdraw and records every transaction in history",
+        "At least 12 passing checks",
+        "scope-puzzles.js has 5 snippets with predictions and actual results, including the var-in-loop case"
+      ]
+    },
+    "hints": [
+      "Private state: declare let count inside createCounter, and return an object of functions that use it. Nothing outside can reach count directly.",
+      "once: keep let called = false and let result inside; on the first call set both, then always return result.",
+      "var-in-loop: for (var i = 0; i < 3; i++) setTimeout(() => console.log(i)) prints 3 3 3. Try it with let and explain the difference."
+    ],
+    "proof": "Commit with day29/ files.",
+    "explainBack": [
+      { "q": "Explain how your counter keeps count private. Where does count live after createCounter returns?", "lookFor": ["count is a local variable", "returned functions close over it", "closure keeps it alive", "nothing outside can access it directly"] },
+      { "q": "Why does the var loop print 3 3 3 but let prints 0 1 2?", "lookFor": ["var is function-scoped: one shared i", "let creates a new binding per iteration", "callbacks run after the loop finishes"] }
+    ],
+    "lastHintExplanation": "A closure is a function plus the variables it could see when it was created. createCounter's local count stays alive because the returned functions still reference it, but nothing else can reach it. With var there is one i shared by every iteration, so callbacks that run later all see its final value; let creates a fresh i for each iteration.",
+    "predict": [
+      { "q": "console.log(x); let x = 5;", "options": ["undefined", "5", "ReferenceError", "null"], "answer": 2, "why": "let is hoisted but in the temporal dead zone until its declaration runs." },
+      { "q": "sayHi(); function sayHi() { console.log('hi') }", "options": ["hi", "undefined", "ReferenceError", "TypeError"], "answer": 0, "why": "Function declarations are fully hoisted, so they can be called before the line they're written on." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Hashing: counting with objects/Maps",
+      "note": "Count characters or numbers in an object or Map, then compare counts.",
+      "problems": [
+        { "title": "LeetCode 242: Valid Anagram", "url": "https://leetcode.com/problems/valid-anagram/" },
+        { "title": "LeetCode 169: Majority Element", "url": "https://leetcode.com/problems/majority-element/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Compound interest",
+      "questions": [
+        { "q": "What is the compound interest on ₹10,000 at 10% a year for 2 years?", "options": ["₹2000", "₹2100", "₹2200", "₹2010"], "answer": 1, "why": "10,000 × 1.21 − 10,000 = 2100." },
+        { "q": "What does ₹8000 grow to at 5% compound interest a year for 2 years?", "options": ["₹8800", "₹8820", "₹8840", "₹8400"], "answer": 1, "why": "8000 × 1.05² = 8000 × 1.1025 = 8820." },
+        { "q": "What is the difference between compound and simple interest on ₹5000 at 10% for 2 years?", "options": ["₹25", "₹50", "₹100", "₹500"], "answer": 1, "why": "For 2 years the difference is P × (r/100)² = 5000 × 0.01 = 50." },
+        { "q": "A sum doubles in 5 years at compound interest. How long does it take to become 4 times?", "options": ["10 years", "15 years", "20 years", "25 years"], "answer": 0, "why": "It doubles every 5 years: ×2 in 5 years, ×4 in 10." },
+        { "q": "What does ₹1000 grow to in 1 year at 20% a year, compounded half-yearly?", "options": ["₹1200", "₹1210", "₹1220", "₹1100"], "answer": 1, "why": "10% per half-year: 1000 × 1.1² = 1210." }
+      ]
+    },
+    "revision": ["Day 28: name 3 benefits of pure functions without looking."]
+  },
+  {
+    "day": 30,
+    "module": "js-functions",
+    "title": "Debug lab: the broken shopping cart, and week review",
+    "goal": "Use console.log and the Node/Chrome debugger to find bugs in real JavaScript logic.",
+    "learn": {
+      "concepts": [
+        "Read the error message: type, message, file and line number",
+        "console.log with labels; console.table for arrays of objects",
+        "The debugger statement and breakpoints in Chrome DevTools or VS Code",
+        "Stepping: step over, step into, watch variables",
+        "Common JS bugs: missing return, off-by-one, = vs ===, wrong starting value"
+      ],
+      "resources": [
+        { "title": "Chrome DevTools: Debug JavaScript", "url": "https://developer.chrome.com/docs/devtools/javascript" },
+        { "title": "VS Code: Node.js debugging", "url": "https://code.visualstudio.com/docs/nodejs/nodejs-debugging" }
+      ]
+    },
+    "build": {
+      "task": "Copy the starter into day30/debug/cart.js and run it with node. It should print Total ₹1130.00, With SAVE10 ₹1017.00, With WRONG ₹1130.00 and Cheapest: Pen. It has 4 bugs. Find each one using console.log or a breakpoint (not by guessing), fix it, and commit each fix separately. Then add 6 checks with your check() helper so these bugs can't come back. Finish with day30/week5-notes.md: one confident topic and one weak topic for each of Days 25–29.",
+      "starterFiles": [
+        { "name": "day30/debug/cart.js", "content": "// Shopping cart helpers. Run: node day30/debug/cart.js\nconst cart = [\n  { name: 'Notebook', price: 60, qty: 3 },\n  { name: 'Pen', price: 10, qty: 5 },\n  { name: 'Bag', price: 900, qty: 1 },\n];\n\nfunction lineTotal(item) {\n  item.price * item.qty;\n}\n\nfunction cartTotal(items) {\n  let total = 0;\n  for (let i = 0; i <= items.length; i++) {\n    total += lineTotal(items[i]);\n  }\n  return total;\n}\n\nfunction applyCoupon(total, code) {\n  if (code = 'SAVE10') {\n    return total * 0.9;\n  }\n  return total;\n}\n\nfunction cheapestItem(items) {\n  let cheapest = { price: 0 };\n  for (const item of items) {\n    if (item.price < cheapest.price) cheapest = item;\n  }\n  return cheapest.name;\n}\n\nconst rupees = (amount) => '₹' + amount.toFixed(2);\n\nconsole.log('Total:', rupees(cartTotal(cart)));                          // expect ₹1130.00\nconsole.log('With SAVE10:', rupees(applyCoupon(cartTotal(cart), 'SAVE10'))); // expect ₹1017.00\nconsole.log('With WRONG:', rupees(applyCoupon(cartTotal(cart), 'WRONG')));   // expect ₹1130.00\nconsole.log('Cheapest:', cheapestItem(cart));                              // expect Pen\n" }
+      ],
+      "acceptance": [
+        "Output matches the 4 expected lines exactly",
+        "4 separate fix commits with messages naming each bug",
+        "6 checks added that would catch each bug",
+        "week5-notes.md has entries for Days 25–29"
+      ]
+    },
+    "hints": [
+      "First run shows a crash. Read the error: which line, and what was undefined? Then log what lineTotal returns.",
+      "Log i and items[i] inside the loop. Does the loop run one time too many?",
+      "In applyCoupon, a single = assigns, so the condition is always truthy. For cheapestItem, what's the first price that could ever be less than 0?"
+    ],
+    "proof": "Link to your final fix commit.",
+    "explainBack": [
+      { "q": "Describe how you found the off-by-one bug. What did the log or debugger show?", "lookFor": ["logged i / items[i] or used breakpoint", "saw items[3] is undefined", "<= should be <"] },
+      { "q": "Why did if (code = 'SAVE10') always run the discount?", "lookFor": ["= assigns instead of compares", "result of assignment is 'SAVE10', which is truthy", "should be ==="] },
+      { "q": "What starting value should cheapestItem use and why?", "lookFor": ["items[0] or Infinity", "no price is below 0, so the original never changes", "returns undefined name"] }
+    ],
+    "lastHintExplanation": "Bug 1: lineTotal has no return, so it returns undefined and the total becomes NaN. Bug 2: i <= items.length reads items[3], which is undefined; use <. Bug 3: code = 'SAVE10' assigns, and the non-empty string is truthy, so every code gets the discount; use ===. Bug 4: cheapest starts at price 0, which no item beats; start from items[0] or Infinity.",
+    "predict": [
+      { "q": "let total = 0; total += undefined; console.log(total)", "options": ["0", "undefined", "NaN", "Error"], "answer": 2, "why": "0 + undefined is NaN, and NaN spreads through any later arithmetic." }
+    ],
+    "debugLab": {
+      "title": "The broken shopping cart",
+      "symptoms": [
+        "The script crashes or prints NaN for the total",
+        "Every coupon code gets the 10% discount",
+        "Cheapest item prints undefined instead of Pen"
+      ],
+      "files": ["day30/debug/cart.js"],
+      "bugCount": 4
+    },
+    "dsa": {
+      "pattern": "Arrays and hashing: Two Sum",
+      "note": "The most famous interview problem. First solve with two loops, then with a Map storing value → index. Explain why the Map version is faster.",
+      "problems": [
+        { "title": "LeetCode 1: Two Sum", "url": "https://leetcode.com/problems/two-sum/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Timed mixed: work and interest",
+      "questions": [
+        { "q": "A takes 15 days and B takes 10 days. How long do they take together?", "options": ["5 days", "6 days", "7.5 days", "12.5 days"], "answer": 1, "why": "1/15 + 1/10 = 5/30 = 1/6." },
+        { "q": "What is the simple interest on ₹2500 at 12% for 2 years?", "options": ["₹500", "₹600", "₹700", "₹300"], "answer": 1, "why": "2500 × 12 × 2 / 100 = 600." },
+        { "q": "One pipe fills a tank in 4 hours and another empties it in 6 hours. Both are open. How long does filling take?", "options": ["10 h", "12 h", "2.4 h", "24 h"], "answer": 1, "why": "1/4 − 1/6 = 1/12." },
+        { "q": "What is the compound interest on ₹2000 at 10% for 2 years?", "options": ["₹400", "₹410", "₹420", "₹440"], "answer": 2, "why": "2000 × 1.21 − 2000 = 420." },
+        { "q": "8 men finish a job in 12 days. How long would 6 men take?", "options": ["9 days", "14 days", "16 days", "18 days"], "answer": 2, "why": "96 man-days / 6 = 16." }
+      ]
+    },
+    "revision": ["Days 25–29: rewrite createCounter from memory in under 5 minutes."]
+  }
+]

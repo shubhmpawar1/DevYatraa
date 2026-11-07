@@ -1,0 +1,407 @@
+[
+  {
+    "day": 43,
+    "module": "js-async",
+    "title": "Asynchronous JavaScript: the event loop and callbacks",
+    "goal": "Predict the order in which synchronous code, timers and callbacks run.",
+    "learn": {
+      "concepts": [
+        "JavaScript runs one thing at a time (single thread)",
+        "The call stack",
+        "setTimeout and setInterval hand work to the browser/Node and come back later",
+        "The task queue and the event loop",
+        "Microtasks (promises) run before the next task (timers)",
+        "Callbacks and 'callback hell'"
+      ],
+      "resources": [
+        { "title": "javascript.info: Event loop: microtasks and macrotasks", "url": "https://javascript.info/event-loop" },
+        { "title": "javascript.info: Introduction: callbacks", "url": "https://javascript.info/callbacks" },
+        { "title": "Philip Roberts: What the heck is the event loop anyway? (video)", "url": "https://www.youtube.com/watch?v=8aGhZQkoFbQ" }
+      ]
+    },
+    "build": {
+      "task": "In day43/: (1) order.js: write 8 snippets mixing console.log, setTimeout(…, 0), setTimeout(…, 100) and Promise.resolve().then(…). Write your predicted output order as a comment before running each, then the actual result. (2) timer.html: a countdown timer page with start, pause and reset buttons and a minutes:seconds display, using setInterval and clearInterval. It must not speed up if you press Start twice. (3) callbacks.js: write loadStep(name, ms, callback) using setTimeout, then chain 3 steps with nested callbacks, and write in a comment why this nesting gets painful.",
+      "starterFiles": [],
+      "acceptance": [
+        "8 order snippets, each with a prediction written before running and the actual output",
+        "Every wrong prediction explained in one line using the words stack, task or microtask",
+        "Timer shows mm:ss, pauses, resumes and resets correctly",
+        "Pressing Start twice doesn't create a second interval",
+        "callbacks.js runs 3 steps in order using nested callbacks"
+      ]
+    },
+    "hints": [
+      "Rule of thumb: all synchronous code first, then all promise callbacks (microtasks), then timer callbacks (tasks), in time order.",
+      "Store the interval id: let intervalId = null; on Start, if (intervalId) return; on Pause, clearInterval(intervalId); intervalId = null.",
+      "Format seconds: String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0')."
+    ],
+    "proof": "Commit with day43/ files.",
+    "explainBack": [
+      { "q": "Take one of your snippets and explain its output order using the call stack, the microtask queue and the task queue.", "lookFor": ["synchronous runs first on the stack", "promise .then is a microtask", "setTimeout callback is a task", "microtasks drain before next task"] },
+      { "q": "Why does setTimeout(fn, 0) not run immediately?", "lookFor": ["callback is queued as a task", "runs only after the stack is empty (and microtasks done)", "0 is a minimum delay, not exact"] }
+    ],
+    "lastHintExplanation": "JavaScript runs synchronous code to completion on the call stack. A setTimeout callback goes to the task queue and a promise .then goes to the microtask queue. When the stack is empty, the event loop runs all microtasks first, then the next task. So the order is sync logs, then .then callbacks, then timers, even with a 0 ms delay.",
+    "predict": [
+      { "q": "console.log('A'); setTimeout(() => console.log('B'), 0); Promise.resolve().then(() => console.log('C')); console.log('D');", "options": ["A B C D", "A D B C", "A D C B", "A C D B"], "answer": 2, "why": "Sync A and D, then microtask C, then timer B." },
+      { "q": "setTimeout(() => console.log(1), 100); setTimeout(() => console.log(2), 0); console.log(3);", "options": ["1 2 3", "3 2 1", "3 1 2", "2 3 1"], "answer": 1, "why": "Sync 3 first, then the 0 ms timer, then the 100 ms timer." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Arrays",
+      "note": "Use the array itself to mark seen values, or a Set. Then build rows from the previous row.",
+      "problems": [
+        { "title": "LeetCode 448: Find All Numbers Disappeared in an Array", "url": "https://leetcode.com/problems/find-all-numbers-disappeared-in-an-array/" },
+        { "title": "LeetCode 118: Pascal's Triangle", "url": "https://leetcode.com/problems/pascals-triangle/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Speed and distance: harder",
+      "questions": [
+        { "q": "A man walks somewhere at 4 km/h and returns at 6 km/h. The round trip takes 5 hours. How far is it one way?", "options": ["10 km", "12 km", "15 km", "24 km"], "answer": 1, "why": "d/4 + d/6 = 5 gives 5d/12 = 5, so d = 12." },
+        { "q": "A train passes a 300 m platform in 30 seconds and a pole in 15 seconds. How long is the train?", "options": ["150 m", "300 m", "450 m", "600 m"], "answer": 1, "why": "L/15 = (L + 300)/30, so L = 300." },
+        { "q": "A car covers 35 km in the first hour and 2 km more each hour after that. How far does it go in 12 hours?", "options": ["552 km", "540 km", "560 km", "520 km"], "answer": 0, "why": "35, 37, …, 57 is an arithmetic series: 12/2 × (35 + 57) = 552." },
+        { "q": "Two speeds are in the ratio 3:4. What is the ratio of times for the same distance?", "options": ["3:4", "4:3", "9:16", "16:9"], "answer": 1, "why": "Time is inversely proportional to speed." },
+        { "q": "A man walks at 5 km/h for 6 hours, then at 4 km/h for 9 hours. What is his average speed?", "options": ["4.4 km/h", "4.5 km/h", "4.6 km/h", "4.2 km/h"], "answer": 0, "why": "(30 + 36) / 15 = 4.4." }
+      ]
+    },
+    "revision": ["Day 41: explain event delegation to an imaginary friend in 4 sentences."]
+  },
+  {
+    "day": 44,
+    "module": "js-async",
+    "title": "Promises",
+    "goal": "Create and chain promises, and handle errors with catch.",
+    "learn": {
+      "concepts": [
+        "A promise is a placeholder for a future value: pending, fulfilled, rejected",
+        "new Promise((resolve, reject) => ...) to wrap callback code",
+        ".then returns a new promise, so you can chain",
+        ".catch handles any rejection earlier in the chain; .finally always runs",
+        "Promise.all, Promise.allSettled, Promise.race, Promise.any",
+        "Always return inside .then when chaining"
+      ],
+      "resources": [
+        { "title": "javascript.info: Promise", "url": "https://javascript.info/promise-basics" },
+        { "title": "javascript.info: Promises chaining", "url": "https://javascript.info/promise-chaining" },
+        { "title": "javascript.info: Promise API", "url": "https://javascript.info/promise-api" }
+      ]
+    },
+    "build": {
+      "task": "In day44/: (1) rewrite yesterday's loadStep as loadStepP(name, ms) returning a promise, and chain 3 steps with .then (flat, no nesting). (2) Write fakeFetch(url) that resolves with fake data after a random 100–600 ms, or rejects 20% of the time with an Error. Use it with .then/.catch/.finally to print a result or a friendly error and always print 'request finished'. (3) Load 4 fake URLs with Promise.all and with Promise.allSettled, and print how the two behave when one fails. (4) Write timeout(promise, ms) using Promise.race that rejects with 'Timed out' if the promise is too slow.",
+      "starterFiles": [],
+      "acceptance": [
+        "3-step chain with no nested .then",
+        "fakeFetch rejects with an Error object, and catch prints its message",
+        ".finally prints on both success and failure",
+        "Output shows Promise.all failing fast and allSettled reporting every result",
+        "timeout() works: a 2000 ms promise with timeout(…, 500) rejects with 'Timed out'"
+      ]
+    },
+    "hints": [
+      "Flat chain: loadStepP('a', 300).then(() => loadStepP('b', 200)).then(() => loadStepP('c', 100)). Returning the next promise keeps the chain waiting.",
+      "Random failure: if (Math.random() < 0.2) reject(new Error(`Failed: ${url}`)); else resolve({ url, data: ... }).",
+      "timeout: return Promise.race([promise, new Promise((_, reject) => setTimeout(() => reject(new Error('Timed out')), ms))])."
+    ],
+    "proof": "Commit with day44/ files.",
+    "explainBack": [
+      { "q": "What's the difference between Promise.all and Promise.allSettled? When would you use each?", "lookFor": ["all rejects as soon as one fails", "allSettled waits for all and reports status of each", "all when you need every result; allSettled when partial results are OK"] },
+      { "q": "Why must you return the next promise inside .then?", "lookFor": ["otherwise the chain doesn't wait for it", "next .then runs immediately with undefined", "errors aren't caught by the outer catch"] }
+    ],
+    "lastHintExplanation": "Each .then returns a new promise that resolves with whatever the callback returns. If you return another promise, the chain waits for it; if you forget, the next step runs immediately with undefined and its errors escape your .catch. Promise.all rejects as soon as any input rejects; Promise.allSettled always waits and gives you each result's status.",
+    "predict": [
+      { "q": "Promise.reject(new Error('x')).then(() => console.log('A')).catch(() => console.log('B')).then(() => console.log('C'))", "options": ["A C", "B", "B C", "A B C"], "answer": 2, "why": "A is skipped; catch handles the error and returns a fulfilled promise, so C runs." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Arrays: Kadane's algorithm",
+      "note": "Keep the best sum ending here and the best overall. Explain why you reset when the running sum goes negative.",
+      "problems": [
+        { "title": "LeetCode 53: Maximum Subarray", "url": "https://leetcode.com/problems/maximum-subarray/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Time and work: pairs and groups",
+      "questions": [
+        { "q": "A+B take 12 days, B+C take 15 days and C+A take 20 days. How long do A, B and C take together?", "options": ["8 days", "10 days", "12 days", "15 days"], "answer": 1, "why": "Adding the pairs counts each person twice: 2(A + B + C) = 1/12 + 1/15 + 1/20 = 1/5, so together they do 1/10 a day." },
+        { "q": "Using the previous question, how long does A take alone?", "options": ["20 days", "24 days", "30 days", "60 days"], "answer": 2, "why": "A = 1/10 − (B + C) = 1/10 − 1/15 = 1/30." },
+        { "q": "A takes 18 days and B takes 15 days. B works 10 days and leaves. How long does A take to finish?", "options": ["5 days", "6 days", "8 days", "9 days"], "answer": 1, "why": "B does 2/3 of the job, leaving 1/3 × 18 = 6 days for A." },
+        { "q": "20 men build 56 m of wall in 6 days. How much would 35 men build in 3 days?", "options": ["42 m", "49 m", "56 m", "63 m"], "answer": 1, "why": "56 × (35 × 3)/(20 × 6) = 56 × 105/120 = 49." },
+        { "q": "A takes 4 hours, B and C together take 3 hours, and A and C together take 2 hours. How long does B take alone?", "options": ["8 h", "10 h", "12 h", "14 h"], "answer": 2, "why": "C = 1/2 − 1/4 = 1/4, so B = 1/3 − 1/4 = 1/12." }
+      ]
+    },
+    "revision": ["Day 43: predict the order of: log, setTimeout 0, Promise.then, log. Then check."]
+  },
+  {
+    "day": 45,
+    "module": "js-async",
+    "title": "async/await and error handling",
+    "goal": "Write asynchronous code that reads like normal code, with proper error handling and parallel requests.",
+    "learn": {
+      "concepts": [
+        "async functions always return a promise",
+        "await pauses the function (not the whole program) until a promise settles",
+        "try/catch/finally with await",
+        "Sequential awaits vs parallel with Promise.all",
+        "for...of with await for ordered work; why forEach doesn't wait",
+        "Top-level await in modules"
+      ],
+      "resources": [
+        { "title": "javascript.info: Async/await", "url": "https://javascript.info/async-await" },
+        { "title": "MDN: async function", "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function" }
+      ]
+    },
+    "build": {
+      "task": "In day45/, rewrite all of Day 44 using async/await. Then write: (1) loadSequential(urls) and loadParallel(urls) using fakeFetch, timing both with console.time and explaining the difference in a comment; (2) retry(fn, attempts = 3, delayMs = 300) that retries a failing async function and throws the last error after all attempts; (3) loadWithFallback(url) that returns cached data from a Map if the request fails. Use try/catch/finally properly everywhere.",
+      "starterFiles": [],
+      "acceptance": [
+        "No .then chains in the rewritten code; async/await throughout",
+        "Timing output shows parallel is faster than sequential for 4 URLs, with a comment explaining why",
+        "retry retries the right number of times, waits between tries and rethrows the last error",
+        "loadWithFallback stores successes in a Map and returns cached data on failure",
+        "No await inside forEach anywhere"
+      ]
+    },
+    "hints": [
+      "Parallel: const results = await Promise.all(urls.map(u => fakeFetch(u))); starts all requests at once.",
+      "retry: for (let i = 1; i <= attempts; i++) { try { return await fn(); } catch (e) { lastError = e; await sleep(delayMs); } } throw lastError;",
+      "sleep helper: const sleep = ms => new Promise(r => setTimeout(r, ms));"
+    ],
+    "proof": "Commit with day45/ files including the timing output in a comment.",
+    "explainBack": [
+      { "q": "Explain why loadParallel is faster than loadSequential with your timing numbers.", "lookFor": ["sequential waits for each before starting the next", "parallel starts all at once", "total ≈ slowest vs sum of all", "quotes their numbers"] },
+      { "q": "In retry, why do you write return await fn() inside try instead of return fn()?", "lookFor": ["without await, the rejection happens after leaving try", "catch wouldn't run", "await makes the error throw inside try"] }
+    ],
+    "lastHintExplanation": "Sequential awaits start each request only after the previous one finishes, so the total time is the sum. Promise.all starts them all at once, so the total is roughly the slowest. Inside try, return fn() hands back a pending promise and leaves the try block before it rejects, so catch never runs; return await fn() makes the rejection throw inside the try.",
+    "predict": [
+      { "q": "async function f() { return 5 } console.log(f())", "options": ["5", "Promise {5} (a promise)", "undefined", "Error"], "answer": 1, "why": "async functions always return a promise." },
+      { "q": "async function f() { console.log(1); await null; console.log(2) } f(); console.log(3)", "options": ["1 2 3", "1 3 2", "3 1 2", "1 2 3 then error"], "answer": 1, "why": "f runs synchronously until await, then the rest resumes as a microtask after 3." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Arrays",
+      "note": "Rotate in place using three reversals. Then group consecutive numbers into ranges.",
+      "problems": [
+        { "title": "LeetCode 189: Rotate Array", "url": "https://leetcode.com/problems/rotate-array/" },
+        { "title": "LeetCode 228: Summary Ranges", "url": "https://leetcode.com/problems/summary-ranges/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Interest: harder",
+      "questions": [
+        { "q": "At simple interest, a sum grows to ₹7200 in 2 years and ₹8400 in 5 years. What is the principal?", "options": ["₹6000", "₹6400", "₹6800", "₹7000"], "answer": 1, "why": "3 years of interest = 1200, so 400 a year. 7200 − 800 = 6400." },
+        { "q": "What is the compound interest on ₹4000 at 5% for 3 years?", "options": ["₹600", "₹630.50", "₹615", "₹640.50"], "answer": 1, "why": "4000 × 1.157625 = 4630.50." },
+        { "q": "At what compound rate does ₹2000 become ₹2420 in 2 years?", "options": ["10%", "11%", "12%", "21%"], "answer": 0, "why": "2420/2000 = 1.21 = 1.1²." },
+        { "q": "The simple interest for 4 years is 1/5 of the principal. What is the rate?", "options": ["4%", "5%", "6%", "8%"], "answer": 1, "why": "20% over 4 years is 5% a year." },
+        { "q": "What is the effective annual rate of 10% a year compounded half-yearly?", "options": ["10%", "10.25%", "10.5%", "11%"], "answer": 1, "why": "1.05² = 1.1025." }
+      ]
+    },
+    "revision": ["Day 44: explain Promise.all vs allSettled without notes."]
+  },
+  {
+    "day": 46,
+    "module": "js-async",
+    "title": "fetch and REST APIs",
+    "goal": "Fetch real data from public APIs, handle errors properly, and render it on a page.",
+    "learn": {
+      "concepts": [
+        "What a REST API is: URLs for resources, HTTP methods for actions",
+        "fetch(url) returns a Response; await res.json() for the body",
+        "fetch only rejects on network failure: check res.ok for 404/500",
+        "Query parameters with URLSearchParams",
+        "POST with method, headers and JSON.stringify body",
+        "CORS in one sentence: the server decides which websites may read its responses"
+      ],
+      "resources": [
+        { "title": "javascript.info: Fetch", "url": "https://javascript.info/fetch" },
+        { "title": "MDN: Using the Fetch API", "url": "https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch" },
+        { "title": "JSONPlaceholder (free fake REST API)", "url": "https://jsonplaceholder.typicode.com/" }
+      ]
+    },
+    "build": {
+      "task": "In day46/, build a 'GitHub profile finder': a form where you type a username; on submit, fetch https://api.github.com/users/{username} and https://api.github.com/users/{username}/repos?sort=updated&per_page=5 in parallel. Show avatar, name, bio, followers and the 5 latest repos with links. Handle: empty input, user not found (404) with a friendly message, network error, and a loading state (disable the button and show 'Loading…'). Also create posts.html that POSTs a new post to JSONPlaceholder (/posts) and shows the returned id.",
+      "starterFiles": [],
+      "acceptance": [
+        "Profile and repos load in parallel with Promise.all",
+        "res.ok is checked; a 404 shows 'User not found' (not a crash)",
+        "Loading state shown and button disabled during the request",
+        "Network errors (try offline mode in DevTools) show a friendly message",
+        "All API text rendered with textContent (no innerHTML with API data)",
+        "POST to JSONPlaceholder sends JSON with the right header and shows the response id"
+      ]
+    },
+    "hints": [
+      "Helper: async function getJSON(url) { const res = await fetch(url); if (!res.ok) throw new Error(`HTTP ${res.status}`); return res.json(); } Then check the message for 404.",
+      "Simulate offline: DevTools → Network → throttling dropdown → Offline.",
+      "POST: fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, body, userId: 1 }) })."
+    ],
+    "proof": "Commit with day46/ files.",
+    "explainBack": [
+      { "q": "Why doesn't fetch reject on a 404? How does your code handle it?", "lookFor": ["fetch only rejects on network failure", "404 is a valid HTTP response", "check res.ok / res.status and throw"] },
+      { "q": "Explain your loading state: when does it start and how do you make sure it always ends?", "lookFor": ["set before awaiting", "cleared in finally", "so it ends on success and on error"] },
+      { "q": "What headers and body did you send in the POST and why?", "lookFor": ["Content-Type: application/json tells server the body format", "body is a JSON string", "method POST creates a resource"] }
+    ],
+    "lastHintExplanation": "fetch resolves whenever the server replies, even with 404 or 500; it only rejects when there's no response at all (offline, DNS failure). So check res.ok and throw yourself. Start the loading state before awaiting and clear it in finally so it ends on both success and error.",
+    "predict": [
+      { "q": "const res = await fetch('https://api.github.com/users/this-user-does-not-exist-xyz'); console.log(res.ok, res.status)", "options": ["Throws an error", "false 404", "true 404", "false 500"], "answer": 1, "why": "The request succeeded at network level; the server answered 404, so ok is false." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Hashing: grids",
+      "note": "Use one Set per row, column and box, or a single Set with keys like 'r3-5'. Medium problem.",
+      "problems": [
+        { "title": "LeetCode 36: Valid Sudoku", "url": "https://leetcode.com/problems/valid-sudoku/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Pipes and cisterns: harder",
+      "questions": [
+        { "q": "Two pipes fill a tank in 12 and 15 minutes, and an outlet empties it in 20 minutes. With all three open, how long does filling take?", "options": ["8 min", "10 min", "12 min", "15 min"], "answer": 1, "why": "1/12 + 1/15 − 1/20 = 6/60 = 1/10." },
+        { "q": "A tank normally fills in 6 hours, but takes 8 hours because of a leak. How long would the leak take to empty a full tank?", "options": ["12 h", "18 h", "24 h", "48 h"], "answer": 2, "why": "1/6 − 1/8 = 1/24." },
+        { "q": "Pipe A fills a tank in 10 minutes and B in 15. A runs for 4 minutes and is then closed. How long does B take to fill the rest?", "options": ["6 min", "9 min", "10 min", "12 min"], "answer": 1, "why": "A fills 2/5, leaving 3/5 × 15 = 9 min for B." },
+        { "q": "A and B fill a tank in 20 and 30 minutes. Both open, and A is closed after 6 minutes. What is the total filling time?", "options": ["18 min", "21 min", "24 min", "15 min"], "answer": 1, "why": "In 6 minutes they fill 6 × 1/12 = 1/2. B fills the other half in 15 min: 6 + 15 = 21." },
+        { "q": "A pump fills a tank in 2 hours, but takes 2⅓ hours because of a leak. How long would the leak take to empty it?", "options": ["7 h", "10 h", "14 h", "12 h"], "answer": 2, "why": "1/2 − 3/7 = 1/14." }
+      ]
+    },
+    "revision": ["Day 45: write retry() from memory."]
+  },
+  {
+    "day": 47,
+    "module": "js-async",
+    "title": "Project: weather app with search, loading and errors",
+    "goal": "Build a polished weather app on a real API with search, debounced suggestions, and solid loading and error states.",
+    "learn": {
+      "concepts": [
+        "Reading API docs: endpoints, parameters, response shape",
+        "Chaining requests: city name → coordinates → forecast",
+        "Debouncing input so you don't send a request on every keystroke",
+        "Ignoring out-of-date responses (race conditions) with AbortController",
+        "UI states: idle, loading, success, empty, error"
+      ],
+      "resources": [
+        { "title": "Open-Meteo: Weather Forecast API docs (no key needed)", "url": "https://open-meteo.com/en/docs" },
+        { "title": "Open-Meteo: Geocoding API docs", "url": "https://open-meteo.com/en/docs/geocoding-api" },
+        { "title": "MDN: AbortController", "url": "https://developer.mozilla.org/en-US/docs/Web/API/AbortController" }
+      ]
+    },
+    "build": {
+      "task": "In day47/, build a weather app with Open-Meteo (no API key). Typing a city shows up to 5 suggestions from the geocoding API (debounced 300 ms; cancel the previous request with AbortController). Choosing one fetches the current temperature, a weather description from the weather code, and a 5-day min/max forecast. Show clear loading, empty ('No cities found') and error states. Remember the last 5 searched cities in localStorage as quick buttons. Make it responsive and accessible.",
+      "starterFiles": [],
+      "acceptance": [
+        "Suggestions are debounced (no request per keystroke, check the Network tab)",
+        "Older suggestion requests are aborted; fast typing never shows stale results",
+        "Current weather and 5-day forecast shown with readable descriptions for weather codes",
+        "Distinct loading, empty and error states",
+        "Last 5 cities remembered and clickable after reload",
+        "Usable with keyboard only and on a phone"
+      ]
+    },
+    "hints": [
+      "Geocoding: https://geocoding-api.open-meteo.com/v1/search?name=Pune&count=5. Forecast: https://api.open-meteo.com/v1/forecast?latitude=..&longitude=..&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=auto.",
+      "Debounce: let t; input.addEventListener('input', () => { clearTimeout(t); t = setTimeout(search, 300); }).",
+      "Abort: keep let controller; before each search: controller?.abort(); controller = new AbortController(); fetch(url, { signal: controller.signal }). Ignore errors whose name is 'AbortError'."
+    ],
+    "proof": "Commit with day47/ files. Optional: deploy it to GitHub Pages and link it.",
+    "explainBack": [
+      { "q": "What problem does debouncing solve, and how does your debounce code work?", "lookFor": ["too many requests per keystroke", "clearTimeout resets the timer on each key", "request only after pause of 300 ms"] },
+      { "q": "Describe the race condition AbortController prevents.", "lookFor": ["older slower response could arrive after newer one", "stale suggestions overwrite fresh ones", "abort cancels previous request"] }
+    ],
+    "lastHintExplanation": "Debouncing waits until the user pauses typing: each keystroke clears the previous timer, so only the last one fires. Without aborting, a slow response for 'Pu' could arrive after the response for 'Pune' and overwrite the newer suggestions. AbortController cancels the old request so only the latest one can update the UI.",
+    "predict": [
+      { "q": "With a 300 ms debounce, a user types 'Pune' with 100 ms between keys and then stops. How many searches run?", "options": ["4", "1", "0", "2"], "answer": 1, "why": "Each key resets the timer; only the pause after the last key triggers a search." }
+    ],
+    "debugLab": null,
+    "dsa": {
+      "pattern": "Hashing: cycle detection",
+      "note": "Store seen numbers in a Set to detect a loop.",
+      "problems": [
+        { "title": "LeetCode 202: Happy Number", "url": "https://leetcode.com/problems/happy-number/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Circular tracks, escalators and stoppages",
+      "questions": [
+        { "q": "Two runners on a 600 m track run in opposite directions at 4 and 6 m/s. When do they first meet?", "options": ["30 s", "60 s", "100 s", "150 s"], "answer": 1, "why": "600 / (4 + 6) = 60 s." },
+        { "q": "You walk up a stopped escalator in 60 seconds and ride the moving escalator standing still in 40 seconds. How long does walking up the moving escalator take?", "options": ["20 s", "24 s", "30 s", "50 s"], "answer": 1, "why": "1/60 + 1/40 = 1/24." },
+        { "q": "A trip takes 2 hours longer at 40 km/h than at 60 km/h. How long is it?", "options": ["200 km", "240 km", "300 km", "120 km"], "answer": 1, "why": "d/40 − d/60 = d/120 = 2, so d = 240." },
+        { "q": "A bus averages 54 km/h without stops and 45 km/h with stops. How many minutes per hour does it stop?", "options": ["8 min", "10 min", "12 min", "15 min"], "answer": 1, "why": "It loses 9 km per hour, which takes 9/54 h = 10 min." },
+        { "q": "A 300 m train at 90 km/h crosses a 200 m bridge. How long does it take?", "options": ["12 s", "20 s", "24 s", "30 s"], "answer": 1, "why": "500 m at 25 m/s = 20 s." }
+      ]
+    },
+    "revision": ["Day 46: write getJSON with the res.ok check from memory."]
+  },
+  {
+    "day": 48,
+    "module": "js-async",
+    "title": "Debug lab: async bugs, and week review",
+    "goal": "Recognise and fix the four most common async/await mistakes.",
+    "learn": {
+      "concepts": [
+        "Forgetting await: you get a Promise, not the value",
+        "async callbacks in forEach aren't awaited",
+        "return without await inside try lets errors escape",
+        "Passing resolve() (called) instead of resolve to setTimeout",
+        "Unhandled promise rejections and how Node reports them"
+      ],
+      "resources": [
+        { "title": "javascript.info: Error handling with promises", "url": "https://javascript.info/promise-error-handling" },
+        { "title": "MDN: Using promises: common mistakes", "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises#common_mistakes" }
+      ]
+    },
+    "build": {
+      "task": "Copy the starter into day48/debug/async-bugs.js and run it with node. Expected output: name: Asha; all: [ 'Asha', 'Ravi', 'Meena' ] (in this order every time); safe: Could not load user 99; waited ms ≥ 1000? true. There are 4 bugs. Fix each in its own commit. Then write day48/week8-notes.md with one confident and one weak topic per day for Days 43–47.",
+      "starterFiles": [
+        { "name": "day48/debug/async-bugs.js", "content": "// Run: node day48/debug/async-bugs.js\nconst db = { 1: { id: 1, name: 'Asha' }, 2: { id: 2, name: 'Ravi' }, 3: { id: 3, name: 'Meena' } };\n\nfunction fetchUser(id) {\n  return new Promise((resolve, reject) => {\n    setTimeout(() => {\n      if (db[id]) resolve(db[id]);\n      else reject(new Error(`User ${id} not found`));\n    }, 100 * Math.random());\n  });\n}\n\n// 1. Print one user's name. Expect: name: Asha\nasync function printName(id) {\n  const user = fetchUser(id);\n  console.log('name:', user.name);\n}\n\n// 2. Load users in order. Expect: [ 'Asha', 'Ravi', 'Meena' ]\nasync function loadAll(ids) {\n  const names = [];\n  ids.forEach(async (id) => {\n    const u = await fetchUser(id);\n    names.push(u.name);\n  });\n  return names;\n}\n\n// 3. A missing user gives a friendly message. Expect: Could not load user 99\nasync function safeLoad(id) {\n  try {\n    return fetchUser(id);\n  } catch (err) {\n    return `Could not load user ${id}`;\n  }\n}\n\n// 4. Wait about 1 second\nfunction wait(ms) {\n  return new Promise((resolve) => setTimeout(resolve(), ms));\n}\n\nasync function main() {\n  await printName(1);\n  console.log('all:', await loadAll([1, 2, 3]));\n  console.log('safe:', await safeLoad(99));\n  const start = Date.now();\n  await wait(1000);\n  console.log('waited ms ≥ 1000?', Date.now() - start >= 1000);\n}\n\nmain();\n" }
+      ],
+      "acceptance": [
+        "Output matches all 4 expected lines; run it 5 times and the order of names never changes",
+        "4 separate fix commits naming each bug",
+        "No unhandled promise rejection warnings",
+        "week8-notes.md covers Days 43–47"
+      ]
+    },
+    "hints": [
+      "'name: undefined' means user is not what you think. Log user itself.",
+      "'all: []' means loadAll returned before any callback finished. forEach ignores the promises its callback returns. Use for...of with await (ordered) or Promise.all with map.",
+      "The safe case crashes even though there's a try/catch: the promise rejects after the function has already returned it. And in wait, look closely at what's passed to setTimeout."
+    ],
+    "proof": "Link to your final fix commit.",
+    "explainBack": [
+      { "q": "Explain each of the 4 bugs in one sentence and your fix.", "lookFor": ["missing await → Promise has no .name", "forEach doesn't await → empty array; use for...of or Promise.all", "return without await escapes try → return await", "resolve() called immediately → pass resolve"] },
+      { "q": "If you fixed loadAll with Promise.all, why is the order still guaranteed?", "lookFor": ["Promise.all keeps results in input order", "regardless of which finishes first"] }
+    ],
+    "lastHintExplanation": "1) fetchUser returns a promise, so without await user.name is undefined. 2) forEach doesn't wait for async callbacks, so names is returned empty; use for...of with await, or Promise.all(ids.map(...)), which keeps input order. 3) return fetchUser(id) leaves the try before the promise rejects; use return await. 4) setTimeout(resolve(), ms) calls resolve immediately; pass resolve itself.",
+    "predict": [
+      { "q": "const r = []; [1, 2].forEach(async n => { await null; r.push(n) }); console.log(r.length)", "options": ["0", "1", "2", "Error"], "answer": 0, "why": "forEach doesn't wait; the pushes happen later as microtasks, after the log." }
+    ],
+    "debugLab": {
+      "title": "Async bugs",
+      "symptoms": [
+        "Prints 'name: undefined'",
+        "Prints 'all: []'",
+        "Crashes with 'User 99 not found' even though there's a try/catch",
+        "The 1-second wait finishes instantly"
+      ],
+      "files": ["day48/debug/async-bugs.js"],
+      "bugCount": 4
+    },
+    "dsa": {
+      "pattern": "Prefix sums",
+      "note": "Precompute running totals so each query is O(1).",
+      "problems": [
+        { "title": "LeetCode 724: Find Pivot Index", "url": "https://leetcode.com/problems/find-pivot-index/" },
+        { "title": "LeetCode 303: Range Sum Query - Immutable", "url": "https://leetcode.com/problems/range-sum-query-immutable/" }
+      ]
+    },
+    "aptitude": {
+      "topic": "Timed mixed: Phase 2 topics",
+      "questions": [
+        { "q": "A 180 m train at 54 km/h passes a pole. How long does it take?", "options": ["10 s", "12 s", "15 s", "18 s"], "answer": 1, "why": "180 m at 15 m/s = 12 s." },
+        { "q": "What is the simple interest on ₹8000 at 7.5% for 2 years?", "options": ["₹1100", "₹1200", "₹1250", "₹1500"], "answer": 1, "why": "8000 × 0.075 × 2 = 1200." },
+        { "q": "A takes 6 days and B takes 12 days. How long do they take together?", "options": ["3 days", "4 days", "6 days", "9 days"], "answer": 1, "why": "1/6 + 1/12 = 1/4." },
+        { "q": "What does ₹5000 grow to at 10% compound interest for 2 years?", "options": ["₹6000", "₹6050", "₹6100", "₹5500"], "answer": 1, "why": "5000 × 1.21 = 6050." },
+        { "q": "A boat goes 10 km/h upstream and 16 km/h downstream. What is its speed in still water?", "options": ["12 km/h", "13 km/h", "3 km/h", "14 km/h"], "answer": 1, "why": "(10 + 16)/2 = 13." }
+      ]
+    },
+    "revision": ["Days 43–47: explain the event loop, promises and fetch error handling in a 2-minute voice note to yourself."]
+  }
+]
