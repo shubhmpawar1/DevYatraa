@@ -1,12 +1,22 @@
 import { Component, inject, input, output, signal } from '@angular/core';
 import { Api, errMsg } from '../core/api';
+import { RoughPaper } from './rough-paper';
 
 interface Q { q: string; code?: string | null; options: string[] }
 
 /** Multiple-choice quiz graded on the server; answers are revealed only after submitting. */
 @Component({
   selector: 'app-quiz',
+  imports: [RoughPaper],
   template: `
+    @if (roughPaper()) {
+      <div class="mb-4 flex justify-end">
+        <button type="button" class="btn-secondary !py-1.5 text-xs" (click)="paperOpen.set(!paperOpen())">
+          ✏️ {{ paperOpen() ? 'Hide rough paper' : 'Open rough paper' }}
+        </button>
+      </div>
+    }
+    <div [class]="showPaper() ? 'grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]' : ''">
     <div class="space-y-5">
       @for (q of questions(); track $index; let i = $index) {
         <div>
@@ -42,6 +52,12 @@ interface Q { q: string; code?: string | null; options: string[] }
         </button>
       }
     </div>
+    @if (showPaper()) {
+      <div class="order-first h-[360px] lg:order-none lg:sticky lg:top-4 lg:h-[calc(100vh-2rem)] lg:self-start">
+        <app-rough-paper [storageKey]="endpoint() + ':' + kind()" />
+      </div>
+    }
+    </div>
   `,
 })
 export class Quiz {
@@ -49,11 +65,16 @@ export class Quiz {
   questions = input.required<Q[]>();
   endpoint = input.required<string>();
   kind = input.required<string>();
+  /** Show a scratch pad beside the questions for working things out. */
+  roughPaper = input(false);
+  paperOpen = signal(true);
   done = output<any>();
   answers = signal<(number | null)[]>([]);
   result = signal<any>(null);
   busy = signal(false);
   error = signal('');
+
+  showPaper() { return this.roughPaper() && this.paperOpen(); }
 
   answeredCount() { return this.answers().filter((a) => a !== null && a !== undefined).length; }
 

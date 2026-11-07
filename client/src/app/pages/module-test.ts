@@ -2,10 +2,11 @@ import { Component, effect, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Api, errMsg } from '../core/api';
+import { RoughPaper } from './rough-paper';
 
 @Component({
   selector: 'app-module-test',
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, RoughPaper],
   template: `
     <a routerLink="/modules" class="text-sm text-slate-500">← All modules</a>
     @if (error()) { <p class="error-box mt-4">{{ error() }}</p> }
@@ -14,7 +15,13 @@ import { Api, errMsg } from '../core/api';
       <p class="mt-1 text-sm text-slate-500">Pass mark {{ t.passPercent }}%. No AI, no looking things up. This only helps if it's honest.</p>
 
       @if (!result()) {
-        <div class="mt-6 space-y-4">
+        <div class="mt-4 flex justify-end">
+          <button type="button" class="btn-secondary !py-1.5 text-xs" (click)="paperOpen.set(!paperOpen())">
+            ✏️ {{ paperOpen() ? 'Hide rough paper' : 'Open rough paper' }}
+          </button>
+        </div>
+        <div [class]="paperOpen() ? 'mt-4 grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]' : 'mt-4'">
+        <div class="space-y-4">
           @for (q of t.questions; track $index; let i = $index) {
             <div class="card">
               <p class="text-sm font-medium text-slate-900">{{ i + 1 }}. {{ q.q }}</p>
@@ -39,6 +46,12 @@ import { Api, errMsg } from '../core/api';
           <button class="btn-primary" [disabled]="busy() || !commitUrl || answeredCount() < t.questions.length" (click)="submit()">
             {{ busy() ? 'Checking…' : 'Submit test (' + answeredCount() + '/' + t.questions.length + ')' }}
           </button>
+        </div>
+        @if (paperOpen()) {
+          <div class="order-first h-[360px] lg:order-none lg:sticky lg:top-4 lg:h-[calc(100vh-2rem)] lg:self-start">
+            <app-rough-paper [storageKey]="'module-test:' + id()" />
+          </div>
+        }
         </div>
       } @else {
         @let r = result();
@@ -76,6 +89,7 @@ export class ModuleTest {
   result = signal<any>(null);
   shortMsg = signal('');
   commitUrl = '';
+  paperOpen = signal(true);
 
   constructor() {
     effect(async () => {

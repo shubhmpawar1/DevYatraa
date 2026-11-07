@@ -230,7 +230,7 @@ const LEVEL: Record<string, { label: string; cls: string; icon: string }> = {
           @if (d.predict.length) {
             <section class="card">
               <p class="section-title">Predict the output</p>
-              <app-quiz [questions]="d.predict" [endpoint]="'/days/' + d.day + '/quiz'" kind="predict" />
+              <app-quiz [questions]="d.predict" [endpoint]="'/days/' + d.day + '/quiz'" kind="predict" [roughPaper]="true" />
             </section>
           }
 
@@ -251,7 +251,7 @@ const LEVEL: Record<string, { label: string; cls: string; icon: string }> = {
           <section class="card">
             <p class="section-title">Aptitude · {{ d.aptitude.topic }}</p>
             <p class="mb-4 text-xs text-brand-700">{{ d.notes.aptitude }}</p>
-            <app-quiz [questions]="d.aptitude.questions" [endpoint]="'/days/' + d.day + '/quiz'" kind="aptitude" />
+            <app-quiz [questions]="d.aptitude.questions" [endpoint]="'/days/' + d.day + '/quiz'" kind="aptitude" [roughPaper]="true" />
           </section>
 
           <!-- Revision -->
