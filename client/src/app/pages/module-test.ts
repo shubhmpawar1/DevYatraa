@@ -48,8 +48,8 @@ import { RoughPaper } from './rough-paper';
           </button>
         </div>
         @if (paperOpen()) {
-          <div class="order-first h-[360px] lg:order-none lg:sticky lg:top-4 lg:h-[calc(100vh-2rem)] lg:self-start">
-            <app-rough-paper [storageKey]="'module-test:' + id()" />
+          <div class="relative z-30 order-first h-[360px] lg:order-none lg:sticky lg:top-20 lg:h-[calc(100vh-6rem)] lg:self-start">
+            <app-rough-paper (closed)="paperOpen.set(false)" [storageKey]="'module-test:' + id()" />
           </div>
         }
         </div>
