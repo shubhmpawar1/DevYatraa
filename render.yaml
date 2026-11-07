@@ -4,6 +4,7 @@ services:
     name: jobready
     runtime: node
     plan: free
+    region: singapore
     buildCommand: cd client && npm ci --include=dev && npm run build && cd ../server && npm ci --include=dev && npm run build
     startCommand: cd server && npm start
     healthCheckPath: /api/health
